@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>儿童故事直播（Calliope + 插画 + BGM）</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <style>
+    body { font-family: "Microsoft YaHei", "PingFang SC", sans-serif; background:#fffaf0; padding:20px; }
+    #controls { margin-bottom:12px; }
+    textarea { width: 100%; height:70px; font-size:18px; }
+    #startBtn { padding:10px 16px; font-size:18px; margin-top:8px; }
+    #story { font-size:22px; line-height:1.8; background: #fff; padding:14px; border-radius:10px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); max-height: 300px; overflow:auto; }
+    #images { margin-top:12px; display:flex; gap:12px; align-items:flex-start; flex-wrap:wrap; }
+    .story-img {
+        width:320px; border-radius:12px; box-shadow:0 8px 20px rgba(0,0,0,0.12);
+        opacity:0; transform: scale(0.95) rotate(-2deg);
+        animation:fadeZoomIn 900ms ease forwards;
+    }
+    @keyframes fadeZoomIn {
+      0% { opacity:0; transform: scale(0.95) rotate(-2deg); filter: blur(2px); }
+      100% { opacity:1; transform: scale(1) rotate(0deg); filter: blur(0); }
+    }
+    #status { margin-top:8px; color:#666; }
+  </style>
+</head>
+<body>
+  <h1>📖 儿童故事直播（Calliope）</h1>
+
+  <div id="controls">
+    <textarea id="prompt">从前有一只小兔子，它非常喜欢冒险。</textarea><br>
+    <button id="startBtn">开始讲故事</button>
+    <div id="status">就绪</div>
+  </div>
+
+  <div id="story"></div>
+  <div id="images"></div>
+
+  <!-- 背景音乐：请把 mp3 放到 static/bgm/warm_story.mp3 -->
+  <audio id="bgm" loop>
+    <source src="/static/bgm/warm_story.mp3" type="audio/mpeg" />
+  </audio>
+
+<script>
+const socket = io();
+const startBtn = document.getElementById("startBtn");
+const storyDiv = document.getElementById("story");
+const imagesDiv = document.getElementById("images");
+const statusDiv = document.getElementById("status");
+const bgm = document.getElementById("bgm");
+
+let isPlayingAudio = false;
+
+// 初始 BGM 音量
+bgm.volume = 0.55;
+bgm.play().catch(()=>{ /* 可能因自动播放策略被阻止，用户点击后会播放 */ });
+
+startBtn.onclick = () => {
+  storyDiv.innerHTML = "";
+  imagesDiv.innerHTML = "";
+  const prompt = document.getElementById("prompt").value;
+  socket.emit("start_story", { prompt });
+  statusDiv.innerText = "请求已发送，正在生成...";
+  // 确保 BGM 在用户交互后播放
+  bgm.play().catch(()=>{});
+};
+
+// 状态信息
+socket.on("status", (d)=> {
+  statusDiv.innerText = d.msg || "";
+});
+
+// 每段文字
+socket.on("story_chunk", (d) => {
+  const p = document.createElement("p");
+  p.innerText = d.text;
+  storyDiv.appendChild(p);
+  storyDiv.scrollTop = storyDiv.scrollHeight;
+});
+
+// 图片（base64 png）
+socket.on("story_image", (d) => {
+  const img = document.createElement("img");
+  img.src = "data:image/png;base64," + d.image;
+  img.className = "story-img";
+  imagesDiv.appendChild(img);
+  img.scrollIntoView({ behavior: "smooth", block: "center" });
+});
+
+// 段落开始：降低 BGM（ducking）
+socket.on("segment_start", (d) => {
+  // 缓慢降低音量
+  fadeVolume(bgm, bgm.volume, 0.18, 300);
+});
+
+// 段落结束：恢复 BGM
+socket.on("segment_end", (d) => {
+  fadeVolume(bgm, bgm.volume, 0.55, 600);
+});
+
+// 接收音频 base64 -> 播放
+socket.on("story_audio", (d) => {
+  if (!d.audio_b64) return;
+  const audioElm = new Audio("data:audio/mpeg;base64," + d.audio_b64);
+  audioElm.play().catch(e => console.warn("播放失败:", e));
+  // 可选：当 audio 播放时加一个小图标提示（未实现）
+});
+
+// 平滑改变音量
+function fadeVolume(audioElem, from, to, duration) {
+  const steps = 12;
+  const stepTime = duration / steps;
+  const delta = (to - from) / steps;
+  let cur = from;
+  let i = 0;
+  const t = setInterval(() => {
+    i++;
+    cur += delta;
+    audioElem.volume = Math.max(0, Math.min(1, cur));
+    if (i >= steps) {
+      clearInterval(t);
+      audioElem.volume = to;
+    }
+  }, stepTime);
+}
+</script>
+</body>
+</html>

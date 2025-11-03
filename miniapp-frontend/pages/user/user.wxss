@@ -1,0 +1,53 @@
+.userA-container{background:#f5f5f5;min-height:100vh;padding-bottom:calc(140rpx + env(safe-area-inset-bottom))}
+.banner{position:relative;height:280rpx}
+.banner-grad{position:absolute;left:0;top:0;right:0;bottom:0;background:linear-gradient(135deg,#fed500 0%,#fcc822 100%)}
+.banner-content{position:absolute;left:0;right:0;bottom:-80rpx;display:flex;flex-direction:column;align-items:center}
+.avatar{width:140rpx;height:140rpx;border-radius:70rpx;border:6rpx solid #fff;box-shadow:0 10rpx 30rpx #0002;background:#eee}
+.avatar-btn{
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  line-height: normal;
+  display: inline-block;
+}
+.avatar-btn::after{
+  border: none;
+}
+.nickname-section{
+  margin-top: 16rpx;
+}
+.nickname{margin-top:0;background:#fff;color:#333;font-size:32rpx;font-weight:600;padding:8rpx 18rpx;border-radius:999rpx;box-shadow:0 6rpx 20rpx #0001;cursor:pointer}
+.nickname-input{
+  background:#fff;color:#333;font-size:32rpx;font-weight:600;padding:8rpx 18rpx;border-radius:999rpx;box-shadow:0 6rpx 20rpx #0001;width:300rpx;text-align:center
+}
+.profile-entry{position:absolute;top:20rpx;right:120rpx;background:rgba(255,255,255,0.9);color:#666;font-size:24rpx;padding:8rpx 20rpx;border-radius:999rpx;box-shadow:0 2rpx 8rpx rgba(0,0,0,0.1)}
+.logout-btn{position:absolute;top:20rpx;right:24rpx;background:rgba(255,255,255,0.9);color:#ff4757;font-size:24rpx;padding:8rpx 20rpx;border-radius:999rpx;box-shadow:0 2rpx 8rpx rgba(0,0,0,0.1)}
+
+.stats{margin-top:120rpx;margin-left:20rpx;margin-right:20rpx;background:#fff;border-radius:16rpx;box-shadow:0 2rpx 12rpx rgba(0,0,0,0.08);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:32rpx 20rpx}
+.stat-item{flex:0 0 calc(33.33% - 12rpx);text-align:center;margin-bottom:0}
+.stat-num{font-size:38rpx;color:#fed500;margin-bottom:8rpx;font-weight:700}
+.stat-label{font-size:24rpx;color:#999}
+
+.tabs{display:flex;background:#fff;margin:16rpx 20rpx;border-radius:16rpx;box-shadow:0 2rpx 12rpx rgba(0,0,0,0.08);overflow:hidden}
+.tab-item{flex:1;text-align:center;padding:24rpx 0;font-size:28rpx;color:#666;position:relative;transition:all 0.3s}
+.tab-item.active{color:#fed500;font-weight:600}
+.tab-item.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:50rpx;height:4rpx;background:#fed500;border-radius:2rpx}
+
+.products-section{padding:0 20rpx}
+.product-item{background:#fff;border-radius:16rpx;box-shadow:0 2rpx 12rpx rgba(0,0,0,0.08);margin-bottom:16rpx;overflow:hidden;transition:all 0.3s}
+.product-item:active{transform:scale(0.98);box-shadow:0 1rpx 8rpx rgba(0,0,0,0.12)}
+.product-click-area{display:flex;padding:20rpx;cursor:pointer}
+.cover{width:180rpx;height:180rpx;flex-shrink:0;border-radius:12rpx;object-fit:cover}
+.info{flex:1;padding-left:20rpx;display:flex;flex-direction:column;justify-content:space-between}
+.name{font-size:30rpx;font-weight:600;color:#333;margin-bottom:12rpx;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.price{font-size:34rpx;color:#ff4757;font-weight:700;margin-bottom:12rpx}
+.status-row{display:flex;justify-content:space-between;align-items:center}
+.status{display:inline-block;padding:6rpx 16rpx;border-radius:999rpx;font-size:24rpx}
+.status.on{background:#e8f5e9;color:#4caf50}
+.status.off{background:#ffe0e0;color:#f44336}
+.toggle-btn{padding:8rpx 20rpx;background:#f0f0f0;color:#666;border-radius:8rpx;font-size:26rpx}
+.sold-tag,.bought-tag{display:inline-block;padding:6rpx 16rpx;border-radius:999rpx;font-size:24rpx;background:#e8f5e9;color:#4caf50;margin-top:8rpx}
+.empty{text-align:center;color:#bbb;margin-top:200rpx;font-size:32rpx}
+.login-tip{text-align:center;color:#999;margin-top:60rpx;padding:40rpx;font-size:28rpx}
+

@@ -1,0 +1,81 @@
+<view class="userA-container">
+  <view class="banner">
+    <view class="banner-grad"></view>
+    <view class="banner-content">
+      <!-- 头像选择：使用新的头像昵称填写能力 -->
+      <!-- 登录后可以使用微信头像选择，也可以使用自定义头像 -->
+      <button wx:if="{{isLoggedIn}}" class="avatar-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar" src="{{user.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
+      </button>
+      <image wx:else class="avatar" src="https://img.yzcdn.cn/vant/cat.jpeg" mode="aspectFill" bindtap="handleLogin"/>
+      
+      <!-- 昵称显示和输入：使用 type="nickname" 可以让用户选择微信昵称或自定义昵称 -->
+      <view wx:if="{{isLoggedIn}}" class="nickname-section">
+        <input 
+          wx:if="{{editingNickname}}"
+          class="nickname-input" 
+          type="nickname" 
+          value="{{user.nickname}}"
+          placeholder="请输入昵称或选择微信昵称"
+          bindblur="onNicknameBlur"
+          bindconfirm="onNicknameConfirm"
+          auto-focus="{{true}}"
+        />
+        <view wx:else class="nickname" bindtap="startEditNickname">
+          {{user.nickname || '点击设置昵称'}}
+        </view>
+      </view>
+      <view wx:else class="nickname" bindtap="handleLogin">
+        点击登录
+      </view>
+      <view wx:if="{{isLoggedIn}}" class="profile-entry" bindtap="goProfile">设置</view>
+      <view wx:if="{{isLoggedIn}}" class="logout-btn" bindtap="handleLogout">退出</view>
+    </view>
+  </view>
+
+  <view wx:if="{{isLoggedIn}}" class="stats">
+    <view class="stat-item" bindtap="goFavorite">
+      <view class="stat-num">{{favoriteCount || 0}}</view>
+      <view class="stat-label">收藏</view>
+    </view>
+    <view class="stat-item" bindtap="goManage">
+      <view class="stat-num">{{publishCount || 0}}</view>
+      <view class="stat-label">发布</view>
+    </view>
+    <view class="stat-item" bindtap="goOrders">
+      <view class="stat-num">{{orderCount || 0}}</view>
+      <view class="stat-label">订单</view>
+    </view>
+  </view>
+
+  <view wx:if="{{!isLoggedIn}}" class="login-tip">
+    <text>登录后查看更多精彩内容</text>
+  </view>
+
+  <view wx:if="{{isLoggedIn}}" class="tabs">
+    <view class="tab-item {{currentTab === 'published' ? 'active' : ''}}" bindtap="switchTab" data-tab="published">我发布的</view>
+    <view class="tab-item {{currentTab === 'sold' ? 'active' : ''}}" bindtap="switchTab" data-tab="sold">我卖出的</view>
+    <view class="tab-item {{currentTab === 'bought' ? 'active' : ''}}" bindtap="switchTab" data-tab="bought">我关注的</view>
+  </view>
+
+  <view wx:if="{{isLoggedIn}}" class="products-section">
+    <view wx:for="{{productList}}" wx:key="id" class="product-item">
+      <view class="product-click-area" bindtap="goProduct" data-id="{{item.id}}">
+        <image class="cover" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
+        <view class="info">
+          <view class="name">{{item.name}}</view>
+          <view class="price">￥{{item.price}}</view>
+          <view class="status-row" wx:if="{{currentTab === 'published'}}">
+            <view class="status {{item.status === 'PUBLISHED' ? 'on' : 'off'}}">{{item.status === 'PUBLISHED' ? '已上架' : '已下架'}}</view>
+            <view class="toggle-btn" catchtap="toggleStatus" data-id="{{item.id}}">{{item.status === 'PUBLISHED' ? '下架' : '上架'}}</view>
+          </view>
+          <view wx:if="{{currentTab === 'sold'}}" class="sold-tag">已售出</view>
+          <view wx:if="{{currentTab === 'bought'}}" class="bought-tag">已关注</view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!productList.length}}" class="empty">{{emptyText}}</view>
+  </view>
+
+</view>
+

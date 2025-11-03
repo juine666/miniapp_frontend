@@ -1,0 +1,136 @@
+---
+alwaysApply: false
+---
+# 🧠 AI 开发提示词模板库（Prompt Library）
+
+适用于 ChatGPT / Cursor / Copilot 等智能代码生成与审查场景。
+
+---
+
+## 💻 `/generate-service` —— 业务模块生成
+
+```yaml
+command: /generate-service
+role: "你是一名资深后端开发工程师"
+context:
+  framework: "Spring Boot 3 + MyBatis Plus + RabbitMQ"
+  database: "MySQL 18"
+  code_style: "阿里巴巴 Java 开发手册规范"
+task: |
+  根据以下业务需求生成完整的模块代码（Controller + Service + Mapper + Entity）：
+
+  【业务描述】
+  {在这里填写你的业务，比如：实现一个订单支付超时自动取消功能}
+
+要求：
+1. 输出目录结构示例；
+2. 所有类带完整注释；
+3. 命名语义清晰（符合 Java 命名规范）；
+4. 提供示例 SQL 或表结构；
+5. 所有返回值使用统一封装类 Result<T>；
+6. 日志使用 @Slf4j，不使用 System.out；
+7. 必要时说明 RabbitMQ 延迟队列配置。
+```
+
+---
+
+## 🧩 `/refactor` —— 代码优化与重构
+
+```yaml
+command: /refactor
+role: "你是一名高级代码审查专家"
+context:
+  language: "Java"
+  style: "遵守阿里巴巴开发手册"
+task: |
+  请优化以下代码：
+  {粘贴你的原始代码}
+
+要求：
+1. 修复潜在的命名、空指针、事务、日志问题；
+2. 优化方法拆分与职责划分；
+3. 增加必要注释；
+4. 保持原始逻辑功能不变；
+5. 输出优化后的完整代码；
+6. 列出主要优化点说明。
+```
+
+---
+
+## 🧪 `/generate-test` —— 单元测试生成
+
+```yaml
+command: /generate-test
+role: "你是一名资深测试开发工程师"
+context:
+  framework: "Spring Boot + JUnit5 + Mockito"
+task: |
+  请为以下 Service 类生成单元测试：
+  {粘贴目标 Service 代码}
+
+要求：
+1. 使用 JUnit5；
+2. 模拟 Repository 层；
+3. 覆盖正常、异常、边界三类用例；
+4. 每个测试方法添加注释说明；
+5. 输出完整的测试类代码；
+6. 推荐断言写法；
+7. 覆盖率目标 ≥80%。
+```
+
+---
+
+## 📘 `/api-doc` —— API 文档生成
+
+```yaml
+command: /api-doc
+role: "你是一名 API 架构设计专家"
+context:
+  standard: "RESTful + OpenAPI3"
+task: |
+  根据以下业务描述，生成详细的接口文档：
+  {填写业务，如 用户下单、取消订单、查询订单}
+
+要求：
+1. 输出接口路径、方法、参数说明、返回结构；
+2. 状态码及错误示例；
+3. 示例 JSON；
+4. 可选：生成 Swagger/OpenAPI 格式；
+5. 遵循 REST 命名规范（动词在资源后，如 /orders/{id}/cancel）。
+```
+
+---
+
+## 📦 代码规范约定（可全局通用）
+
+```yaml
+language: Java
+rules:
+  - 类名：PascalCase
+  - 方法/变量名：camelCase
+  - 常量名：大写 + 下划线分隔
+  - 日志统一使用 @Slf4j
+  - 控制层仅负责请求分发
+  - Service 层只负责业务逻辑
+  - DAO 层负责数据库操作
+  - 统一返回类 Result<T>
+  - 核心逻辑须有注释
+  - 不允许出现 System.out.println
+  - 使用 @Transactional 处理事务
+```
+
+---
+
+## 📘 如何使用
+
+### 在 Cursor 中：
+
+1. 打开 “Prompts” → “Custom Commands”；
+2. 点击 “Create Command”；
+3. 将上方模板复制进去；
+4. 命名为 `/generate-service` 等；
+5. 下次直接输入命令即可。
+
+
+---
+

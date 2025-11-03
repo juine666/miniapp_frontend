@@ -1,0 +1,11 @@
+<view class="history-container">
+  <view wx:for="{{historyList}}" wx:key="id" class="history-item" bindtap="onTapProduct" data-id="{{item.productId}}">
+    <image class="cover" src="{{item.productCoverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
+    <view class="info">
+      <view class="name">{{item.productName}}</view>
+      <view class="time">{{item.viewedAt}}</view>
+    </view>
+  </view>
+  <view wx:if="{{!historyList.length}}" class="empty">暂无浏览历史</view>
+</view>
+

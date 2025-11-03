@@ -1,0 +1,13 @@
+<view class="tab-bar">
+  <view class="tab-bar-border"></view>
+  <view wx:for="{{list}}" wx:key="index" class="tab-bar-item {{item.isSpecial ? 'special-item' : ''}} {{selected === index ? 'tab-bar-item-selected' : ''}}" data-path="{{item.pagePath}}" data-index="{{index}}" bindtap="switchTab">
+    <view wx:if="{{!item.isSpecial}}" class="tab-bar-icon-wrapper">
+      <text class="tab-bar-icon">{{index === 0 ? '🏠' : index === 1 ? '📍' : index === 3 ? '💬' : '👤'}}</text>
+    </view>
+    <view wx:else class="publish-btn">
+      <text class="publish-icon">✚</text>
+    </view>
+    <view class="tab-bar-text">{{item.text}}</view>
+  </view>
+</view>
+

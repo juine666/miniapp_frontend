@@ -1,0 +1,36 @@
+<view class="nearby-container">
+  <!-- 位置信息栏 -->
+  <view class="location-bar">
+    <view class="location-info">
+      <text class="location-icon">📍</text>
+      <text class="location-text">{{locationName}}</text>
+      <view wx:if="{{location}}" class="location-radius">{{radius}}km</view>
+    </view>
+    <view wx:if="{{!location}}" class="retry-btn" bindtap="onRetryLocation">重试</view>
+  </view>
+  
+  <!-- 商品列表 -->
+  <view class="goods-list">
+    <view wx:for="{{goodsList}}" wx:key="id" wx:for-item="item" wx:for-index="idx" class="goods-card">
+      <view class="goods-content" bindtap="onTapDetail" data-id="{{item.id}}">
+        <image class="goods-img" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
+        <view class="goods-title">{{item.name}}</view>
+        <view class="goods-meta">
+          <view class="goods-price">￥{{item.price}}</view>
+          <view wx:if="{{item.distanceText}}" class="goods-distance">{{item.distanceText}}</view>
+        </view>
+      </view>
+      <view class="action-buttons">
+        <view wx:if="{{false}}" class="action-btn share-btn" catchtap="onShare" data-id="{{item.id}}">
+          <text class="action-icon">📤</text>
+        </view>
+        <view class="action-btn favorite-btn {{item.isFavorited ? 'favorited' : ''}}" catchtap="toggleFavorite" data-id="{{item.id}}" data-index="{{idx}}">
+          <text class="action-icon">{{item.isFavorited ? '❤️' : '🤍'}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!loading && !goodsList.length && location}}" class="empty-tip">附近暂无商品</view>
+    <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
+  </view>
+</view>
+

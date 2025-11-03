@@ -1,0 +1,254 @@
+.container {
+  background: #f5f5f5;
+  min-height: 100vh;
+  padding: 16rpx;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+}
+
+/* 订单卡片 */
+.order-card {
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.08);
+  margin-bottom: 16rpx;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+.order-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 1rpx 8rpx rgba(0,0,0,0.12);
+}
+
+/* 订单头部 */
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx 28rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.order-id {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.order-status {
+  font-size: 26rpx;
+  padding: 6rpx 20rpx;
+  border-radius: 999rpx;
+  font-weight: 500;
+}
+
+.order-status.CREATED {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.order-status.PAID {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.order-status.SHIPPED {
+  background: #d4edda;
+  color: #155724;
+}
+
+.order-status.COMPLETED {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.order-status.CANCELLED {
+  background: #f5c6cb;
+  color: #721c24;
+}
+
+/* 商品信息 */
+.order-product {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 28rpx;
+  position: relative;
+}
+
+.product-img {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  background: #f8f8f8;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 140rpx;
+}
+
+.product-name {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+}
+
+.product-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.product-price {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #ff4757;
+}
+
+.product-date {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.arrow {
+  font-size: 48rpx;
+  color: #ccc;
+  margin-left: 12rpx;
+}
+
+/* 订单底部 */
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20rpx 28rpx;
+  border-top: 1rpx solid #f0f0f0;
+  background: #fafafa;
+}
+
+.order-amount {
+  display: flex;
+  align-items: baseline;
+}
+
+.amount-label {
+  font-size: 26rpx;
+  color: #666;
+  margin-right: 8rpx;
+}
+
+.amount-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.order-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.action-btn {
+  padding: 12rpx 32rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  text-align: center;
+  min-width: 120rpx;
+}
+
+.pay-btn {
+  background: linear-gradient(135deg, #fed500 0%, #fcc822 100%);
+  color: #fff;
+  font-weight: 500;
+  box-shadow: 0 2rpx 8rpx rgba(254, 213, 0, 0.3);
+  transition: all 0.3s;
+}
+.pay-btn:active {
+  opacity: 0.9;
+  transform: scale(0.95);
+}
+
+.detail-btn {
+  background: #fff;
+  color: #666;
+  border: 1rpx solid #e0e0e0;
+  transition: all 0.3s;
+}
+.detail-btn:active {
+  background: #f8f8f8;
+  transform: scale(0.95);
+}
+
+.review-btn {
+  background: #fff;
+  color: #fed500;
+  border: 1rpx solid #fed500;
+  transition: all 0.3s;
+}
+.review-btn:active {
+  background: #fffbf0;
+  transform: scale(0.95);
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 200rpx 40rpx 100rpx;
+}
+
+.empty-icon {
+  width: 240rpx;
+  height: 240rpx;
+  opacity: 0.3;
+  margin-bottom: 40rpx;
+}
+
+.empty-text {
+  font-size: 32rpx;
+  color: #999;
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+
+.empty-desc {
+  font-size: 26rpx;
+  color: #bbb;
+  margin-bottom: 60rpx;
+}
+
+.empty-btn {
+  background: linear-gradient(135deg, #fed500 0%, #fcc822 100%);
+  color: #fff;
+  border: none;
+  border-radius: 999rpx;
+  padding: 20rpx 60rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 12rpx rgba(254, 213, 0, 0.3);
+  transition: all 0.3s;
+}
+.empty-btn:active {
+  opacity: 0.9;
+  transform: scale(0.95);
+}
+
+/* 加载状态 */
+.loading, .no-more {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+

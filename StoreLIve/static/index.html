@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>媒体下载器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input[type="url"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .file-list {
+            margin-top: 15px;
+        }
+        .file-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .file-type {
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            color: white;
+        }
+        .type-image {
+            background: #28a745;
+        }
+        .type-video {
+            background: #dc3545;
+        }
+        .loading {
+            text-align: center;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📥 页面媒体下载器</h1>
+        
+        <form id="downloadForm">
+            <div class="form-group">
+                <label for="url">页面URL:</label>
+                <input type="url" id="url" name="url" placeholder="https://example.com/page" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="css_selector">CSS选择器 (可选):</label>
+                <input type="text" id="css_selector" name="css_selector" value="div.post-content .dplayer video" placeholder="div.post-content .dplayer video">
+                <small style="color: #666; font-size: 12px;">指定特定的页面区域来提取媒体文件，默认为视频播放器区域</small>
+            </div>
+            
+            <button type="submit" id="downloadBtn">自动下载所有媒体文件</button>
+        </form>
+        
+        <div id="result" class="result">
+            <div id="resultContent"></div>
+        </div>
+    </div>
+
+<script>
+        document.getElementById('downloadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const url = document.getElementById('url').value;
+            const cssSelector = document.getElementById('css_selector').value;
+            
+            const downloadBtn = document.getElementById('downloadBtn');
+            const result = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            // 显示加载状态
+            downloadBtn.disabled = true;
+            downloadBtn.textContent = '下载中...';
+            result.style.display = 'block';
+            result.className = 'result loading';
+            
+            const loadingText = cssSelector ? 
+                `正在分析指定区域 "${cssSelector}" 并下载媒体文件，请稍候...` :
+                '正在分析页面并自动下载所有图片和视频，请稍候...';
+            resultContent.innerHTML = loadingText;
+            
+            try {
+                const requestData = { url: url };
+                if (cssSelector) {
+                    requestData.css_selector = cssSelector;
+                }
+                
+                const response = await fetch('/api/download_media', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.className = 'result success';
+                    const selectorInfo = data.css_selector ? `<p><strong>CSS选择器:</strong> ${data.css_selector}</p>` : '';
+                    resultContent.innerHTML = `
+                        <h3>✅ 下载完成！</h3>
+                        <p><strong>保存位置:</strong> ${data.folder}</p>
+                        ${selectorInfo}
+                        <p><strong>下载文件数:</strong> ${data.total_files} 个</p>
+                        <div class="file-list">
+                            ${data.files.map(file => `
+                                <div class="file-item">
+                                    <span>
+                                        <span class="file-type type-${file.type}">${file.type === 'image' ? '图片' : '视频'}</span>
+                                        ${file.filename}
+                                    </span>
+                                    <span>${(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                } else {
+                    result.className = 'result error';
+                    resultContent.innerHTML = `
+                        <h3>❌ 下载失败</h3>
+                        <p>${data.error}</p>
+                    `;
+                }
+            } catch (error) {
+                result.className = 'result error';
+                resultContent.innerHTML = `
+                    <h3>❌ 网络错误</h3>
+                    <p>${error.message}</p>
+                `;
+            } finally {
+                downloadBtn.disabled = false;
+                downloadBtn.textContent = '自动下载所有媒体文件';
+            }
+        });
+</script>
+</body>
+</html>

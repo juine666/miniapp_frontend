@@ -1,0 +1,15 @@
+{
+  "name": "stylemirror-miniapp",
+  "version": "1.0.0",
+  "description": "StyleMirror 二手商品小程序",
+  "main": "main.js",
+  "scripts": {
+    "dev:mp-weixin": "uni -p mp-weixin --watch",
+    "build:mp-weixin": "uni build -p mp-weixin"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "uni-app": {
+    "scripts": {}
+  }
+}

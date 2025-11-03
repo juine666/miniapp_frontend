@@ -1,0 +1,26 @@
+<view class="container" catchtap="goToDetail">
+  <view class="share-card">
+    <!-- 商品图片 -->
+    <view class="image-wrapper">
+      <image wx:if="{{product.coverUrl}}" mode="aspectFill" src="{{product.coverUrl}}" class="product-image"/>
+      <image wx:else mode="aspectFill" src="https://img.yzcdn.cn/vant/cat.jpeg" class="product-image"/>
+      <view class="price-tag" wx:if="{{product.price}}">
+        <text class="price-symbol">￥</text>
+        <text class="price-value">{{product.price}}</text>
+      </view>
+    </view>
+    
+    <!-- 商品信息 -->
+    <view class="info-section">
+      <view class="product-name">{{product.name}}</view>
+      <view class="product-desc" wx:if="{{product.description}}">{{product.description}}</view>
+      <view class="product-desc placeholder" wx:else>暂无商品描述</view>
+    </view>
+    
+    <!-- 点击提示 -->
+    <view class="tip-section">
+      <text class="tip-icon">👆</text>
+      <text class="tip-text">点击查看商品详情</text>
+    </view>
+  </view>
+</view>

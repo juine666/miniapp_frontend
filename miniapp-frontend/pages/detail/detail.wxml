@@ -1,0 +1,101 @@
+<view class="container">
+  <!-- 加载中状态 -->
+  <view wx:if="{{loading}}" class="loading-container">
+    <text>加载中...</text>
+  </view>
+  
+  <!-- 商品内容（始终显示，即使加载失败也显示默认内容） -->
+  <!-- 商品图片区域 -->
+  <view class="image-section">
+    <!-- 多张图片轮播 -->
+    <swiper wx:if="{{imageList.length > 0}}" class="image-swiper" indicator-dots="{{imageList.length > 1}}" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay="{{false}}" circular="{{false}}" bindchange="onSwiperChange">
+      <swiper-item wx:for="{{imageList}}" wx:key="index">
+        <image mode="aspectFill" src="{{item}}" class="main-image" bindtap="previewImage" data-index="{{index}}"/>
+      </swiper-item>
+    </swiper>
+    <!-- 单张图片或默认图片 -->
+    <image wx:elif="{{item.coverUrl}}" mode="aspectFill" src="{{item.coverUrl}}" class="main-image" bindtap="previewImage" data-index="0"/>
+    <image wx:else mode="aspectFill" src="https://img.yzcdn.cn/vant/cat.jpeg" class="main-image"/>
+    <view wx:if="{{!isMyProduct}}" class="favorite-btn {{isFavorited ? 'favorited' : ''}}" catchtap="toggleFavorite">
+      <text class="favorite-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
+    </view>
+    <!-- 图片数量指示器 -->
+    <view wx:if="{{imageList.length > 1}}" class="image-indicator">{{currentImageIndex + 1}}/{{imageList.length}}</view>
+  </view>
+
+  <!-- 价格和标题 -->
+  <view class="price-section">
+    <view class="price">￥<text class="price-main">{{item.price || 0}}</text></view>
+    <view class="title">{{item.name || '商品名称'}}</view>
+  </view>
+
+  <!-- 商品信息卡片 -->
+  <view class="info-card">
+    <view class="info-row" wx:if="{{item.description}}">
+      <view class="info-label">商品描述</view>
+      <view class="info-value">{{item.description}}</view>
+    </view>
+    <view class="info-row">
+      <view class="info-label">分类</view>
+      <view class="info-value">{{categoryName || '未分类'}}</view>
+    </view>
+    <view class="info-row">
+      <view class="info-label">发布时间</view>
+      <view class="info-value">{{item.createdAt || '刚刚'}}</view>
+    </view>
+    <view class="info-row">
+      <view class="info-label">状态</view>
+      <view class="status-badge {{item.status === 'PUBLISHED' ? 'online' : 'offline'}}">
+        {{item.status === 'PUBLISHED' ? '在售' : '已下架'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 卖家信息卡片 -->
+  <view class="seller-card">
+    <view class="seller-header">
+      <image class="seller-avatar" src="{{sellerInfo.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
+      <view class="seller-info">
+        <view class="seller-name">{{sellerInfo.nickname || '卖家'}}</view>
+        <view class="seller-tag">个人卖家</view>
+      </view>
+      <view wx:if="{{!isMyProduct}}" class="chat-btn-mini" catchtap="onChat">
+        <text class="chat-icon">💬</text>
+        <text>联系</text>
+      </view>
+    </view>
+    <!-- 卖家联系方式 -->
+    <view wx:if="{{sellerContact}}" class="seller-contact">
+      <view wx:if="{{sellerContact.wechatId}}" class="contact-item">
+        <text class="contact-label">微信：</text>
+        <text class="contact-value">{{sellerContact.wechatId}}</text>
+        <text class="copy-btn" bindtap="copyContact" data-type="wechat" data-value="{{sellerContact.wechatId}}">复制</text>
+      </view>
+      <view wx:if="{{sellerContact.phone}}" class="contact-item">
+        <text class="contact-label">手机：</text>
+        <text class="contact-value">{{sellerContact.phone}}</text>
+        <text class="copy-btn" bindtap="copyContact" data-type="phone" data-value="{{sellerContact.phone}}">复制</text>
+      </view>
+      <view wx:if="{{sellerContact.email}}" class="contact-item">
+        <text class="contact-label">邮箱：</text>
+        <text class="contact-value">{{sellerContact.email}}</text>
+        <text class="copy-btn" bindtap="copyContact" data-type="email" data-value="{{sellerContact.email}}">复制</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏（固定） -->
+  <view class="bottom-bar">
+    <view wx:if="{{!isMyProduct}}" class="bar-action" catchtap="toggleFavorite">
+      <text class="action-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
+      <text class="action-text">{{isFavorited ? '已收藏' : '收藏'}}</text>
+    </view>
+    <button wx:if="{{false}}" class="bar-action share-btn" open-type="share">
+      <text class="action-icon">📤</text>
+      <text class="action-text">分享</text>
+    </button>
+    <button wx:if="{{!isMyProduct}}" class="bar-btn chat" bindtap="onChat" hover-class="bar-btn-hover">聊一聊</button>
+    <button wx:if="{{!isMyProduct}}" class="bar-btn buy" bindtap="onBuy" hover-class="bar-btn-hover">我想要</button>
+  </view>
+</view>
+

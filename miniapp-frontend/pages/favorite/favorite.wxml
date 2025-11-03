@@ -1,0 +1,16 @@
+<view class="favorite-container">
+  <view class="goods-list">
+    <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
+    <view wx:for="{{products}}" wx:key="id" class="goods-card" bindtap="onTapProduct" data-id="{{item.id}}">
+      <view class="goods-content">
+        <image class="goods-img" src="{{item.coverUrl || item.cover_url || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill" lazy-load="{{true}}"/>
+        <view class="goods-title">{{item.name || '商品名称'}}</view>
+        <view class="goods-meta">
+          <view class="goods-price">￥{{item.price || 0}}</view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!loading && !products.length}}" class="empty-tip">暂无收藏</view>
+  </view>
+</view>
+

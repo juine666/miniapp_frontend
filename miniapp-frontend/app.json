@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/detail/detail",
+    "pages/publish/publish",
+    "pages/user/user",
+    "pages/nearby/nearby",
+    "pages/orders/orders",
+    "pages/share/share",
+    "pages/message/message",
+    "pages/manage/manage",
+    "pages/favorite/favorite",
+    "pages/profile/profile",
+    "pages/batch-publish/batch-publish"
+  ],
+  "window": {
+    "navigationBarTitleText": "StyleMirror",
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#888",
+    "selectedColor": "#333",
+    "backgroundColor": "#fff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/nearby/nearby",
+        "text": "附近"
+      },
+      {
+        "pagePath": "pages/publish/publish",
+        "text": "发布"
+      },
+      {
+        "pagePath": "pages/message/message",
+        "text": "消息"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的"
+      }
+    ]
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于展示附近的二手商品"
+    }
+  }
+}
+

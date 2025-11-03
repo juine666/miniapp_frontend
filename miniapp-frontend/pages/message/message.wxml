@@ -1,0 +1,103 @@
+<view class="chat-container">
+  <!-- 会话列表模式 -->
+  <view wx:if="{{!showChat}}" class="conversation-list">
+    <!-- 会话列表 -->
+    <scroll-view class="conversations-scroll" scroll-y enable-back-to-top="{{true}}">
+      <view wx:for="{{conversations}}" wx:key="userId" class="conversation-item" catchtap="openConversation" data-userid="{{item.userId}}" data-productid="{{item.productId || ''}}">
+        <image class="conversation-avatar" src="{{item.userAvatar || '/static/default-avatar.png'}}" mode="aspectFill"/>
+        <view class="conversation-content">
+          <view class="conversation-header">
+            <view class="conversation-name">{{item.userName || '用户'}}</view>
+            <view class="conversation-time">{{item.timeStr}}</view>
+          </view>
+          <view class="conversation-message">
+            <text class="message-preview">{{item.lastMessageContent}}</text>
+            <view wx:if="{{item.unreadCount > 0}}" class="unread-badge">{{item.unreadCount > 99 ? '99+' : item.unreadCount}}</view>
+          </view>
+        </view>
+        <view class="conversation-arrow">›</view>
+      </view>
+      
+      <view wx:if="{{!conversations.length && !loading}}" class="empty-conversations">
+        <view class="empty-icon">💬</view>
+        <view class="empty-text">暂无消息</view>
+        <view class="empty-desc">快去和卖家聊聊吧～</view>
+      </view>
+      
+      <!-- 加载更多提示 -->
+      <view wx:if="{{loading && conversations.length > 0}}" class="loading-more">
+        <text>加载中...</text>
+      </view>
+      <view wx:if="{{!hasMore && conversations.length > 0}}" class="no-more">
+        <text>没有更多了</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 聊天界面模式 -->
+  <view wx:else class="chat-view">
+    <!-- 返回按钮 -->
+    <view class="chat-header" bindtap="goBackToList">
+      <text class="back-icon">‹</text>
+      <text class="chat-title">聊天</text>
+    </view>
+
+    <!-- 商品信息卡片（参考闲鱼） -->
+    <view wx:if="{{productInfo}}" class="product-card" bindtap="goToProductDetail">
+      <image class="product-img" src="{{productInfo.coverUrl}}" mode="aspectFill"/>
+      <view class="product-info">
+        <view class="product-name">{{productInfo.name}}</view>
+        <view class="product-price">￥{{productInfo.price}}</view>
+      </view>
+      <view class="product-arrow">›</view>
+    </view>
+
+    <!-- 消息列表 -->
+    <scroll-view class="messages-list" scroll-y scroll-top="{{scrollTop}}" scroll-into-view="{{scrollIntoView}}" scroll-with-animation="{{true}}">
+      <view wx:for="{{messages}}" wx:key="id" class="message-item {{item.fromUser == currentUserId ? 'sent' : 'received'}}">
+        <!-- 接收的消息显示头像 -->
+        <view wx:if="{{item.fromUser != currentUserId}}" class="avatar-wrapper avatar-wrapper-received">
+          <image class="avatar" src="{{otherUserInfo.avatarUrl || '/static/default-avatar.png'}}" mode="aspectFill"/>
+        </view>
+        
+        <view class="message-content">
+          <view class="message-bubble {{item.fromUser == currentUserId ? 'sent-bubble' : 'received-bubble'}}">
+            <text class="message-text">{{item.content}}</text>
+          </view>
+          <view class="message-time">{{item.timeStr || item.createdAt}}</view>
+        </view>
+        
+        <!-- 发送的消息显示头像 -->
+        <view wx:if="{{item.fromUser == currentUserId}}" class="avatar-wrapper avatar-wrapper-sent">
+          <image class="avatar" src="{{currentUserInfo.avatarUrl || '/static/default-avatar.png'}}" mode="aspectFill"/>
+        </view>
+      </view>
+      
+      <view wx:if="{{!messages.length}}" class="empty-tip">
+        <view class="empty-icon">💬</view>
+        <view class="empty-text">暂无消息，开始聊天吧～</view>
+      </view>
+    </scroll-view>
+
+    <!-- 快捷回复（参考闲鱼） -->
+    <view wx:if="{{productInfo && !messages.length}}" class="quick-replies">
+      <view class="quick-item" bindtap="sendQuickMessage" data-content="你好，请问这个商品还在吗？">
+        <text>还在吗？</text>
+      </view>
+      <view class="quick-item" bindtap="sendQuickMessage" data-content="可以便宜点吗？">
+        <text>能便宜吗？</text>
+      </view>
+      <view class="quick-item" bindtap="sendQuickMessage" data-content="可以看下实物吗？">
+        <text>看实物</text>
+      </view>
+    </view>
+
+    <!-- 输入框 -->
+    <view class="input-bar">
+      <input class="input" placeholder="输入消息..." value="{{inputContent}}" bindinput="onInput" confirm-type="send" bindconfirm="sendMessage" adjust-position="{{true}}"/>
+      <view class="send-btn" bindtap="sendMessage">
+        <text>发送</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,65 @@
+<view class="xy-container">
+  <!-- 批量发布入口 -->
+  <view class="batch-entry" wx:if="{{!productId}}">
+    <text class="batch-text">需要批量发布？</text>
+    <text class="batch-link" bindtap="goBatchPublish">点击这里</text>
+  </view>
+  
+  <view class="xy-card">
+    <!-- 图片上传区域 -->
+    <view class="images-section">
+      <view class="images-grid">
+        <!-- 已上传的图片 -->
+        <view wx:for="{{form.imageUrls}}" wx:key="index" class="image-item">
+          <image src="{{item}}" mode="aspectFill" class="uploaded-image" bindtap="replaceImage" data-index="{{index}}" binderror="onImageError"/>
+          <view class="delete-btn" catchtap="deleteImage" data-index="{{index}}">×</view>
+        </view>
+        <!-- 添加图片按钮 -->
+        <view wx:if="{{form.imageUrls.length < 3}}" class="image-item add-image" bindtap="chooseImage">
+          <view wx:if="{{uploading}}" class="upload-mask">
+            <text>上传中...</text>
+          </view>
+          <view wx:else class="add-placeholder">+</view>
+        </view>
+      </view>
+      <view class="image-tip">最多可上传3张图片</view>
+    </view>
+    
+    <!-- 分类选择 -->
+    <view class="xy-input-group category-group">
+      <text class="xy-label">分类</text>
+      <picker wx:if="{{categoryList.length > 0}}" class="category-picker" mode="selector" range="{{categoryList}}" range-key="name" value="{{categoryIndex >= 0 ? categoryIndex : 0}}" bindchange="onCategoryChange">
+        <view class="picker-value {{form.categoryId ? '' : 'placeholder'}}">
+          {{categoryName || (form.categoryId ? '请选择分类' : '请选择分类（必填）')}}
+        </view>
+      </picker>
+      <view wx:else class="picker-value placeholder">加载分类中...</view>
+    </view>
+    
+    <view class="desc-section">
+      <textarea class="xy-input desc" placeholder="详细说明（选填）" bindinput="onInput" data-key="description" maxlength="140" auto-height="{{true}}" cursor-spacing="20">{{form.description}}</textarea>
+    </view>
+    <view class="xy-input-group price-group">
+      <text class="xy-label">价格</text>
+      <input class="xy-input price" placeholder="请输入价格" type="digit" bindinput="onInput" data-key="price" value="{{form.price}}" maxlength="8"/>
+      <text class="xy-label" style="min-width: auto; margin-left: 8rpx;">元</text>
+    </view>
+    
+    <!-- 位置选择 -->
+    <view class="xy-input-group location-group">
+      <text class="xy-label">位置</text>
+      <view class="location-right">
+        <view class="location-content" bindtap="chooseLocation">
+          <text class="location-text {{location ? '' : 'placeholder'}}">{{locationName}}</text>
+          <text class="location-icon">📍</text>
+        </view>
+        <view wx:if="{{!location}}" class="location-quick-btn" bindtap="useCurrentLocation">
+          <text class="quick-btn-text">使用当前位置</text>
+        </view>
+      </view>
+    </view>
+    
+    <button class="xy-btn-primary" bindtap="submit">{{productId ? '保存修改' : '发布闲置'}}</button>
+  </view>
+</view>
+

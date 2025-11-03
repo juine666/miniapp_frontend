@@ -1,0 +1,55 @@
+<view class="index-container">
+  <!-- 搜索框 -->
+  <view class="search-bar">
+    <view class="search-input-wrapper">
+      <text class="search-icon">🔍</text>
+      <input class="search-input" type="text" placeholder="搜索商品名称" value="{{searchKeyword}}" bindinput="onSearchInput" bindconfirm="onSearchConfirm" confirm-type="search"/>
+      <view wx:if="{{searchKeyword}}" class="search-clear" bindtap="onClearSearch">✕</view>
+    </view>
+  </view>
+  
+  <!-- 分类和排序栏 -->
+  <view class="filter-bar">
+    <view class="filter-item">
+      <text class="filter-label">分类：</text>
+      <picker mode="selector" range="{{categoryList}}" range-key="name" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="filter-picker">
+          <text class="filter-text">{{categoryList[categoryIndex] ? categoryList[categoryIndex].name : '全部'}}</text>
+          <text class="filter-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+    
+    <view class="filter-item">
+      <text class="filter-label">排序：</text>
+      <picker mode="selector" range="{{sortOptions}}" range-key="label" value="{{sortIndex}}" bindchange="onSortChange">
+        <view class="filter-picker">
+          <text class="filter-text">{{sortOptions[sortIndex] ? sortOptions[sortIndex].label : '最新'}}</text>
+          <text class="filter-arrow">▼</text>
+        </view>
+      </picker>
+    </view>
+  </view>
+  
+  <view class="goods-list">
+    <view wx:for="{{goodsList}}" wx:key="id" wx:for-item="item" wx:for-index="idx" class="goods-card">
+      <view class="goods-content" bindtap="onTapDetail" data-id="{{item.id}}">
+        <image class="goods-img" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
+        <view class="goods-title">{{item.name}}</view>
+        <view class="goods-meta">
+          <view class="goods-price">￥{{item.price}}</view>
+        </view>
+      </view>
+      <view class="action-buttons">
+        <view wx:if="{{false}}" class="action-btn share-btn" catchtap="onShare" data-id="{{item.id}}" data-item="{{item}}">
+          <text class="action-icon">📤</text>
+        </view>
+        <view class="action-btn favorite-btn {{item.isFavorited ? 'favorited' : ''}}" catchtap="toggleFavorite" data-id="{{item.id}}" data-index="{{idx}}">
+          <text class="action-icon">{{item.isFavorited ? '❤️' : '🤍'}}</text>
+        </view>
+      </view>
+    </view>
+    <view wx:if="!goodsList.length" class="empty-tip">暂无商品</view>
+  </view>
+</view>
+
