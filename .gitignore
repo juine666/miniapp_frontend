@@ -42,6 +42,12 @@ logs/
 .env
 .env.local
 
+# Configuration files with secrets
+**/application.yml
+**/application.properties
+!**/application.yml.example
+!**/application.properties.example
+
 # Build outputs
 bin/
 build/

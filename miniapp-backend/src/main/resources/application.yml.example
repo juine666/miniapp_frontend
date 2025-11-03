@@ -1,0 +1,85 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: miniapp-backend
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/miniapp?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    username: ${DATASOURCE_USERNAME:root}
+    password: ${DATASOURCE_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+    validate-on-migrate: false
+  web:
+    resources:
+      # 禁用默认的静态资源映射，避免 API 路径被当作静态资源
+      add-mappings: false
+
+# MyBatis Plus配置
+mybatis-plus:
+  configuration:
+    # 使用标准输出，显示完整的SQL语句和参数值（开发环境推荐）
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 开启SQL格式化
+    map-underscore-to-camel-case: true
+  # 显示MyBatis Plus的banner
+  global-config:
+    banner: false
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    com.stylemirror.miniapp_backend: DEBUG
+    com.stylemirror.miniapp_backend.controller.AuthController: DEBUG
+    com.stylemirror.miniapp_backend.common.GlobalExceptionHandler: ERROR
+    org.springframework.web.client: DEBUG
+  file:
+    name: logs/miniapp-backend.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:change_this_to_a_long_random_secret}
+    issuer: stylemirror
+    expirationMinutes: 43200 # 30 days
+  user:
+     name: ${ADMIN_USERNAME:test}
+     password: ${ADMIN_PASSWORD:test}
+admin:
+  defaultUsername: ${ADMIN_DEFAULT_USERNAME:admin}
+  defaultPassword: ${ADMIN_DEFAULT_PASSWORD:admin123}
+
+wechat:
+  appid: ${WECHAT_APPID:your_wechat_appid}
+  secret: ${WECHAT_SECRET:your_wechat_secret}
+  pay:
+    # 是否启用模拟支付（开发测试时使用）
+    mock-mode: true
+    # 商户号（真实支付时需要）
+    mchid: ${WECHAT_MCHID:}
+    # API密钥（真实支付时需要）
+    api-key: ${WECHAT_API_KEY:}
+    # 证书路径（真实支付时需要）
+    cert-path: ${WECHAT_CERT_PATH:}
+
+oss:
+  endpoint: ${OSS_ENDPOINT:oss-cn-shenzhen.aliyuncs.com}
+  accessKeyId: ${OSS_ACCESS_KEY_ID:your_access_key_id}
+  accessKeySecret: ${OSS_ACCESS_KEY_SECRET:your_access_key_secret}
+  bucket: ${OSS_BUCKET:your_bucket_name}
+  publicBaseUrl: ${OSS_PUBLIC_BASE_URL:https://your_bucket.oss-cn-shenzhen.aliyuncs.com}
+
+
+  
