@@ -11,7 +11,8 @@
     <description>Demo project for Spring Boot</description>
     <properties>
         <java.version>18</java.version>
-        <mybatis-plus.version>3.5.7</mybatis-plus.version>
+        <spring-boot.version>3.2.0</spring-boot.version>
+        <mybatis-plus.version>3.5.8</mybatis-plus.version>
         <springdoc.version>2.6.0</springdoc.version>
         <jjwt.version>0.11.5</jjwt.version>
         <aliyun-oss.version>3.17.4</aliyun-oss.version>
@@ -119,7 +120,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>3.5.7</version>
+                <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.stylemirror.miniapp_backend.MiniappBackendApplication</mainClass>
                 </configuration>
@@ -146,7 +147,7 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.5.7</version>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
