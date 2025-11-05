@@ -33,6 +33,7 @@ public class MyOrderController {
     private final OrderItemMapper orderItemMapper;
     private final ProductMapper productMapper;
     private final UserService userService;
+    private final com.stylemirror.miniapp_backend.common.TestAuthHelper testAuthHelper;
 
     /**
      * 获取我买到的商品列表（分页）
@@ -126,15 +127,10 @@ public class MyOrderController {
     }
 
     /**
-     * 获取当前用户ID（真机测试必须登录）
+     * 获取当前用户ID（测试模式下支持无认证访问）
      */
     private Long getUserId(Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        return userService.findByOpenid(auth.getName())
-                .map(u -> u.getId())
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        return testAuthHelper.getUserId(auth);
     }
 }
 

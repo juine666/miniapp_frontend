@@ -1,6 +1,17 @@
+// 环境配置
+const ENV_CONFIG = {
+  // 开发环境（本地开发）
+  development: 'http://localhost:8081',
+  // 生产环境（部署到服务器后修改为你的服务器地址）
+  production: "https://api.fxyw.work",  // 或 'http://your-server-ip:8081'
+};
+
+// 当前环境：开发时使用 development，发布时改为 production
+const CURRENT_ENV = 'production';
+
 App({
   globalData: {
-    baseURL: 'http://192.168.101.4:8081',
+    baseURL: ENV_CONFIG[CURRENT_ENV],
     token: '',
     openid: '',
     editingProductId: null,  // 用于在tabBar页面间传递编辑的商品ID

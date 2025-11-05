@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class FavoriteController {
     private final FavoriteService favoriteService;
     private final UserService userService;
+    private final com.stylemirror.miniapp_backend.common.TestAuthHelper testAuthHelper;
 
     /**
      * 收藏商品
@@ -76,15 +77,10 @@ public class FavoriteController {
     }
 
     /**
-     * 获取当前用户ID（真机测试必须登录）
+     * 获取当前用户ID（测试模式下支持无认证访问）
      */
     private Long getUserId(Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        return userService.findByOpenid(auth.getName())
-                .map(u -> u.getId())
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        return testAuthHelper.getUserId(auth);
     }
 }
 

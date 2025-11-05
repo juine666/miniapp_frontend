@@ -27,6 +27,7 @@ public class MessageController {
     private final MessageService messageService;
     private final UserService userService;
     private final ProductService productService;
+    private final com.stylemirror.miniapp_backend.common.TestAuthHelper testAuthHelper;
 
     /**
      * 发送消息请求
@@ -125,14 +126,9 @@ public class MessageController {
     }
 
     /**
-     * 获取当前用户ID（真机测试必须登录）
+     * 获取当前用户ID（测试模式下支持无认证访问）
      */
     private Long getUserId(Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        return userService.findByOpenid(auth.getName())
-                .map(u -> u.getId())
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
+        return testAuthHelper.getUserId(auth);
     }
 }

@@ -37,14 +37,16 @@ public class OrderController {
     private final UserMapper userMapper;
     private final ContactInfoService contactInfoService;
     private final WeChatPayService weChatPayService;
+    private final com.stylemirror.miniapp_backend.common.TestAuthHelper testAuthHelper;
 
-    public OrderController(OrderMapper orderMapper, OrderItemMapper orderItemMapper, ProductMapper productMapper, UserMapper userMapper, ContactInfoService contactInfoService, WeChatPayService weChatPayService) {
+    public OrderController(OrderMapper orderMapper, OrderItemMapper orderItemMapper, ProductMapper productMapper, UserMapper userMapper, ContactInfoService contactInfoService, WeChatPayService weChatPayService, com.stylemirror.miniapp_backend.common.TestAuthHelper testAuthHelper) {
         this.orderMapper = orderMapper;
         this.orderItemMapper = orderItemMapper;
         this.productMapper = productMapper;
         this.userMapper = userMapper;
         this.contactInfoService = contactInfoService;
         this.weChatPayService = weChatPayService;
+        this.testAuthHelper = testAuthHelper;
     }
 
     public record CreateOrderRequest(@NotNull Long productId, @Min(1) int quantity) {}
@@ -115,14 +117,7 @@ public class OrderController {
     }
     
     private Long getUserId(Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        User user = userMapper.selectOne(new QueryWrapper<User>().eq("openid", auth.getName()));
-        if (user == null) {
-            throw new IllegalArgumentException("用户不存在");
-        }
-        return user.getId();
+        return testAuthHelper.getUserId(auth);
     }
 
     @PostMapping

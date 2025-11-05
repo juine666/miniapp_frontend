@@ -16,13 +16,14 @@ import java.util.Optional;
 
 /**
  * 商品服务类
- * 负责商品的CRUD操作
+ * 负责商品的CRUD操作，集成Redis缓存
  */
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class ProductService {
     private final ProductMapper productMapper;
+    private final CacheService cacheService;
 
     /**
      * 查询所有商品
@@ -66,10 +67,29 @@ public class ProductService {
     }
 
     /**
-     * 根据ID查询商品
+     * 根据ID查询商品（带缓存）
      */
     public Optional<Product> findById(Long id) {
-        return Optional.ofNullable(productMapper.selectById(id));
+        if (id == null) {
+            return Optional.empty();
+        }
+
+        // 先从缓存获取
+        String cacheKey = cacheService.getProductKey(id);
+        Product cachedProduct = cacheService.get(cacheKey, Product.class);
+        if (cachedProduct != null) {
+            log.debug("从缓存获取商品: ID={}", id);
+            return Optional.of(cachedProduct);
+        }
+
+        // 缓存未命中，从数据库查询
+        Product product = productMapper.selectById(id);
+        if (product != null) {
+            // 写入缓存
+            cacheService.set(cacheKey, product);
+            log.debug("从数据库获取商品并写入缓存: ID={}", id);
+        }
+        return Optional.ofNullable(product);
     }
 
     /**
@@ -143,17 +163,31 @@ public class ProductService {
     }
 
     /**
-     * 保存商品（新增或更新）
+     * 保存商品（新增或更新，同步更新缓存）
      */
     @Transactional(rollbackFor = Exception.class)
     public Product save(Product product) {
-        if (product.getId() == null) {
+        boolean isNew = product.getId() == null;
+        
+        if (isNew) {
             productMapper.insert(product);
             log.info("新增商品，ID: {}, 名称: {}", product.getId(), product.getName());
         } else {
             productMapper.updateById(product);
             log.info("更新商品，ID: {}, 名称: {}", product.getId(), product.getName());
+            
+            // 删除旧缓存
+            String cacheKey = cacheService.getProductKey(product.getId());
+            cacheService.delete(cacheKey);
         }
+        
+        // 写入新缓存
+        if (product.getId() != null) {
+            String cacheKey = cacheService.getProductKey(product.getId());
+            cacheService.set(cacheKey, product);
+            log.debug("更新商品缓存: ID={}", product.getId());
+        }
+        
         return product;
     }
 
@@ -180,11 +214,16 @@ public class ProductService {
     }
 
     /**
-     * 更新商品信息（仅限卖家本人）
+     * 更新商品信息（仅限卖家本人，同步更新缓存）
      */
     @Transactional(rollbackFor = Exception.class)
     public Product updateProduct(Long productId, Long sellerId, Product updateData) {
-        Product product = productMapper.selectById(productId);
+        // 先从缓存获取，缓存未命中再从数据库查询
+        Product product = findById(productId).orElse(null);
+        if (product == null) {
+            // 如果缓存也没有，从数据库查询
+            product = productMapper.selectById(productId);
+        }
         if (product == null) {
             throw new IllegalArgumentException("商品不存在");
         }
@@ -208,18 +247,35 @@ public class ProductService {
         if (updateData.getCategoryId() != null) {
             product.setCategoryId(updateData.getCategoryId());
         }
+        if (updateData.getLatitude() != null) {
+            product.setLatitude(updateData.getLatitude());
+        }
+        if (updateData.getLongitude() != null) {
+            product.setLongitude(updateData.getLongitude());
+        }
         
         productMapper.updateById(product);
         log.info("更新商品，ID: {}, 卖家ID: {}", productId, sellerId);
+        
+        // 更新缓存
+        String cacheKey = cacheService.getProductKey(productId);
+        cacheService.set(cacheKey, product);
+        log.debug("更新商品缓存: ID={}", productId);
+        
         return product;
     }
 
     /**
-     * 上下架商品（仅限卖家本人）
+     * 上下架商品（仅限卖家本人，同步更新缓存）
      */
     @Transactional(rollbackFor = Exception.class)
     public void updateStatus(Long productId, Long sellerId, String status) {
-        Product product = productMapper.selectById(productId);
+        // 先从缓存获取，缓存未命中再从数据库查询
+        Product product = findById(productId).orElse(null);
+        if (product == null) {
+            // 如果缓存也没有，从数据库查询
+            product = productMapper.selectById(productId);
+        }
         if (product == null) {
             throw new IllegalArgumentException("商品不存在");
         }
@@ -230,6 +286,22 @@ public class ProductService {
         product.setStatus(status);
         productMapper.updateById(product);
         log.info("更新商品状态，ID: {}, 卖家ID: {}, 状态: {}", productId, sellerId, status);
+        
+        // 更新缓存
+        String cacheKey = cacheService.getProductKey(productId);
+        cacheService.set(cacheKey, product);
+        log.debug("更新商品缓存: ID={}", productId);
+    }
+
+    /**
+     * 删除商品缓存
+     */
+    public void evictProductCache(Long productId) {
+        if (productId != null) {
+            String cacheKey = cacheService.getProductKey(productId);
+            cacheService.delete(cacheKey);
+            log.debug("删除商品缓存: ID={}", productId);
+        }
     }
 }
 

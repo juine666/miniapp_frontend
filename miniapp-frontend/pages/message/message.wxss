@@ -4,18 +4,21 @@ page {
 }
 
 .chat-container {
-  height: calc(100vh - 140rpx - env(safe-area-inset-bottom));
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: #f5f5f5;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* 会话列表样式（参考闲鱼） */
 .conversation-list {
-  height: calc(100vh - 140rpx - env(safe-area-inset-bottom));
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: #fff;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 .conversations-scroll {
@@ -157,10 +160,12 @@ page {
 
 /* 聊天界面样式 */
 .chat-view {
-  height: calc(100vh - 140rpx - env(safe-area-inset-bottom));
+  height: 100vh;
   display: flex;
   flex-direction: column;
   background: #f5f5f5;
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 .chat-header {
@@ -237,9 +242,9 @@ page {
 .messages-list {
   flex: 1;
   padding: 24rpx 0 24rpx 16rpx;
-  height: 0;
   overflow-y: auto;
   box-sizing: border-box;
+  min-height: 0;
 }
 
 .message-item {
@@ -406,7 +411,10 @@ page {
   padding: 20rpx 24rpx;
   background: #fff;
   border-top: 1rpx solid #eee;
-  padding-bottom: calc(20rpx + 140rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
 }
 
 .input {

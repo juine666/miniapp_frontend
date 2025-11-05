@@ -39,6 +39,7 @@ public class ProductController {
     private final UserService userService;
     private final ModerationService moderationService;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final com.stylemirror.miniapp_backend.common.TestAuthHelper testAuthHelper;
 
     /**
      * 发布商品请求
@@ -285,11 +286,9 @@ public class ProductController {
      */
     @PostMapping
     public ResponseEntity<ApiResponse<Product>> publish(@Valid @RequestBody PublishRequest req, Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
+        Long sellerId = testAuthHelper.getUserId(auth);
         
-        log.info("发布商品，分类ID: {}, OpenID: {}", req.categoryId(), auth.getName());
+        log.info("发布商品，分类ID: {}, 卖家ID: {}", req.categoryId(), sellerId);
         
         // 验证分类是否存在
         categoryService.findById(req.categoryId())
@@ -299,10 +298,6 @@ public class ProductController {
         if (req.description() != null && !req.description().trim().isEmpty()) {
             moderationService.assertCleanText(req.description());
         }
-        
-        User seller = userService.findByOpenid(auth.getName())
-            .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-        Long sellerId = seller.getId();
         
         Product product = new Product();
         // 如果没有提供名称，使用分类名称作为默认名称

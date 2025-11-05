@@ -35,14 +35,8 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/admin/auth/**",
                                 "/api/oss/**",
-                                "/api/user/**",
-                                "/api/favorites/**",
-                                "/api/my/**",
-                                "/api/messages/**",
-                                "/api/browse-history/**",
                                 "/api/categories/**",
-                                "/api/products/**",
-                                "/api/orders/**"
+                                "/api/products/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -54,7 +48,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
-        cfg.addAllowedOriginPattern("http://localhost:*/");
+        // 允许所有来源（开发和生产环境）
+        cfg.addAllowedOriginPattern("*");
         cfg.addAllowedHeader("*");
         cfg.addAllowedMethod("*");
         cfg.setAllowCredentials(true);

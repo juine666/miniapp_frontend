@@ -32,7 +32,7 @@ public class ShareController {
      */
     @PostMapping("/product/{id}")
     public ResponseEntity<ApiResponse<Map<String, Object>>> create(@PathVariable Long id, Authentication auth) {
-        log.info("创建商品分享链接，商品ID: {}, OpenID: {}", id, auth.getName());
+        log.info("创建商品分享链接，商品ID: {}", id);
         Product product = productService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("商品不存在"));
         // Optional: ensure only seller can create share link

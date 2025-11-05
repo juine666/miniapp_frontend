@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
     private final ContactInfoService contactInfoService;
+    private final com.stylemirror.miniapp_backend.common.TestAuthHelper testAuthHelper;
 
     /**
      * 更新用户资料请求
@@ -41,11 +42,9 @@ public class UserController {
      */
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<User>> me(Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        log.debug("获取当前用户信息，OpenID: {}", auth.getName());
-        User user = userService.findByOpenid(auth.getName())
+        Long userId = testAuthHelper.getUserId(auth);
+        log.debug("获取当前用户信息，用户ID: {}", userId);
+        User user = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         return ResponseEntity.ok(ApiResponse.success(user));
     }
@@ -55,11 +54,9 @@ public class UserController {
      */
     @PostMapping("/profile")
     public ResponseEntity<ApiResponse<User>> updateProfile(@Valid @RequestBody UpdateProfileRequest req, Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        log.info("更新用户资料，OpenID: {}", auth.getName());
-        User user = userService.findByOpenid(auth.getName())
+        Long userId = testAuthHelper.getUserId(auth);
+        log.info("更新用户资料，用户ID: {}", userId);
+        User user = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
         if (req.nickname() != null) {
             user.setNickname(req.nickname());
@@ -75,13 +72,8 @@ public class UserController {
      */
     @GetMapping("/contact")
     public ResponseEntity<ApiResponse<ContactInfo>> getContact(Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        log.debug("获取用户联系方式，OpenID: {}", auth.getName());
-        User user = userService.findByOpenid(auth.getName())
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-        Long userId = user.getId();
+        Long userId = testAuthHelper.getUserId(auth);
+        log.debug("获取用户联系方式，用户ID: {}", userId);
         ContactInfo info = contactInfoService.findByUserId(userId).orElse(null);
         return ResponseEntity.ok(ApiResponse.success(info));
     }
@@ -112,13 +104,8 @@ public class UserController {
      */
     @PostMapping("/contact")
     public ResponseEntity<ApiResponse<ContactInfo>> updateContact(@Valid @RequestBody UpdateContactRequest req, Authentication auth) {
-        if (auth == null) {
-            throw new IllegalArgumentException("请先登录");
-        }
-        log.info("更新用户联系方式，OpenID: {}", auth.getName());
-        User user = userService.findByOpenid(auth.getName())
-                .orElseThrow(() -> new IllegalArgumentException("用户不存在"));
-        Long userId = user.getId();
+        Long userId = testAuthHelper.getUserId(auth);
+        log.info("更新用户联系方式，用户ID: {}", userId);
         ContactInfo info = contactInfoService.findByUserId(userId)
                 .orElse(new ContactInfo());
         info.setUserId(userId);
