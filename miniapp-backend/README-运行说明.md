@@ -1,5 +1,13 @@
 # 后端服务运行说明
 
+## ⚠️ 重要：构建工具规则
+
+**本项目只使用 Maven，不使用 Gradle。**
+- ✅ 使用 Maven 进行构建和运行
+- ❌ 不要使用 Gradle
+- ❌ 不要添加 Gradle 相关文件（build.gradle, settings.gradle, gradlew 等）
+- ❌ 不要使用 Gradle 命令
+
 ## 开发模式（推荐）
 
 ### 前台运行（可以看到控制台日志和错误）
@@ -8,10 +16,16 @@ cd miniapp-backend
 ./前台运行.sh
 ```
 
-或者直接：
+或者直接使用 Maven：
 ```bash
 cd miniapp-backend
-./gradlew bootRun -x test
+mvn spring-boot:run
+```
+
+或者跳过测试运行：
+```bash
+cd miniapp-backend
+mvn spring-boot:run -DskipTests
 ```
 
 **优点**：
@@ -23,7 +37,7 @@ cd miniapp-backend
 ### 后台运行
 ```bash
 cd miniapp-backend
-./gradlew bootRun -x test &
+mvn spring-boot:run -DskipTests &
 ```
 
 **查看日志**：

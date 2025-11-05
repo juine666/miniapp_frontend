@@ -52,9 +52,15 @@ logs/
 bin/
 build/
 target/
+*.class
+
+# Gradle (禁止使用 - 项目只使用Maven)
 gradle/
 .gradle/
-*.class
+build.gradle
+settings.gradle
+gradlew
+gradlew.bat
 
 # Audio/Media cache
 audio_cache/

@@ -1,7 +1,16 @@
 HELP.md
+
+# Gradle (禁止使用 - 项目只使用Maven)
 .gradle
+gradle/
+build.gradle
+settings.gradle
+gradlew
+gradlew.bat
+
+# Build outputs
 build/
-!gradle/wrapper/gradle-wrapper.jar
+target/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
