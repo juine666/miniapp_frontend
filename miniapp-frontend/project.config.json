@@ -6,12 +6,12 @@
   "setting": {
     "urlCheck": false,
     "es6": true,
+    "enhance": true,
     "minified": true,
     "postcss": true,
     "compileWorklet": false,
     "uglifyFileName": false,
-    "uploadWithSourceMap": true,
-    "enhance": false,
+    "uploadWithSourceMap": false,
     "packNpmManually": false,
     "packNpmRelationList": [],
     "minifyWXSS": true,
@@ -21,7 +21,7 @@
     "useCompilerPlugins": false,
     "condition": false,
     "swc": false,
-    "disableSWC": true,
+    "disableSWC": false,
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],
