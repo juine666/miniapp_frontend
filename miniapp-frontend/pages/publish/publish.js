@@ -46,13 +46,7 @@ Page({
       console.log('加载发布模式');
       wx.setNavigationBarTitle({ title: '发布商品' });
       // 确保是新建模式，清除可能残留的数据
-      this.setData({ 
-        productId: null,
-        'form.imageUrls': [],
-        'form.description': '',
-        'form.price': '',
-        'form.categoryId': null
-      });
+      this.resetForm();
     }
   },
   onShow() {
@@ -76,7 +70,37 @@ Page({
     // 如果当前没有productId且不在保存状态，确保是新建模式
     else if (!this.data.productId && !this.data.saving) {
       wx.setNavigationBarTitle({ title: '发布商品' });
+      // 如果是通过tabBar进入的新建模式，确保表单是空的
+      // 检查是否有残留数据（除了默认分类）
+      const hasData = (this.data.form.imageUrls && this.data.form.imageUrls.length > 0) ||
+                      (this.data.form.description && this.data.form.description.trim()) ||
+                      (this.data.form.price && this.data.form.price.trim()) ||
+                      (this.data.location);
+      if (hasData) {
+        console.log('检测到残留数据，清除表单');
+        this.resetForm();
+      }
     }
+  },
+  // 重置表单数据
+  resetForm() {
+    // 获取默认分类（如果有）
+    const defaultCategoryId = this.data.categoryList.length > 0 ? this.data.categoryList[0].id : null;
+    const defaultCategoryName = this.data.categoryList.length > 0 ? this.data.categoryList[0].name : '';
+    
+    this.setData({ 
+      productId: null,
+      'form.name': '',
+      'form.description': '',
+      'form.price': '',
+      'form.imageUrls': [],
+      'form.categoryId': defaultCategoryId,
+      categoryIndex: this.data.categoryList.length > 0 ? 0 : 0,
+      categoryName: defaultCategoryName,
+      location: null,
+      locationName: '未设置位置'
+    });
+    console.log('表单已重置');
   },
   async loadCategories() {
     try {
@@ -614,13 +638,8 @@ Page({
         
         if (res.code === 0) {
           wx.showToast({ title: '已发布', icon: 'success' });
-          // 清除表单数据
-          this.setData({ 
-            'form.imageUrls': [],
-            'form.description': '',
-            'form.price': '',
-            'form.categoryId': null
-          });
+          // 清除所有表单数据，包括位置信息
+          this.resetForm();
           setTimeout(() => {
             wx.navigateBack();
           }, 1000);

@@ -36,6 +36,8 @@ spring:
           min-idle: 0
           max-wait: -1ms
         shutdown-timeout: 100ms
+        # 禁用RESP3协议，使用RESP2以避免认证问题
+        client-name: miniapp-backend
 # MyBatis Plus配置
 mybatis-plus:
   configuration:
