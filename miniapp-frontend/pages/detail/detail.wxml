@@ -95,7 +95,8 @@
       <text class="action-text">分享</text>
     </button>
     <button wx:if="{{!isMyProduct}}" class="bar-btn chat" bindtap="onChat" hover-class="bar-btn-hover">聊一聊</button>
-    <button wx:if="{{!isMyProduct}}" class="bar-btn buy" bindtap="onBuy" hover-class="bar-btn-hover">我想要</button>
+    <!-- 隐藏"我想要"按钮 -->
+    <!-- <button wx:if="{{!isMyProduct}}" class="bar-btn buy" bindtap="onBuy" hover-class="bar-btn-hover">我想要</button> -->
   </view>
 </view>
 

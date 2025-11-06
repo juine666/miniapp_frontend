@@ -42,10 +42,11 @@
       <view class="stat-num">{{publishCount || 0}}</view>
       <view class="stat-label">发布</view>
     </view>
-    <view class="stat-item" bindtap="goOrders">
+    <!-- 隐藏"我的订单"入口 -->
+    <!-- <view class="stat-item" bindtap="goOrders">
       <view class="stat-num">{{orderCount || 0}}</view>
       <view class="stat-label">订单</view>
-    </view>
+    </view> -->
   </view>
 
   <view wx:if="{{!isLoggedIn}}" class="login-tip">
