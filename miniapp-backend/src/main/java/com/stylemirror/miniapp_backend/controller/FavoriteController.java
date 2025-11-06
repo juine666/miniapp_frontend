@@ -29,7 +29,7 @@ public class FavoriteController {
      */
     @PostMapping("/{productId}")
     public ResponseEntity<ApiResponse<Void>> addFavorite(
-            @PathVariable Long productId,
+            @PathVariable("productId") Long productId,
             Authentication auth) {
         Long userId = getUserId(auth);
         log.info("添加收藏，用户ID: {}, 商品ID: {}", userId, productId);
@@ -42,7 +42,7 @@ public class FavoriteController {
      */
     @DeleteMapping("/{productId}")
     public ResponseEntity<ApiResponse<Void>> removeFavorite(
-            @PathVariable Long productId,
+            @PathVariable("productId") Long productId,
             Authentication auth) {
         Long userId = getUserId(auth);
         log.info("取消收藏，用户ID: {}, 商品ID: {}", userId, productId);
@@ -55,7 +55,7 @@ public class FavoriteController {
      */
     @GetMapping("/{productId}/check")
     public ResponseEntity<ApiResponse<Boolean>> checkFavorite(
-            @PathVariable Long productId,
+            @PathVariable("productId") Long productId,
             Authentication auth) {
         Long userId = getUserId(auth);
         boolean favorited = favoriteService.isFavorited(userId, productId);

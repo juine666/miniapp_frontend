@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: miniapp-backend
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
   datasource:
     url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/miniapp?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
     username: ${DATASOURCE_USERNAME:root}
