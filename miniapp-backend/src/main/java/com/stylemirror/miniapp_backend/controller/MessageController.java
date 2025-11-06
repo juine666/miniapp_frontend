@@ -82,8 +82,8 @@ public class MessageController {
      */
     @GetMapping("/conversations")
     public ResponseEntity<ApiResponse<PageResponse<Message>>> getConversations(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
             Authentication auth) {
         Long userId = getUserId(auth);
         log.debug("获取会话列表，用户ID: {}, 页码: {}, 每页数量: {}", userId, page, size);
