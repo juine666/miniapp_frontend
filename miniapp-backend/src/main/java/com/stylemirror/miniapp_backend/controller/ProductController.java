@@ -134,7 +134,7 @@ public class ProductController {
      */
     @GetMapping("/by-category/{categoryId}")
     public ResponseEntity<ApiResponse<PageResponse<Product>>> byCategory(
-            @PathVariable Long categoryId,
+            @PathVariable("categoryId") Long categoryId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "sortBy", defaultValue = "latest") String sortBy,
@@ -148,7 +148,7 @@ public class ProductController {
      * 查询商品详情（包含卖家信息和分类信息）
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<Map<String, Object>>> detail(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Map<String, Object>>> detail(@PathVariable("id") Long id) {
         log.debug("查询商品详情，ID: {}", id);
         Product product = productService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("商品不存在"));

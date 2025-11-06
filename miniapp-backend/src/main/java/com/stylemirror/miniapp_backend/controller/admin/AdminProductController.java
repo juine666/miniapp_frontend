@@ -61,7 +61,7 @@ public class AdminProductController {
      */
     @PutMapping("/{id}/status/{status}")
     public ResponseEntity<ApiResponse<Product>> setStatus(
-            @PathVariable Long id, 
+            @PathVariable("id") Long id, 
             @PathVariable String status) {
         
         // 验证状态值

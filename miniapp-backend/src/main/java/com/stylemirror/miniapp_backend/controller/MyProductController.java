@@ -114,7 +114,7 @@ public class MyProductController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Product>> update(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody UpdateProductRequest req,
             Authentication auth) {
         Long sellerId = getUserId(auth);
@@ -160,7 +160,7 @@ public class MyProductController {
      */
     @PatchMapping("/{id}/status")
     public ResponseEntity<ApiResponse<Void>> updateStatus(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestParam @NotNull String value,
             Authentication auth) {
         Long sellerId = getUserId(auth);

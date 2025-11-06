@@ -90,7 +90,7 @@ public class AdminCategoryController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Category>> update(
-            @PathVariable Long id, 
+            @PathVariable("id") Long id, 
             @Valid @RequestBody UpsertRequest req) {
         
         log.info("更新分类，ID: {}, 名称: {}", id, req.name());
@@ -124,7 +124,7 @@ public class AdminCategoryController {
      * @return 删除结果
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") Long id) {
         log.info("删除分类，ID: {}", id);
         
         // 检查分类是否存在

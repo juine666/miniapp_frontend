@@ -82,7 +82,7 @@ public class UserController {
      * 获取指定用户的联系方式
      */
     @GetMapping("/{userId}/contact")
-    public ResponseEntity<ApiResponse<ContactInfo>> getUserContact(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<ContactInfo>> getUserContact(@PathVariable("userId") Long userId) {
         log.debug("获取用户联系方式，用户ID: {}", userId);
         ContactInfo info = contactInfoService.findByUserId(userId).orElse(null);
         return ResponseEntity.ok(ApiResponse.success(info));
@@ -92,7 +92,7 @@ public class UserController {
      * 根据用户ID获取用户信息
      */
     @GetMapping("/{userId}")
-    public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<User>> getUserById(@PathVariable("userId") Long userId) {
         log.debug("获取用户信息，用户ID: {}", userId);
         User user = userService.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("用户不存在"));

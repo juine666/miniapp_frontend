@@ -57,7 +57,7 @@ public class AdminUserController {
      * @return 更新后的用户信息
      */
     @PutMapping("/{id}/ban")
-    public ResponseEntity<ApiResponse<User>> ban(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<User>> ban(@PathVariable("id") Long id) {
         log.info("封禁用户，ID: {}", id);
         User user = userService.updateBanStatus(id, true);
         log.info("用户封禁成功，ID: {}, OpenID: {}", user.getId(), user.getOpenid());
@@ -71,7 +71,7 @@ public class AdminUserController {
      * @return 更新后的用户信息
      */
     @PutMapping("/{id}/unban")
-    public ResponseEntity<ApiResponse<User>> unban(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<User>> unban(@PathVariable("id") Long id) {
         log.info("解封用户，ID: {}", id);
         User user = userService.updateBanStatus(id, false);
         log.info("用户解封成功，ID: {}, OpenID: {}", user.getId(), user.getOpenid());

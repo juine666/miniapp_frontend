@@ -69,7 +69,7 @@ public class MessageController {
      */
     @GetMapping("/conversation/{userId}")
     public ResponseEntity<ApiResponse<List<Message>>> getConversation(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             Authentication auth) {
         Long currentUserId = getUserId(auth);
         log.debug("获取聊天记录，用户ID: {}, 对方ID: {}", currentUserId, userId);
@@ -96,7 +96,7 @@ public class MessageController {
      */
     @PatchMapping("/{messageId}/read")
     public ResponseEntity<ApiResponse<Void>> markAsRead(
-            @PathVariable Long messageId,
+            @PathVariable("messageId") Long messageId,
             Authentication auth) {
         Long userId = getUserId(auth);
         messageService.markAsRead(messageId, userId);
@@ -118,7 +118,7 @@ public class MessageController {
      */
     @PatchMapping("/conversation/{userId}/read")
     public ResponseEntity<ApiResponse<Void>> markConversationAsRead(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             Authentication auth) {
         Long currentUserId = getUserId(auth);
         messageService.markConversationAsRead(currentUserId, userId);

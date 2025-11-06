@@ -147,7 +147,7 @@ public class OrderController {
     }
 
     @PostMapping("/{orderId}/pay")
-    public ResponseEntity<ApiResponse<java.util.Map<String, String>>> pay(@PathVariable Long orderId, Authentication auth) {
+    public ResponseEntity<ApiResponse<java.util.Map<String, String>>> pay(@PathVariable("orderId") Long orderId, Authentication auth) {
         Long userId = getUserId(auth);
         User buyer = userMapper.selectById(userId);
         if (buyer == null) throw new IllegalArgumentException("用户不存在");
@@ -168,7 +168,7 @@ public class OrderController {
      * 在生产环境中，应该通过微信支付回调来更新订单状态
      */
     @PostMapping("/{orderId}/confirm-pay")
-    public ResponseEntity<ApiResponse<Order>> confirmPay(@PathVariable Long orderId, Authentication auth) {
+    public ResponseEntity<ApiResponse<Order>> confirmPay(@PathVariable("orderId") Long orderId, Authentication auth) {
         Long userId = getUserId(auth);
         User buyer = userMapper.selectById(userId);
         if (buyer == null) throw new IllegalArgumentException("用户不存在");
