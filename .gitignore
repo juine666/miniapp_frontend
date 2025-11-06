@@ -42,11 +42,11 @@ logs/
 .env
 .env.local
 
-# Configuration files with secrets
-**/application.yml
-**/application.properties
-!**/application.yml.example
-!**/application.properties.example
+# Configuration files with secrets (排除实际配置文件，但保留模板)
+*.local.yml
+*.local.properties
+!src/main/resources/application.yml
+!src/main/resources/application.properties
 
 # Build outputs
 bin/
@@ -75,3 +75,6 @@ unpackage/
 *.bak
 *.tmp
 
+
+# 环境变量文件
+.env
