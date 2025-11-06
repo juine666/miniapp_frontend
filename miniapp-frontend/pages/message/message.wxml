@@ -4,7 +4,7 @@
     <!-- 会话列表 -->
     <scroll-view class="conversations-scroll" scroll-y enable-back-to-top="{{true}}">
       <view wx:for="{{conversations}}" wx:key="userId" class="conversation-item" catchtap="openConversation" data-userid="{{item.userId}}" data-productid="{{item.productId || ''}}">
-        <image class="conversation-avatar" src="{{item.userAvatar || '/static/default-avatar.png'}}" mode="aspectFill"/>
+        <image class="conversation-avatar" src="{{item.userAvatar || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
         <view class="conversation-content">
           <view class="conversation-header">
             <view class="conversation-name">{{item.userName || '用户'}}</view>
@@ -57,7 +57,7 @@
       <view wx:for="{{messages}}" wx:key="id" class="message-item {{item.fromUser == currentUserId ? 'sent' : 'received'}}">
         <!-- 接收的消息显示头像 -->
         <view wx:if="{{item.fromUser != currentUserId}}" class="avatar-wrapper avatar-wrapper-received">
-          <image class="avatar" src="{{otherUserInfo.avatarUrl || '/static/default-avatar.png'}}" mode="aspectFill"/>
+          <image class="avatar" src="{{otherUserInfo.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
         </view>
         
         <view class="message-content">
@@ -69,7 +69,7 @@
         
         <!-- 发送的消息显示头像 -->
         <view wx:if="{{item.fromUser == currentUserId}}" class="avatar-wrapper avatar-wrapper-sent">
-          <image class="avatar" src="{{currentUserInfo.avatarUrl || '/static/default-avatar.png'}}" mode="aspectFill"/>
+          <image class="avatar" src="{{currentUserInfo.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
         </view>
       </view>
       
