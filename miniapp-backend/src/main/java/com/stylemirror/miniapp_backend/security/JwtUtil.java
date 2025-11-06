@@ -20,9 +20,9 @@ public class JwtUtil {
     private final long expirationMillis;
 
     public JwtUtil(
-            @Value("${security.jwt.secret}") String secret,
-            @Value("${security.jwt.issuer}") String issuer,
-            @Value("${security.jwt.expirationMinutes}") long expirationMinutes
+            @Value("${security.jwt.secret:change_this_to_a_long_random_secret}") String secret,
+            @Value("${security.jwt.issuer:stylemirror}") String issuer,
+            @Value("${security.jwt.expirationMinutes:43200}") long expirationMinutes
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.issuer = issuer;
