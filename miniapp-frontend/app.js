@@ -3,7 +3,7 @@ const ENV_CONFIG = {
   // 开发环境（本地开发）
   development: 'http://localhost:8081',
   // 生产环境（部署到服务器后修改为你的服务器地址）
-  production: "https://api.fxyw.work",  // 或 'http://your-server-ip:8081'
+  production: "https://fxyw.work",  // 或 'http://your-server-ip:8081'
 };
 
 // 当前环境：开发时使用 development，发布时改为 production
