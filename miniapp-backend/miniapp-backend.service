@@ -1,0 +1,65 @@
+[Unit]
+Description=Miniapp Backend Service
+After=network.target mysql.service
+
+[Service]
+Type=simple
+# 修改为实际运行的用户
+User=root
+# 修改为实际的工作目录
+WorkingDirectory=/opt/miniapp_frontend/miniapp-backend
+# JAR文件路径
+ExecStart=/usr/bin/java -jar /opt/miniapp_frontend/miniapp-backend/target/miniapp-backend-0.0.1-SNAPSHOT.jar
+# 重启策略
+Restart=always
+RestartSec=10
+
+# ==================== 环境变量配置 ====================
+# 数据库配置
+Environment="DATASOURCE_URL=jdbc:mysql://47.106.94.2:3306/miniapp?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai"
+Environment="DATASOURCE_USERNAME=admin"
+Environment="DATASOURCE_PASSWORD=123123"
+
+# Redis配置
+Environment="REDIS_HOST=47.106.94.2"
+Environment="REDIS_PORT=6379"
+Environment="REDIS_PASSWORD=123456"
+Environment="REDIS_DATABASE=1"
+
+# JWT配置（请使用安全的随机密钥）
+Environment="JWT_SECRET=change_this_to_a_long_random_secret"
+
+# 管理员配置
+Environment="ADMIN_USERNAME=admin"
+Environment="ADMIN_PASSWORD=admin123"
+Environment="ADMIN_DEFAULT_USERNAME=admin"
+Environment="ADMIN_DEFAULT_PASSWORD=admin123"
+
+# 微信小程序配置
+Environment="WECHAT_APPID=your_wechat_appid"
+Environment="WECHAT_SECRET=your_wechat_secret"
+
+# 微信支付配置（可选）
+Environment="WECHAT_PAY_MOCK_MODE=true"
+Environment="WECHAT_MCHID="
+Environment="WECHAT_API_KEY="
+Environment="WECHAT_CERT_PATH="
+
+# 阿里云OSS配置
+Environment="OSS_ENDPOINT=oss-cn-shenzhen.aliyuncs.com"
+Environment="OSS_ACCESS_KEY_ID=your_access_key_id"
+Environment="OSS_ACCESS_KEY_SECRET=your_access_key_secret"
+Environment="OSS_BUCKET=your_bucket_name"
+Environment="OSS_PUBLIC_BASE_URL=https://your_bucket.oss-cn-shenzhen.aliyuncs.com"
+
+# JVM参数（可选，根据需要调整）
+Environment="JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC"
+
+# 日志配置
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=miniapp-backend
+
+[Install]
+WantedBy=multi-user.target
+
