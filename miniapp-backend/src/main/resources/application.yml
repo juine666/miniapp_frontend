@@ -69,15 +69,6 @@ admin:
 wechat:
   appid: ${WECHAT_APPID:your_wechat_appid}
   secret: ${WECHAT_SECRET:your_wechat_secret}
-  pay:
-    # 是否启用模拟支付（开发测试时使用）
-    mock-mode: ${WECHAT_PAY_MOCK_MODE:true}
-    # 商户号（真实支付时需要）
-    mchid: ${WECHAT_MCHID:}
-    # API密钥（真实支付时需要）
-    api-key: ${WECHAT_API_KEY:}
-    # 证书路径（真实支付时需要）
-    cert-path: ${WECHAT_CERT_PATH:}
 
 oss:
   endpoint: ${OSS_ENDPOINT:oss-cn-shenzhen.aliyuncs.com}
