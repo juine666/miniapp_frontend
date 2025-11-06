@@ -1,10 +1,12 @@
 package com.stylemirror.miniapp_backend.service;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -12,10 +14,17 @@ import java.util.concurrent.TimeUnit;
  * 提供通用的缓存操作方法
  */
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class CacheService {
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
+
+    public CacheService(
+            RedisTemplate<String, Object> redisTemplate,
+            @Qualifier("redisObjectMapper") ObjectMapper objectMapper) {
+        this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     // 缓存前缀
     private static final String USER_PREFIX = "user:";
@@ -73,6 +82,15 @@ public class CacheService {
             Object value = redisTemplate.opsForValue().get(key);
             if (value != null) {
                 log.debug("缓存命中: key={}", key);
+                // 如果已经是目标类型，直接返回
+                if (clazz.isInstance(value)) {
+                    return clazz.cast(value);
+                }
+                // 如果是 LinkedHashMap（JSON 反序列化的结果），需要转换为目标类型
+                if (value instanceof LinkedHashMap) {
+                    return objectMapper.convertValue(value, clazz);
+                }
+                // 其他情况尝试直接转换
                 return clazz.cast(value);
             }
             log.debug("缓存未命中: key={}", key);
