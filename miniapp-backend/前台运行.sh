@@ -20,6 +20,6 @@ sleep 2
 echo "启动服务..."
 echo ""
 
-# 前台运行，可以看到所有日志和错误
-./gradlew bootRun -x test
+# 使用Maven运行，可以看到所有日志和错误
+mvn spring-boot:run -DskipTests
 

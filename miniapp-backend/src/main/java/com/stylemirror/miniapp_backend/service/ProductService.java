@@ -33,6 +33,44 @@ public class ProductService {
     }
 
     /**
+     * 分页查询商品列表（管理端使用）
+     * 
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @param keyword 搜索关键词（商品名称、描述）
+     * @param status 状态筛选（PUBLISHED、PENDING、REJECTED、OFFLINE）
+     * @param categoryId 分类ID筛选
+     * @return 分页响应
+     */
+    public PageResponse<Product> findPageForAdmin(int page, int size, String keyword, String status, Long categoryId) {
+        Page<Product> pageObj = new Page<>(page, size);
+        QueryWrapper<Product> wrapper = new QueryWrapper<>();
+        
+        // 关键词搜索：商品名称或描述
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(w -> w.like("name", keyword)
+                    .or()
+                    .like("description", keyword));
+        }
+        
+        // 状态筛选
+        if (StringUtils.hasText(status)) {
+            wrapper.eq("status", status);
+        }
+        
+        // 分类筛选
+        if (categoryId != null) {
+            wrapper.eq("category_id", categoryId);
+        }
+        
+        // 按创建时间倒序
+        wrapper.orderByDesc("created_at");
+        
+        Page<Product> result = productMapper.selectPage(pageObj, wrapper);
+        return PageResponse.of(result.getRecords(), (int) result.getCurrent(), (int) result.getSize(), result.getTotal());
+    }
+
+    /**
      * 分页查询所有商品
      * @param page 页码
      * @param size 每页数量

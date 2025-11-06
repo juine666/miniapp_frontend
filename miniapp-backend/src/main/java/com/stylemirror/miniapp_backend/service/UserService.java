@@ -1,12 +1,15 @@
 package com.stylemirror.miniapp_backend.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.stylemirror.miniapp_backend.common.PageResponse;
 import com.stylemirror.miniapp_backend.domain.User;
 import com.stylemirror.miniapp_backend.repository.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,38 @@ public class UserService {
      */
     public List<User> findAll() {
         return userMapper.selectList(null);
+    }
+
+    /**
+     * 分页查询用户列表（管理端使用）
+     * 
+     * @param page 页码（从0开始）
+     * @param size 每页大小
+     * @param keyword 搜索关键词（昵称、OpenID）
+     * @param banned 封禁状态筛选（null表示全部，true表示已封禁，false表示正常）
+     * @return 分页响应
+     */
+    public PageResponse<User> findPage(int page, int size, String keyword, Boolean banned) {
+        Page<User> pageObj = new Page<>(page, size);
+        QueryWrapper<User> wrapper = new QueryWrapper<>();
+        
+        // 关键词搜索：昵称或OpenID
+        if (StringUtils.hasText(keyword)) {
+            wrapper.and(w -> w.like("nickname", keyword)
+                    .or()
+                    .like("openid", keyword));
+        }
+        
+        // 封禁状态筛选
+        if (banned != null) {
+            wrapper.eq("banned", banned);
+        }
+        
+        // 按创建时间倒序
+        wrapper.orderByDesc("created_at");
+        
+        Page<User> result = userMapper.selectPage(pageObj, wrapper);
+        return PageResponse.of(result.getRecords(), (int) result.getCurrent(), (int) result.getSize(), result.getTotal());
     }
 
     /**
@@ -84,6 +119,21 @@ public class UserService {
             log.debug("从数据库获取用户并写入缓存: OpenID={}, ID={}", openid, user.getId());
         }
         return Optional.ofNullable(user);
+    }
+
+    /**
+     * 封禁/解封用户
+     * 
+     * @param id 用户ID
+     * @param banned 是否封禁
+     * @return 更新后的用户
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public User updateBanStatus(Long id, boolean banned) {
+        User user = findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("用户不存在，ID: " + id));
+        user.setBanned(banned);
+        return save(user);
     }
 
     /**
