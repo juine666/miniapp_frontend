@@ -256,6 +256,42 @@ Page({
         compressedFiles.push(compressedPath);
       }
       
+      // 图片内容安全检测
+      wx.showLoading({ title: '检测图片内容...' });
+      for (let i = 0; i < compressedFiles.length; i++) {
+        const filePath = compressedFiles[i];
+        try {
+          // 读取图片文件并转换为base64
+          const fs = wx.getFileSystemManager();
+          const fileData = fs.readFileSync(filePath, 'base64');
+          
+          // 调用后端API进行图片内容审核
+          const checkRes = await request({
+            url: '/api/oss/check-image',
+            method: 'POST',
+            data: {
+              image: fileData,
+              imageType: 'base64'
+            }
+          });
+          
+          if (checkRes.code !== 0) {
+            throw new Error(checkRes.message || '图片内容不符合规范，请更换图片');
+          }
+        } catch (checkError) {
+          // 如果检测失败，提示用户
+          wx.hideLoading();
+          this.setData({ uploading: false });
+          wx.showModal({
+            title: '图片审核失败',
+            content: checkError.message || '图片内容不符合规范，请更换图片后重试',
+            showCancel: false,
+            confirmText: '知道了'
+          });
+          return;
+        }
+      }
+      
       wx.showLoading({ title: '获取上传凭证...' });
       const dirPrefix = 'uploads/' + (new Date().toISOString().slice(0,10)) + '/';
       const policy = await request({ url: '/api/oss/policy', method: 'POST', data: { dirPrefix } });
@@ -362,6 +398,38 @@ Page({
       const file = choose.tempFiles[0];
       const stat = fs.statSync(file.tempFilePath);
       const compressedPath = await compressToTarget(file.tempFilePath, stat.size, MAX_BYTES, MIN_BYTES);
+      
+      // 图片内容安全检测
+      wx.showLoading({ title: '检测图片内容...' });
+      try {
+        // 读取图片文件并转换为base64
+        const fileData = fs.readFileSync(compressedPath, 'base64');
+        
+        // 调用后端API进行图片内容审核
+        const checkRes = await request({
+          url: '/api/oss/check-image',
+          method: 'POST',
+          data: {
+            image: fileData,
+            imageType: 'base64'
+          }
+        });
+        
+        if (checkRes.code !== 0) {
+          throw new Error(checkRes.message || '图片内容不符合规范，请更换图片');
+        }
+      } catch (checkError) {
+        // 如果检测失败，提示用户
+        wx.hideLoading();
+        this.setData({ uploading: false });
+        wx.showModal({
+          title: '图片审核失败',
+          content: checkError.message || '图片内容不符合规范，请更换图片后重试',
+          showCancel: false,
+          confirmText: '知道了'
+        });
+        return;
+      }
       
       wx.showLoading({ title: '获取上传凭证...' });
       const dirPrefix = 'uploads/' + (new Date().toISOString().slice(0,10)) + '/';
