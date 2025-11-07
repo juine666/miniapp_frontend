@@ -18,17 +18,64 @@ Page({
   },
   goEdit(e) {
     const id = e.currentTarget.dataset.id;
-    wx.navigateTo({ url: `/pages/publish/publish?id=${id}` });
+    console.log('点击编辑商品，ID:', id, '类型:', typeof id);
+    if (!id) {
+      wx.showToast({ title: '商品ID不存在', icon: 'none' });
+      return;
+    }
+    // 使用全局数据传递商品ID，因为publish页面在tabBar中
+    const app = getApp();
+    app.globalData.editingProductId = Number(id);
+    wx.switchTab({ url: '/pages/publish/publish' });
   },
   async toggleStatus(e) {
     e.stopPropagation();
     const id = e.currentTarget.dataset.id;
-    const product = this.data.products.find(p => p.id === id);
+    console.log('切换商品状态，ID:', id, '类型:', typeof id);
+    if (!id) {
+      wx.showToast({ title: '商品ID不存在', icon: 'none' });
+      return;
+    }
+    
+    const product = this.data.products.find(p => p.id == id);
+    if (!product) {
+      wx.showToast({ title: '商品不存在', icon: 'none' });
+      return;
+    }
+    
     const newStatus = product.status === 'PUBLISHED' ? 'OFFLINE' : 'PUBLISHED';
-    const res = await request({ url: `/api/my/products/${id}/status?value=${newStatus}`, method: 'PATCH' });
-    if (res.code === 0) {
-      wx.showToast({ title: newStatus === 'PUBLISHED' ? '已上架' : '已下架' });
-      this.loadProducts();
+    console.log('当前状态:', product.status, '新状态:', newStatus);
+    
+    try {
+      wx.showLoading({ title: '处理中...' });
+      const res = await request({ 
+        url: `/api/my/products/${id}/status?value=${newStatus}`, 
+        method: 'PATCH'
+      });
+      wx.hideLoading();
+      
+      if (res.code === 0) {
+        wx.showToast({ 
+          title: newStatus === 'PUBLISHED' ? '已上架' : '已下架',
+          icon: 'success'
+        });
+        // 延迟刷新，确保状态更新完成
+        setTimeout(() => {
+          this.loadProducts();
+        }, 500);
+      } else {
+        wx.showToast({ 
+          title: res.message || '操作失败', 
+          icon: 'none' 
+        });
+      }
+    } catch (error) {
+      wx.hideLoading();
+      console.error('切换状态失败:', error);
+      wx.showToast({ 
+        title: '操作失败，请重试', 
+        icon: 'none' 
+      });
     }
   }
 });
