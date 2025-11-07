@@ -60,7 +60,7 @@
       </view>
     </view>
     
-    <button class="xy-btn-primary" bindtap="submit">{{productId ? '保存修改' : '发布闲置'}}</button>
+    <button class="xy-btn-primary" bindtap="submit">{{productId ? '确认修改' : '发布闲置'}}</button>
   </view>
 </view>
 

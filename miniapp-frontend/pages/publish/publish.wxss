@@ -280,7 +280,7 @@
 /* 发布按钮 */
 .xy-btn-primary {
   width: calc(100% - 64rpx);
-  margin: 40rpx 32rpx 32rpx 32rpx;
+  margin: 40rpx 32rpx calc(32rpx + 140rpx + env(safe-area-inset-bottom)) 32rpx;
   background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%);
   color: #fff;
   font-size: 32rpx;
