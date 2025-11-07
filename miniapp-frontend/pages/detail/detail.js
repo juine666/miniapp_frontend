@@ -52,7 +52,8 @@ Page({
     this.checkFavorite();
   },
   onShow() {
-    // 每次显示页面时，如果ID存在，重新加载数据（防止数据缓存问题）
+    // 每次显示页面时，重新加载数据（确保数据是最新的）
+    // 这样可以防止从其他页面返回时显示旧数据
     const id = this.data.id;
     if (id) {
       console.log('详情页onShow，重新加载商品ID:', id);
