@@ -46,7 +46,8 @@
       <text class="xy-label" style="min-width: auto; margin-left: 8rpx;">元</text>
     </view>
     
-    <!-- 位置选择 -->
+    <!-- 位置选择 - 已隐藏 -->
+    <!--
     <view class="xy-input-group location-group">
       <text class="xy-label">位置</text>
       <view class="location-right">
@@ -59,6 +60,7 @@
         </view>
       </view>
     </view>
+    -->
     
     <button class="xy-btn-primary" bindtap="submit">{{productId ? '确认修改' : '发布闲置'}}</button>
   </view>
