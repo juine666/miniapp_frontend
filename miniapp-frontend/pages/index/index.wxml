@@ -1,4 +1,15 @@
 <view class="index-container">
+  <!-- 滚动公告栏 -->
+  <view class="notice-bar">
+    <view class="notice-content">
+      <text class="notice-icon">📢</text>
+      <view class="notice-text-wrapper">
+        <view class="notice-text">本平台只展示信息，不买卖</view>
+        <view class="notice-text">本平台只展示信息，不买卖</view>
+      </view>
+    </view>
+  </view>
+  
   <!-- 搜索框 -->
   <view class="search-bar">
     <view class="search-input-wrapper">
