@@ -1,6 +1,6 @@
 <view class="manage-container">
   <view class="goods-list">
-    <view wx:for="{{products}}" wx:key="id" class="goods-card" bindtap="goEdit" data-id="{{item.id}}" data-product="{{item}}">
+    <view wx:for="{{products}}" wx:key="id" class="goods-card" bindtap="goDetail" data-id="{{item.id}}" data-product="{{item}}">
       <view class="goods-content">
         <image class="goods-img" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
         <view class="goods-title">{{item.name}}</view>

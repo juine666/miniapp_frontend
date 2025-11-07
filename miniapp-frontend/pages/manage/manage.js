@@ -16,7 +16,26 @@ Page({
       this.setData({ products: res.data || [] });
     }
   },
+  // 跳转到商品详情页
+  goDetail(e) {
+    const id = e.currentTarget.dataset.id;
+    console.log('点击查看商品详情，ID:', id, '类型:', typeof id);
+    if (!id) {
+      wx.showToast({ title: '商品ID不存在', icon: 'none' });
+      return;
+    }
+    // 跳转到详情页
+    wx.navigateTo({ 
+      url: `/pages/detail/detail?id=${id}`,
+      fail: (err) => {
+        console.error('跳转详情页失败:', err);
+        wx.showToast({ title: '跳转失败', icon: 'none' });
+      }
+    });
+  },
+  // 编辑商品
   goEdit(e) {
+    e.stopPropagation(); // 阻止事件冒泡
     const id = e.currentTarget.dataset.id;
     console.log('点击编辑商品，ID:', id, '类型:', typeof id);
     if (!id) {
