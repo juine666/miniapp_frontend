@@ -179,6 +179,7 @@ Page({
           } : null;
           
           this.setData({
+            productId: id, // 确保productId被设置
             'form.name': product.name || '',
             'form.description': product.description || '',
             'form.price': product.price ? String(product.price) : '',
