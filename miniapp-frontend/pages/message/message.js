@@ -1,4 +1,5 @@
 const { request } = require('../../utils/request');
+const { validateText } = require('../../utils/sensitiveWordFilter');
 
 Page({
   data: {
@@ -212,6 +213,18 @@ Page({
     const { inputContent, productId, userId } = this.data;
     if (!inputContent.trim()) {
       wx.showToast({ title: '请输入消息', icon: 'none' });
+      return;
+    }
+    
+    // 前端敏感词预检查
+    const validation = validateText(inputContent);
+    if (!validation.valid) {
+      wx.showModal({
+        title: '消息包含敏感词',
+        content: validation.message,
+        showCancel: false,
+        confirmText: '知道了'
+      });
       return;
     }
     

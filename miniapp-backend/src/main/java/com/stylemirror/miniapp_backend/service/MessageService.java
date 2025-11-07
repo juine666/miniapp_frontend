@@ -21,12 +21,16 @@ import java.util.List;
 @Slf4j
 public class MessageService {
     private final MessageMapper messageMapper;
+    private final ModerationService moderationService;
 
     /**
      * 发送消息
      */
     @Transactional(rollbackFor = Exception.class)
     public Message sendMessage(Long fromUserId, Long toUserId, String content) {
+        // 敏感词过滤
+        moderationService.assertCleanText(content);
+        
         Message message = new Message();
         message.setFromUser(fromUserId);
         message.setToUser(toUserId);
