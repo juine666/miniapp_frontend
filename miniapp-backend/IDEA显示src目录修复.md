@@ -21,16 +21,16 @@
    - 在左侧选择 **Modules**
    - 选择 `miniapp-backend` 模块
    - 查看 **Sources** 标签页
-   - 确认 `src/main/java` 标记为 **Sources**（蓝色）
-   - 确认 `src/main/resources` 标记为 **Resources**（绿色）
-   - 确认 `src/test/java` 标记为 **Test Sources**（绿色）
+   - 确认 `src/main/java` 标记为 **Sources**（蓝色文件夹图标）
+   - 确认 `src/main/resources` 标记为 **Resources**（在 Sources 标签页中显示，类型为 `java-resource`）
+   - 确认 `src/test/java` 标记为 **Test Sources**（绿色文件夹图标）
 
 3. **如果目录未标记，手动添加**：
    - 点击 **Sources** 标签页
    - 点击 **+** 按钮
-   - 选择 `src/main/java` → 标记为 **Sources**
-   - 选择 `src/main/resources` → 标记为 **Resources**
-   - 选择 `src/test/java` → 标记为 **Test Sources**
+   - 选择 `src/main/java` → 标记为 **Sources**（蓝色）
+   - 选择 `src/main/resources` → 标记为 **Resources**（在 Sources 标签页中，类型选择 `java-resource`）
+   - 选择 `src/test/java` → 标记为 **Test Sources**（绿色）
 
 4. 点击 **Apply** 和 **OK**
 
