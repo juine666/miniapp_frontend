@@ -1,9 +1,11 @@
 <view class="xy-container">
-  <!-- 批量发布入口 -->
+  <!-- 批量发布入口 - 已隐藏 -->
+  <!--
   <view class="batch-entry" wx:if="{{!productId}}">
     <text class="batch-text">需要批量发布？</text>
     <text class="batch-link" bindtap="goBatchPublish">点击这里</text>
   </view>
+  -->
   
   <view class="xy-card">
     <!-- 图片上传区域 -->
