@@ -92,6 +92,7 @@
   align-items: flex-start;
   padding: 20rpx 0;
   border-bottom: 1rpx solid #f5f5f5;
+  min-height: 60rpx;
 }
 .info-row:last-child {
   border-bottom: none;
@@ -102,12 +103,19 @@
   font-size: 26rpx;
   color: #999;
   flex-shrink: 0;
+  margin-right: 20rpx;
+  line-height: 1.6;
+  word-break: keep-all;
+  white-space: nowrap;
 }
 .info-value {
   flex: 1;
   font-size: 26rpx;
   color: #333;
   line-height: 1.6;
+  word-break: break-all;
+  word-wrap: break-word;
+  min-width: 0;
 }
 .status-badge {
   display: inline-block;
