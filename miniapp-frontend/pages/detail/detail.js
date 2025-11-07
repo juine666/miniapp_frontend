@@ -24,7 +24,22 @@ Page({
     }
     
     console.log('详情页商品ID:', id, '类型:', typeof id);
-    this.setData({ id: String(id) }); // 确保ID是字符串
+    const newId = String(id);
+    
+    // 如果ID发生变化，清空旧数据并重新加载
+    if (this.data.id !== newId) {
+      this.setData({ 
+        id: newId,
+        item: {},
+        imageList: [],
+        sellerInfo: { nickname: '卖家', avatarUrl: 'https://img.yzcdn.cn/vant/cat.jpeg' },
+        sellerContact: null,
+        categoryName: '未分类',
+        isFavorited: false
+      });
+    } else {
+      this.setData({ id: newId });
+    }
     
     // 启用分享菜单
     wx.showShareMenu({
@@ -35,6 +50,15 @@ Page({
     this.loadCurrentUser();
     this.loadDetail();
     this.checkFavorite();
+  },
+  onShow() {
+    // 每次显示页面时，如果ID存在，重新加载数据（防止数据缓存问题）
+    const id = this.data.id;
+    if (id) {
+      console.log('详情页onShow，重新加载商品ID:', id);
+      this.loadDetail();
+      this.checkFavorite();
+    }
   },
   async loadDetail() {
     const id = this.data.id;
