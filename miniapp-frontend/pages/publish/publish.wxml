@@ -38,7 +38,7 @@
     
     <view class="desc-section">
       <view class="desc-label">详细说明<text class="optional-text">（选填）</text></view>
-      <textarea class="xy-input desc" placeholder="请输入详细说明" bindinput="onInput" data-key="description" maxlength="140" auto-height="{{true}}" cursor-spacing="20">{{form.description}}</textarea>
+      <textarea class="xy-input desc" placeholder="请输入商品详细描述信息" bindinput="onInput" data-key="description" maxlength="140" auto-height="{{true}}" cursor-spacing="20">{{form.description}}</textarea>
     </view>
     <view class="xy-input-group price-group">
       <text class="xy-label">价格</text>
