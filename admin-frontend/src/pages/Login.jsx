@@ -1,15 +1,12 @@
-import React, { useState } from 'react'
-import { Button, Card, Form, Input, message } from 'antd'
+import React from 'react'
+import { Button, Card, Form, Input } from 'antd'
 import { useAuth } from '../auth/AuthContext'
 
 export default function Login() {
-  const { login } = useAuth()
-  const [loading, setLoading] = useState(false)
+  const { login, loading } = useAuth()
+  
   const onFinish = async (values) => {
-    setLoading(true)
-    const ok = await login(values.username, values.password)
-    setLoading(false)
-    if (!ok) message.error('登录失败')
+    await login(values.username, values.password)
   }
   return (
     <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>

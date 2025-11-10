@@ -1,35 +1,169 @@
-import React, { createContext, useContext, useMemo, useState } from 'react'
+import React, { createContext, useContext, useMemo, useState, useEffect } from 'react'
 import axios from 'axios'
+import { message } from 'antd'
+import { getPermissionsByRole } from '../config/permissions'
 
 const AuthCtx = createContext(null)
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem('adminToken') || '')
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(false)
+
   const api = useMemo(() => {
-    const instance = axios.create({ baseURL: 'http://localhost:8080' })
-    instance.interceptors.request.use(cfg => {
-      if (token) cfg.headers['Authorization'] = `Bearer ${token}`
-      return cfg
+    const instance = axios.create({ 
+      baseURL: 'http://localhost:8081',
+      timeout: 10000
     })
+    
+    // 请求拦截器：添加token
+    instance.interceptors.request.use(
+      cfg => {
+        if (token) {
+          cfg.headers['Authorization'] = `Bearer ${token}`
+        }
+        return cfg
+      },
+      error => Promise.reject(error)
+    )
+    
+    // 响应拦截器：处理错误和权限
+    instance.interceptors.response.use(
+      response => response,
+      error => {
+        if (error.response) {
+          const { status, data } = error.response
+          if (status === 401) {
+            // 未授权，清除token并跳转登录
+            setToken('')
+            localStorage.removeItem('adminToken')
+            message.error('登录已过期，请重新登录')
+          } else if (status === 403) {
+            message.error('没有权限访问此资源')
+          } else if (status >= 500) {
+            message.error('服务器错误，请稍后重试')
+          } else {
+            message.error(data?.message || '请求失败')
+          }
+        } else if (error.request) {
+          message.error('网络错误，请检查网络连接')
+        } else {
+          message.error('请求失败：' + error.message)
+        }
+        return Promise.reject(error)
+      }
+    )
+    
     return instance
   }, [token])
 
-  const login = async (username, password) => {
-    const res = await axios.post('http://localhost:8080/api/admin/auth/login', { username, password })
-    if (res.data?.code === 0) {
-      const t = res.data.data.token
-      setToken(t)
-      localStorage.setItem('adminToken', t)
-      return true
+  // 从token中解析用户信息（简单实现，实际应该从后端获取）
+  useEffect(() => {
+    if (token) {
+      try {
+        // JWT token的payload部分（base64解码）
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const role = payload.role || 'ADMIN'
+        const username = payload.sub?.replace('admin:', '') || 'admin'
+        
+        // 根据角色获取权限列表
+        const permissions = getPermissionsByRole(role)
+        
+        setUser({
+          username,
+          role,
+          permissions,
+          // 支持从token中获取权限（如果后端返回）
+          ...(payload.permissions && { permissions: payload.permissions })
+        })
+      } catch (e) {
+        console.error('解析token失败', e)
+        setUser({ 
+          username: 'admin', 
+          role: 'ADMIN',
+          permissions: getPermissionsByRole('ADMIN')
+        })
+      }
+    } else {
+      setUser(null)
     }
-    return false
-  }
-  const logout = () => { setToken(''); localStorage.removeItem('adminToken') }
+  }, [token])
 
-  return <AuthCtx.Provider value={{ token, api, login, logout }}>{children}</AuthCtx.Provider>
+  const login = async (username, password) => {
+    setLoading(true)
+    try {
+      const res = await axios.post('http://localhost:8081/api/admin/auth/login', { username, password })
+      if (res.data?.code === 0) {
+        const t = res.data.data.token
+        setToken(t)
+        localStorage.setItem('adminToken', t)
+        message.success('登录成功')
+        return true
+      } else {
+        message.error(res.data?.message || '登录失败')
+        return false
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        message.error('用户名或密码错误')
+      } else {
+        message.error('登录失败，请稍后重试')
+      }
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const logout = () => {
+    setToken('')
+    setUser(null)
+    localStorage.removeItem('adminToken')
+    message.success('已退出登录')
+  }
+
+  // 检查是否有管理员权限
+  const hasAdminRole = () => {
+    return user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN'
+  }
+
+  // 检查是否有权限
+  const hasPermission = (permission) => {
+    if (!user?.permissions) return false
+    return user.permissions.includes(permission) || user.permissions.includes('system:config')
+  }
+
+  // 检查是否有任一权限
+  const hasAnyPermission = (permissions) => {
+    if (!user?.permissions || !permissions) return false
+    return permissions.some(permission => hasPermission(permission))
+  }
+
+  return (
+    <AuthCtx.Provider value={{ 
+      token, 
+      user, 
+      api, 
+      login, 
+      logout, 
+      loading,
+      hasAdminRole,
+      hasPermission,
+      hasAnyPermission,
+      isAuthenticated: !!token
+    }}>
+      {children}
+    </AuthCtx.Provider>
+  )
 }
 
-export function useAuth() { return useContext(AuthCtx) }
+export function useAuth() {
+  const context = useContext(AuthCtx)
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider')
+  }
+  return context
+}
 
 
 

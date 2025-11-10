@@ -50,8 +50,8 @@ public class CategoryService {
                     .like("description", keyword));
         }
         
-        // 按创建时间倒序
-        wrapper.orderByDesc("created_at");
+        // 按ID倒序（ID是自增的，可以表示创建顺序）
+        wrapper.orderByDesc("id");
         
         Page<Category> result = categoryMapper.selectPage(pageObj, wrapper);
         return PageResponse.of(result.getRecords(), (int) result.getCurrent(), (int) result.getSize(), result.getTotal());
