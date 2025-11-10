@@ -63,6 +63,10 @@
         <text class="chat-icon">💬</text>
         <text>联系</text>
       </view>
+      <view wx:if="{{isMyProduct}}" class="edit-btn-mini" catchtap="goEdit">
+        <text class="edit-icon">✏️</text>
+        <text>编辑</text>
+      </view>
     </view>
     <!-- 卖家联系方式 -->
     <view wx:if="{{sellerContact}}" class="seller-contact">
@@ -95,6 +99,7 @@
       <text class="action-text">分享</text>
     </button>
     <button wx:if="{{!isMyProduct}}" class="bar-btn chat" bindtap="onChat" hover-class="bar-btn-hover">聊一聊</button>
+    <button wx:if="{{isMyProduct}}" class="bar-btn edit" bindtap="goEdit" hover-class="bar-btn-hover">编辑商品</button>
     <!-- 隐藏"我想要"按钮 -->
     <!-- <button wx:if="{{!isMyProduct}}" class="bar-btn buy" bindtap="onBuy" hover-class="bar-btn-hover">我想要</button> -->
   </view>

@@ -2,18 +2,66 @@ const { request } = require('../../utils/request');
 
 Page({
   data: {
-    products: []
+    activeTab: 0, // 0: 我发布的, 1: 我关注的
+    products: [], // 我发布的商品
+    favorites: [], // 我关注的商品
+    currentProducts: [] // 当前显示的商品列表
   },
   onLoad() {
     this.loadProducts();
   },
   onShow() {
-    this.loadProducts();
+    // 根据当前标签页刷新数据
+    if (this.data.activeTab === 0) {
+      this.loadProducts();
+    } else {
+      this.loadFavorites();
+    }
   },
+  // 切换标签页
+  switchTab(e) {
+    const index = parseInt(e.currentTarget.dataset.index);
+    if (this.data.activeTab === index) return;
+    
+    this.setData({ activeTab: index });
+    
+    // 根据标签页加载数据
+    if (index === 0) {
+      this.loadProducts();
+    } else {
+      this.loadFavorites();
+    }
+  },
+  // 加载我发布的商品
   async loadProducts() {
-    const res = await request({ url: '/api/my/products' });
-    if (res.code === 0) {
-      this.setData({ products: res.data || [] });
+    try {
+      const res = await request({ url: '/api/my/products' });
+      if (res.code === 0) {
+        const products = res.data?.content || res.data || [];
+        this.setData({ 
+          products: products,
+          currentProducts: products
+        });
+      }
+    } catch (error) {
+      console.error('加载商品失败:', error);
+      wx.showToast({ title: '加载失败', icon: 'none' });
+    }
+  },
+  // 加载我关注的商品
+  async loadFavorites() {
+    try {
+      const res = await request({ url: '/api/favorites' });
+      if (res.code === 0) {
+        const favorites = res.data?.content || res.data || [];
+        this.setData({ 
+          favorites: favorites,
+          currentProducts: favorites
+        });
+      }
+    } catch (error) {
+      console.error('加载关注商品失败:', error);
+      wx.showToast({ title: '加载失败', icon: 'none' });
     }
   },
   // 跳转到商品详情页
@@ -80,7 +128,9 @@ Page({
         });
         // 延迟刷新，确保状态更新完成
         setTimeout(() => {
-          this.loadProducts();
+          if (this.data.activeTab === 0) {
+            this.loadProducts();
+          }
         }, 500);
       } else {
         wx.showToast({ 

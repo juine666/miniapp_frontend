@@ -14,7 +14,7 @@ command: /generate-service
 role: "你是一名资深后端开发工程师"
 context:
   framework: "Spring Boot 3 + MyBatis Plus + RabbitMQ"
-  database: "MySQL 18"
+  database: "MySQL 17"
   code_style: "阿里巴巴 Java 开发手册规范"
 task: |
   根据以下业务需求生成完整的模块代码（Controller + Service + Mapper + Entity）：
@@ -118,6 +118,59 @@ rules:
   - 不允许出现 System.out.println
   - 使用 @Transactional 处理事务
 ```
+
+---
+
+## 🔧 版本兼容性配置（已验证可用）
+
+### ✅ 推荐版本组合（稳定配置）
+
+```yaml
+framework_versions:
+  spring_boot: "3.1.5"           # ✅ 稳定版本，与 MyBatis Plus 兼容
+  mybatis_plus: "3.5.7"          # ✅ 稳定版本，功能完整
+  maven: "3.8.5"                 # ✅ 需配合 IDEA 2022.1+
+  jdk: "17"                      # ✅ 推荐版本
+  idea: "2023.3"                # ✅ 最低要求（推荐 2023.3）
+```
+
+
+### 📊 版本兼容性矩阵
+
+| Spring Boot | MyBatis Plus | 兼容性 | 备注 |
+|------------|--------------|--------|------|
+| 3.2.0 | 3.5.7 | ❌ | 有 factoryBeanObjectType 错误 |
+| **3.1.5** | **3.5.7** | ✅ | **推荐组合** |
+| 3.1.x | 3.5.7 | ✅ | 稳定 |
+
+| IDEA 版本 | Maven 版本 | 兼容性 | 备注 |
+|-----------|-----------|--------|------|
+| 2021.2.3 | 3.8.5 | ❌ | 有 NoSuchMethodError |
+| **2022.1+** | **3.8.5** | ✅ | **推荐** |
+| 2023.3 | 3.8.5 | ✅ | 最新推荐 |
+
+### 🎯 新项目快速配置模板
+
+```xml
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.1.5</version>  <!-- ✅ 稳定版本 -->
+</parent>
+
+<properties>
+    <java.version>17</java.version>
+    <mybatis-plus.version>3.5.7</mybatis-plus.version>  <!-- ✅ 稳定版本 -->
+</properties>
+```
+
+### 📝 创建新项目检查清单
+
+- [ ] Spring Boot: 3.1.5（推荐）
+- [ ] MyBatis Plus: 3.5.7（推荐）
+- [ ] JDK: 17
+- [ ] IDEA: 2023.3（推荐 2023.3）
+- [ ] Maven: 3.8.5（需配合新版本 IDEA）
 
 ---
 

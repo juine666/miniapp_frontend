@@ -383,6 +383,28 @@ Page({
       console.error('获取当前用户信息失败', e);
     }
   },
+  // 编辑商品
+  goEdit() {
+    const id = this.data.id;
+    console.log('点击编辑商品，ID:', id);
+    if (!id) {
+      wx.showToast({ title: '商品ID不存在', icon: 'none' });
+      return;
+    }
+    // 使用全局数据传递商品ID，因为publish页面在tabBar中
+    const app = getApp();
+    app.globalData.editingProductId = Number(id);
+    wx.switchTab({ 
+      url: '/pages/publish/publish',
+      success: () => {
+        console.log('跳转到编辑页面成功');
+      },
+      fail: (err) => {
+        console.error('跳转编辑页面失败:', err);
+        wx.showToast({ title: '跳转失败', icon: 'none' });
+      }
+    });
+  },
   async onChat() {
     console.log('点击聊天按钮，当前数据:', {
       id: this.data.id,

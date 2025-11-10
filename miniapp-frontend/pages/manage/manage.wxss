@@ -5,6 +5,43 @@
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
+/* 标签页样式 */
+.tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 1rpx solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 32rpx 0;
+  font-size: 30rpx;
+  color: #666;
+  position: relative;
+  transition: color 0.3s;
+}
+
+.tab-item.active {
+  color: #ff4757;
+  font-weight: 600;
+}
+
+.tab-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60rpx;
+  height: 4rpx;
+  background: #ff4757;
+  border-radius: 2rpx;
+}
+
 .goods-list {
   display: flex;
   flex-wrap: wrap;

@@ -1,0 +1,51 @@
+-- 钱包主表
+CREATE TABLE IF NOT EXISTS wallet (
+    user_id BIGINT PRIMARY KEY COMMENT '用户ID',
+    balance DECIMAL(10,2) NOT NULL DEFAULT 0 COMMENT '余额'
+);
+
+-- 钱包流水表
+CREATE TABLE IF NOT EXISTS wallet_tx (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    type VARCHAR(16) NOT NULL COMMENT '类型: income,outcome,withdraw',
+    amount DECIMAL(10,2) NOT NULL,
+    remark VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 收藏表
+CREATE TABLE IF NOT EXISTS favorite (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 浏览历史表
+CREATE TABLE IF NOT EXISTS browse_history (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    viewed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 评论表
+CREATE TABLE IF NOT EXISTS comment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    product_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    images TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 消息表
+CREATE TABLE IF NOT EXISTS message (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    from_user BIGINT NOT NULL,
+    to_user BIGINT NOT NULL,
+    content VARCHAR(255) NOT NULL,
+    read_flag TINYINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
