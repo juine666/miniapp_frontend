@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Select, Space, Table, Tag, Input, Card, Modal, Image, message, Descriptions } from 'antd'
-import { SearchOutlined, EyeOutlined } from '@ant-design/icons'
+import { Button, Select, Space, Table, Tag, Input, Card, Modal, Image, message, Descriptions, Form, InputNumber, Upload, Input as AntInput } from 'antd'
+import { SearchOutlined, EyeOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
 import { useAuth } from '../auth/AuthContext'
+import { PERMISSIONS } from '../config/permissions'
 
 const { Search } = Input
 const { Option } = Select
@@ -21,11 +22,17 @@ const statusLabels = {
 }
 
 export default function Products() {
-  const { api } = useAuth()
+  const { api, hasPermission } = useAuth()
   const [data, setData] = useState({ content: [], totalElements: 0, totalPages: 0 })
+  const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
   const [detailVisible, setDetailVisible] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [editMode, setEditMode] = useState(false)
+  const [uploadVisible, setUploadVisible] = useState(false)
+  const [editImageFileList, setEditImageFileList] = useState([])
+  const [editForm] = Form.useForm()
+  const [uploadForm] = Form.useForm()
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 20,
@@ -36,6 +43,22 @@ export default function Products() {
     status: undefined,
     categoryId: undefined
   })
+
+  // 加载分类列表
+  const loadCategories = async () => {
+    try {
+      const res = await api.get('/api/admin/categories', { params: { page: 0, size: 100 } })
+      if (res.data.code === 0) {
+        setCategories(res.data.data.content || [])
+      }
+    } catch (error) {
+      console.error('加载分类列表失败', error)
+    }
+  }
+
+  useEffect(() => {
+    loadCategories()
+  }, [])
 
   const load = async (page = 0, size = 20) => {
     setLoading(true)
@@ -70,7 +93,7 @@ export default function Products() {
 
   useEffect(() => {
     load(0, pagination.pageSize)
-  }, [filters])
+  }, [filters.keyword, filters.status, filters.categoryId])
 
   const handleTableChange = (newPagination) => {
     load(newPagination.current - 1, newPagination.pageSize)
@@ -96,7 +119,110 @@ export default function Products() {
 
   const showDetail = (record) => {
     setSelectedProduct(record)
+    setEditMode(false)
     setDetailVisible(true)
+    setEditImageFileList([])  // 清空编辑图片列表
+    // 初始化编辑表单
+    editForm.setFieldsValue({
+      name: record.name,
+      price: record.price,
+      description: record.description
+    })
+  }
+
+  const handleEditStart = () => {
+    if (!hasPermission(PERMISSIONS.PRODUCT_EDIT)) {
+      message.error('您没有权限编辑商品')
+      return
+    }
+    setEditMode(true)
+  }
+
+  const handleEditSave = async () => {
+    try {
+      const values = await editForm.validateFields()
+      const formData = new FormData()
+      formData.append('name', values.name)
+      formData.append('price', values.price)
+      formData.append('description', values.description || '')
+      
+      // 如果有新图片，添加到 FormData 让后端处理
+      if (editImageFileList.length > 0) {
+        const file = editImageFileList[0]
+        if (file.originFileObj) {
+          formData.append('image', file.originFileObj)
+        }
+      }
+      
+      await api.put(`/api/admin/products/${selectedProduct.id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      message.success('商品已更新')
+      setEditMode(false)
+      setEditImageFileList([])
+      load(pagination.current - 1, pagination.pageSize)
+      setDetailVisible(false)
+    } catch (error) {
+      console.error('更新商品失败', error)
+      message.error('更新商品失败')
+    }
+  }
+
+  const handleUploadProductSave = async () => {
+    if (!hasPermission(PERMISSIONS.PRODUCT_CREATE)) {
+      message.error('您没有权限上传商品')
+      return
+    }
+    try {
+      const values = await uploadForm.validateFields()
+      const formData = new FormData()
+      formData.append('name', values.name)
+      formData.append('price', values.price)
+      formData.append('description', values.description || '')
+      formData.append('categoryId', values.categoryId || 1)
+      
+      // 添加图片文件，由后端处理上传
+      if (values.coverUrl && values.coverUrl.fileList && values.coverUrl.fileList.length > 0) {
+        const file = values.coverUrl.fileList[0]
+        if (file.originFileObj) {
+          formData.append('image', file.originFileObj)
+        }
+      } else {
+        message.error('请选择商品图片')
+        return
+      }
+      
+      await api.post('/api/admin/products', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      message.success('商品上传成功')
+      setUploadVisible(false)
+      uploadForm.resetFields()
+      load(0, pagination.pageSize)
+    } catch (error) {
+      console.error('上传商品失败', error)
+      message.error('上传商品失败')
+    }
+  }
+
+  // 从 coverUrl JSON 字符串中提取第一张图片 URL
+  const getCoverImage = (coverUrl) => {
+    if (!coverUrl) return null
+    try {
+      // 如果是 JSON 字符串，解析它
+      if (typeof coverUrl === 'string') {
+        const urls = JSON.parse(coverUrl)
+        return Array.isArray(urls) && urls.length > 0 ? urls[0] : null
+      }
+      // 如果已经是数组
+      if (Array.isArray(coverUrl)) {
+        return coverUrl.length > 0 ? coverUrl[0] : null
+      }
+      return coverUrl
+    } catch (e) {
+      // 如果不是 JSON，直接返回
+      return coverUrl
+    }
   }
 
   const columns = [
@@ -114,18 +240,21 @@ export default function Products() {
     },
     { 
       title: '封面', 
-      dataIndex: 'coverImage',
-      width: 100,
-      render: (image) => image ? (
-        <Image 
-          src={image} 
-          alt="cover" 
-          width={60} 
-          height={60} 
-          style={{ objectFit: 'cover', borderRadius: 4 }}
-          preview={false}
-        />
-      ) : '-'
+      dataIndex: 'coverUrl',
+      width: 120,
+      render: (coverUrl) => {
+        const imageUrl = getCoverImage(coverUrl)
+        return imageUrl ? (
+          <Image 
+            src={imageUrl} 
+            alt="cover" 
+            width={60} 
+            height={60} 
+            style={{ objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }}
+            preview={{ mask: '查看全部图片' }}
+          />
+        ) : '-'
+      }
     },
     { 
       title: '价格', 
@@ -193,6 +322,7 @@ export default function Products() {
             <Option value="REJECTED">已驳回</Option>
             <Option value="OFFLINE">已下线</Option>
           </Select>
+          <Button type="primary" icon={<PlusOutlined />} onClick={() => setUploadVisible(true)}>上传商品</Button>
           <Button onClick={() => load(pagination.current - 1, pagination.pageSize)}>刷新</Button>
         </Space>
         
@@ -214,13 +344,62 @@ export default function Products() {
       </Space>
 
       <Modal
-        title="商品详情"
+        title={editMode ? '编辑商品' : '商品详情'}
         open={detailVisible}
-        onCancel={() => setDetailVisible(false)}
-        footer={null}
+        onCancel={() => {
+          setDetailVisible(false)
+          setEditMode(false)
+        }}
+        footer={editMode ? [
+          <Button key="back" onClick={() => setEditMode(false)}>取消</Button>,
+          <Button key="submit" type="primary" onClick={handleEditSave}>保存</Button>
+        ] : [
+          <Button key="edit" type="primary" onClick={handleEditStart}>编辑</Button>,
+          <Button key="close" onClick={() => setDetailVisible(false)}>关闭</Button>
+        ]}
         width={800}
       >
-        {selectedProduct && (
+        {selectedProduct && editMode ? (
+          <Form form={editForm} layout="vertical">
+            <Form.Item label="标题" name="name" rules={[{ required: true, message: '请输入标题' }]}>
+              <Input />
+            </Form.Item>
+            <Form.Item label="价格" name="price" rules={[{ required: true, message: '请输入价格' }]}>
+              <InputNumber min={0} step={0.01} />
+            </Form.Item>
+            <Form.Item label="描述" name="description">
+              <Input.TextArea rows={4} />
+            </Form.Item>
+            <Form.Item label="图片">
+              <div>
+                <div style={{ color: '#999', fontSize: '12px', marginBottom: '8px' }}>
+                  当前图片: 
+                  {(() => {
+                    const imageUrl = getCoverImage(selectedProduct.coverUrl)
+                    return imageUrl ? (
+                      <Image src={imageUrl} width={100} style={{ marginLeft: '8px' }} />
+                    ) : '无'
+                  })()}
+                </div>
+                <Upload
+                  listType="picture-card"
+                  maxCount={1}
+                  beforeUpload={() => false}
+                  fileList={editImageFileList}
+                  onChange={(info) => {
+                    console.log('Upload onChange:', info.fileList)
+                    setEditImageFileList(info.fileList)
+                  }}
+                >
+                  <div>
+                    <UploadOutlined />
+                    <div style={{ marginTop: 8 }}>点击更换图片</div>
+                  </div>
+                </Upload>
+              </div>
+            </Form.Item>
+          </Form>
+        ) : selectedProduct ? (
           <Descriptions column={2} bordered>
             <Descriptions.Item label="ID">{selectedProduct.id}</Descriptions.Item>
             <Descriptions.Item label="状态">
@@ -231,10 +410,38 @@ export default function Products() {
             <Descriptions.Item label="标题" span={2}>{selectedProduct.name}</Descriptions.Item>
             <Descriptions.Item label="价格">¥{selectedProduct.price?.toFixed(2) || '-'}</Descriptions.Item>
             <Descriptions.Item label="分类">{selectedProduct.categoryName || '-'}</Descriptions.Item>
-            <Descriptions.Item label="封面" span={2}>
-              {selectedProduct.coverImage ? (
-                <Image src={selectedProduct.coverImage} width={200} />
-              ) : '-'}
+            <Descriptions.Item label="所有图片" span={2}>
+              {(() => {
+                try {
+                  let images = []
+                  if (typeof selectedProduct.coverUrl === 'string') {
+                    images = JSON.parse(selectedProduct.coverUrl)
+                  } else if (Array.isArray(selectedProduct.coverUrl)) {
+                    images = selectedProduct.coverUrl
+                  }
+                  
+                  if (Array.isArray(images) && images.length > 0) {
+                    return (
+                      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {images.map((url, idx) => (
+                          <Image
+                            key={idx}
+                            src={url}
+                            alt={`product-${idx}`}
+                            width={100}
+                            height={100}
+                            style={{ objectFit: 'cover', borderRadius: 4, cursor: 'pointer' }}
+                            preview={true}
+                          />
+                        ))}
+                      </div>
+                    )
+                  }
+                } catch (e) {
+                  console.error('解析图片失败', e)
+                }
+                return '-'
+              })()}
             </Descriptions.Item>
             <Descriptions.Item label="描述" span={2}>
               {selectedProduct.description || '-'}
@@ -246,7 +453,55 @@ export default function Products() {
               {selectedProduct.updatedAt ? new Date(selectedProduct.updatedAt).toLocaleString('zh-CN') : '-'}
             </Descriptions.Item>
           </Descriptions>
-        )}
+        ) : null}
+      </Modal>
+
+      <Modal
+        title="上传新商品"
+        open={uploadVisible}
+        onCancel={() => {
+          setUploadVisible(false)
+          uploadForm.resetFields()
+        }}
+        footer={[
+          <Button key="cancel" onClick={() => {
+            setUploadVisible(false)
+            uploadForm.resetFields()
+          }}>取消</Button>,
+          <Button key="submit" type="primary" onClick={handleUploadProductSave}>上传</Button>
+        ]}
+        width={800}
+      >
+        <Form form={uploadForm} layout="vertical">
+          <Form.Item label="商品标题" name="name" rules={[{ required: true, message: '请输入商品标题' }]}>
+            <Input placeholder="请输入商品标题" />
+          </Form.Item>
+          <Form.Item label="商品价格" name="price" rules={[{ required: true, message: '请输入商品价格' }]}>
+            <InputNumber min={0} step={0.01} placeholder="请输入价格" style={{ width: '100%' }} />
+          </Form.Item>
+          <Form.Item label="商品描述" name="description">
+            <Input.TextArea rows={4} placeholder="请输入商品描述" />
+          </Form.Item>
+          <Form.Item label="分类" name="categoryId" rules={[{ required: true, message: '请选择商品分类' }]}>
+            <Select placeholder="请选择商品分类">
+              {categories.map(cat => (
+                <Option key={cat.id} value={cat.id}>{cat.name}</Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item label="商品图片" name="coverUrl" rules={[{ required: true, message: '请上传至少一张商品图片' }]}>
+            <Upload
+              listType="picture-card"
+              maxCount={1}
+              beforeUpload={() => false}
+            >
+              <div>
+                <UploadOutlined />
+                <div style={{ marginTop: 8 }}>点击上传图片</div>
+              </div>
+            </Upload>
+          </Form.Item>
+        </Form>
       </Modal>
     </Card>
   )

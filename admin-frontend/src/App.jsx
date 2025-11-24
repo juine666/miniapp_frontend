@@ -1,5 +1,5 @@
-import React from 'react'
-import { Layout, Menu, Avatar, Dropdown, Space, Typography, Button } from 'antd'
+import React, { useMemo } from 'react'
+import { Layout, Menu, Avatar, Dropdown, Space, Typography, Button, Spin } from 'antd'
 import { 
   Link, 
   Route, 
@@ -13,13 +13,20 @@ import {
   ShoppingOutlined,
   UserOutlined,
   LogoutOutlined,
-  SettingOutlined
+  SettingOutlined,
+  FileExcelOutlined,
+  FileTextOutlined,
+  DashboardOutlined
 } from '@ant-design/icons'
 import Login from './pages/Login'
-import Categories from './pages/Categories'
-import Products from './pages/Products'
-import Users from './pages/Users'
-import Settings from './pages/Settings'
+const Dashboard = React.lazy(() => import('./pages/Dashboard'))
+const Categories = React.lazy(() => import('./pages/Categories'))
+const Products = React.lazy(() => import('./pages/Products'))
+const Users = React.lazy(() => import('./pages/Users'))
+const Settings = React.lazy(() => import('./pages/Settings'))
+const ExcelImport = React.lazy(() => import('./pages/ExcelImport'))
+const StudentEnrollment = React.lazy(() => import('./pages/StudentEnrollment'))
+const SystemConfig = React.lazy(() => import('./pages/SystemConfig'))
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { PermissionCheck } from './components/PermissionCheck'
 import { MENU_PERMISSIONS, PERMISSIONS } from './config/permissions'
@@ -27,6 +34,13 @@ import { useTheme } from './components/ThemeProvider'
 
 const { Header, Sider, Content } = Layout
 const { Text } = Typography
+
+// 加载指示器
+const PageLoadingFallback = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
+    <Spin tip="加载中..." />
+  </div>
+)
 
 // 权限路由保护组件
 function ProtectedRoute({ children }) {
@@ -59,6 +73,97 @@ function Shell() {
   const { token, user, logout, isAuthenticated, hasAdminRole, hasPermission } = useAuth()
   const { theme } = useTheme()
   
+  // 所有 hooks 必须在条件检查之前调用
+  const selectedKey = (() => {
+    if (location.pathname === '/' || location.pathname.startsWith('/dashboard')) return '0'
+    if (location.pathname.startsWith('/categories')) return '1'
+    if (location.pathname.startsWith('/products')) return '2'
+    if (location.pathname.startsWith('/users')) return '3'
+    if (location.pathname.startsWith('/settings')) return '4-1'
+    if (location.pathname.startsWith('/oss-config')) return '4-2'
+    if (location.pathname.startsWith('/excel-import')) return '5'
+    if (location.pathname.startsWith('/student-enrollment')) return '6'
+    return '0'
+  })()
+  
+  // 使用 useMemo 优化菜单项生成，避免不必要的重新计算
+  const menuItems = useMemo(() => [
+    {
+      key: '0',
+      icon: <DashboardOutlined />,
+      label: <Link to="/dashboard">数据统计</Link>
+    },
+    {
+      key: '1',
+      icon: <AppstoreOutlined />,
+      label: <Link to="/categories">分类管理</Link>,
+      permission: MENU_PERMISSIONS['/categories']
+    },
+    {
+      key: '2',
+      icon: <ShoppingOutlined />,
+      label: <Link to="/products">商品审核</Link>,
+      permission: MENU_PERMISSIONS['/products']
+    },
+    {
+      key: '3',
+      icon: <UserOutlined />,
+      label: <Link to="/users">用户管理</Link>,
+      permission: MENU_PERMISSIONS['/users']
+    },
+    {
+      key: '4',
+      icon: <SettingOutlined />,
+      label: '系统设置',
+      permission: PERMISSIONS.SYSTEM_THEME,
+      children: [
+        {
+          key: '4-1',
+          label: <Link to="/settings">主题设置</Link>,
+          permission: PERMISSIONS.SYSTEM_THEME
+        },
+        {
+          key: '4-2',
+          label: <Link to="/oss-config">OSS 配置</Link>,
+          permission: PERMISSIONS.SYSTEM_CONFIG
+        }
+      ]
+    },
+    {
+      key: '5',
+      icon: <FileExcelOutlined />,
+      label: <Link to="/excel-import">Excel 导入</Link>,
+      permission: MENU_PERMISSIONS['/excel-import']
+    },
+    {
+      key: '6',
+      icon: <FileTextOutlined />,
+      label: <Link to="/student-enrollment">学生登记</Link>,
+      permission: MENU_PERMISSIONS['/student-enrollment']
+    }
+  ].filter(item => !item.permission || hasPermission(item.permission)).map(item => {
+    if (item.children) {
+      return {
+        ...item,
+        children: item.children.filter(child => !child.permission || hasPermission(child.permission))
+      }
+    }
+    return item
+  }), [hasPermission])
+  
+  // 用户下拉菜单
+  const userMenuItems = [
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: '退出登录',
+      onClick: () => {
+        logout()
+        navigate('/login')
+      }
+    }
+  ]
+  
   // 如果未登录，显示登录页面
   if (!isAuthenticated || !token) {
     return <Login />
@@ -81,58 +186,6 @@ function Shell() {
       </div>
     )
   }
-  
-  // 根据路径确定选中的菜单项
-  const getSelectedKey = () => {
-    if (location.pathname.startsWith('/categories')) return '1'
-    if (location.pathname.startsWith('/products')) return '2'
-    if (location.pathname.startsWith('/users')) return '3'
-    if (location.pathname.startsWith('/settings')) return '4'
-    return '1'
-  }
-  
-  const selectedKey = getSelectedKey()
-  
-  // 根据权限动态生成菜单
-  const menuItems = [
-    {
-      key: '1',
-      icon: <AppstoreOutlined />,
-      label: <Link to="/categories">分类管理</Link>,
-      permission: MENU_PERMISSIONS['/categories']
-    },
-    {
-      key: '2',
-      icon: <ShoppingOutlined />,
-      label: <Link to="/products">商品审核</Link>,
-      permission: MENU_PERMISSIONS['/products']
-    },
-    {
-      key: '3',
-      icon: <UserOutlined />,
-      label: <Link to="/users">用户管理</Link>,
-      permission: MENU_PERMISSIONS['/users']
-    },
-    {
-      key: '4',
-      icon: <SettingOutlined />,
-      label: <Link to="/settings">系统设置</Link>,
-      permission: PERMISSIONS.SYSTEM_THEME
-    }
-  ].filter(item => !item.permission || hasPermission(item.permission))
-  
-  // 用户下拉菜单
-  const userMenuItems = [
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: '退出登录',
-      onClick: () => {
-        logout()
-        navigate('/login')
-      }
-    }
-  ]
   
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -190,7 +243,16 @@ function Shell() {
           background: theme.contentBg,
           minHeight: 280
         }}>
-          <Routes>
+          <React.Suspense fallback={<PageLoadingFallback />}>
+            <Routes>
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/categories" 
               element={
@@ -231,10 +293,41 @@ function Shell() {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="/oss-config" 
+              element={
+                <ProtectedRoute>
+                  <PermissionCheck permission={PERMISSIONS.SYSTEM_CONFIG}>
+                    <SystemConfig />
+                  </PermissionCheck>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/excel-import" 
+              element={
+                <ProtectedRoute>
+                  <PermissionCheck permission={PERMISSIONS.EXCEL_IMPORT}>
+                    <ExcelImport />
+                  </PermissionCheck>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/student-enrollment" 
+              element={
+                <ProtectedRoute>
+                  <PermissionCheck permission={PERMISSIONS.STUDENT_ENROLLMENT_VIEW}>
+                    <StudentEnrollment />
+                  </PermissionCheck>
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<Navigate to="/categories" replace />} />
-            <Route path="*" element={<Navigate to="/categories" replace />} />
-          </Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </React.Suspense>
         </Content>
       </Layout>
     </Layout>

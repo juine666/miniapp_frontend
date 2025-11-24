@@ -10,12 +10,20 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
   datasource:
-    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/miniapp?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
+    url: ${DATASOURCE_URL:jdbc:mysql://localhost:3306/miniapp?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
     username: ${DATASOURCE_USERNAME:root}
     password: ${DATASOURCE_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      auto-commit: true
+      connection-test-query: SELECT 1
   flyway:
-    enabled: false
+    enabled: true
     baseline-on-migrate: true
     validate-on-migrate: false
   web:
@@ -87,10 +95,10 @@ wechat:
 
 oss:
   endpoint: ${OSS_ENDPOINT:oss-cn-shenzhen.aliyuncs.com}
-  accessKeyId: ${OSS_ACCESS_KEY_ID:your_access_key_id}
-  accessKeySecret: ${OSS_ACCESS_KEY_SECRET:your_access_key_secret}
-  bucket: ${OSS_BUCKET:your_bucket_name}
-  publicBaseUrl: ${OSS_PUBLIC_BASE_URL:https://your_bucket.oss-cn-shenzhen.aliyuncs.com}
+  accessKeyId: ${OSS_ACCESS_KEY_ID:替换为你的AccessKeyId}
+  accessKeySecret: ${OSS_ACCESS_KEY_SECRET:替换为你的AccessKeySecret}
+  bucket: ${OSS_BUCKET:twoshop}
+  publicBaseUrl: ${OSS_PUBLIC_BASE_URL:https://twoshop.oss-cn-shenzhen.aliyuncs.com}
 
 # 测试模式配置
 test:

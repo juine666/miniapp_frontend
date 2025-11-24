@@ -4,10 +4,15 @@ import com.stylemirror.miniapp_backend.common.ApiResponse;
 import com.stylemirror.miniapp_backend.common.PageResponse;
 import com.stylemirror.miniapp_backend.domain.Product;
 import com.stylemirror.miniapp_backend.service.ProductService;
+import com.stylemirror.miniapp_backend.util.OssUploadUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 /**
  * 管理员商品控制器
@@ -21,6 +26,10 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AdminProductController {
     private final ProductService productService;
+    private final OssUploadUtil ossUploadUtil;
+    
+    @Value("${oss.publicBaseUrl:https://twoshop.oss-cn-shenzhen.aliyuncs.com}")
+    private String ossPublicBaseUrl;
 
     /**
      * 分页查询商品列表
@@ -87,11 +96,101 @@ public class AdminProductController {
     }
 
     /**
-     * 验证状态值是否有效
-     * 
-     * @param status 状态值
-     * @return 是否有效
+     * 创建/上传商品
      */
+    @PostMapping
+    public ResponseEntity<ApiResponse<Product>> createProduct(
+            @RequestParam("name") String name,
+            @RequestParam("price") String price,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "categoryId", defaultValue = "1") Long categoryId,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        
+        try {
+            log.info("创建商品，名称: {}, 价格: {}, 分类ID: {}", name, price, categoryId);
+            
+            Product product = new Product();
+            product.setName(name);
+            product.setPrice(new java.math.BigDecimal(price));
+            product.setDescription(description);
+            product.setCategoryId(categoryId);
+            product.setStatus("PENDING"); // 默认待审核
+            
+            // 处理图片上传（如果提供）
+            if (image != null && !image.isEmpty()) {
+                try {
+                    String imageUrl = ossUploadUtil.uploadFile(image);
+                    if (imageUrl != null) {
+                        product.setCoverUrl("[\"" + imageUrl + "\"]");
+                        log.info("商品图片已上传: {}", imageUrl);
+                    }
+                } catch (Exception uploadError) {
+                    log.error("图片上传失败", uploadError);
+                    throw new RuntimeException("图片上传失败: " + uploadError.getMessage());
+                }
+            }
+            
+            Product saved = productService.save(product);
+            log.info("商品创建成功，ID: {}", saved.getId());
+            return ResponseEntity.ok(ApiResponse.success(saved));
+        } catch (Exception e) {
+            log.error("创建商品失败", e);
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error(500, "创建商品失败: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * 编辑商品
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Product>> updateProduct(
+            @PathVariable("id") Long id,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "price", required = false) String price,
+            @RequestParam(value = "description", required = false) String description,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        
+        try {
+            log.info("更新商品，ID: {}", id);
+            
+            Product product = productService.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("商品不存在，ID: " + id));
+            
+            if (name != null && !name.isEmpty()) {
+                product.setName(name);
+            }
+            if (price != null && !price.isEmpty()) {
+                product.setPrice(new java.math.BigDecimal(price));
+            }
+            if (description != null) {
+                product.setDescription(description);
+            }
+            
+            // 处理图片上传（如果提供）
+            if (image != null && !image.isEmpty()) {
+                try {
+                    String imageUrl = ossUploadUtil.uploadFile(image);
+                    if (imageUrl != null) {
+                        product.setCoverUrl("[\"" + imageUrl + "\"]");
+                        log.info("商品图片已更新: {}", imageUrl);
+                    }
+                } catch (Exception uploadError) {
+                    log.error("图片上传失败", uploadError);
+                    throw new RuntimeException("图片上传失败: " + uploadError.getMessage());
+                }
+            }
+            
+            Product updated = productService.save(product);
+            log.info("商品更新成功，ID: {}", updated.getId());
+            return ResponseEntity.ok(ApiResponse.success(updated));
+        } catch (Exception e) {
+            log.error("更新商品失败", e);
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error(500, "更新商品失败: " + e.getMessage()));
+        }
+    }
+    
     private boolean isValidStatus(String status) {
         return "PUBLISHED".equals(status) 
                 || "PENDING".equals(status) 

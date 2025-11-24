@@ -1,0 +1,26 @@
+-- 学生登记表
+CREATE TABLE IF NOT EXISTS student_enrollment (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '学生ID',
+    institution_name VARCHAR(255) NOT NULL COMMENT '教育机构名称',
+    grade VARCHAR(50) NOT NULL COMMENT '所属年级',
+    class_name VARCHAR(100) NOT NULL COMMENT '班级名称',
+    teacher_name VARCHAR(100) COMMENT '班主任名称',
+    student_name VARCHAR(100) NOT NULL COMMENT '儿童姓名',
+    student_id_card VARCHAR(18) NOT NULL UNIQUE COMMENT '儿童身份证号码',
+    birth_date DATE COMMENT '儿童出生年月日',
+    gender VARCHAR(10) COMMENT '性别(男/女)',
+    contact_phone VARCHAR(20) COMMENT '联系电话',
+    mother_name VARCHAR(100) COMMENT '母亲姓名',
+    mother_id_card VARCHAR(18) COMMENT '母亲身份证号码',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    created_by VARCHAR(100) COMMENT '创建人',
+    updated_by VARCHAR(100) COMMENT '更新人',
+    INDEX idx_institution_name (institution_name),
+    INDEX idx_student_name (student_name),
+    INDEX idx_student_id_card (student_id_card),
+    INDEX idx_class_name (class_name),
+    INDEX idx_grade (grade),
+    INDEX idx_contact_phone (contact_phone),
+    INDEX idx_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='学生登记表';

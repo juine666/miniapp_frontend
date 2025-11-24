@@ -4,13 +4,11 @@ import com.stylemirror.miniapp_backend.config.TestConfig;
 import com.stylemirror.miniapp_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
 
 /**
  * 测试认证辅助类
  * 在测试模式下，当没有认证信息时返回测试用户ID
  */
-@Component
 @RequiredArgsConstructor
 public class TestAuthHelper {
     private final TestConfig testConfig;

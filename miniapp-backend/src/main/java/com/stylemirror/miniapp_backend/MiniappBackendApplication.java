@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
 
 @SpringBootApplication(exclude = {FlywayAutoConfiguration.class})
-@MapperScan("com.stylemirror.miniapp_backend.repository")
+@MapperScan({"com.stylemirror.miniapp_backend.repository", "com.stylemirror.miniapp_backend.mapper"})
 public class MiniappBackendApplication {
 
 	public static void main(String[] args) {

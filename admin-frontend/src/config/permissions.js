@@ -13,6 +13,8 @@ export const PERMISSIONS = {
   
   // 商品管理
   PRODUCT_VIEW: 'product:view',
+  PRODUCT_CREATE: 'product:create',
+  PRODUCT_EDIT: 'product:edit',
   PRODUCT_AUDIT: 'product:audit',
   PRODUCT_PUBLISH: 'product:publish',
   PRODUCT_REJECT: 'product:reject',
@@ -26,6 +28,14 @@ export const PERMISSIONS = {
   // 系统管理
   SYSTEM_CONFIG: 'system:config',
   SYSTEM_THEME: 'system:theme',
+  EXCEL_IMPORT: 'excel:import',
+  
+  // 学生登记管理
+  STUDENT_ENROLLMENT_VIEW: 'student_enrollment:view',
+  STUDENT_ENROLLMENT_CREATE: 'student_enrollment:create',
+  STUDENT_ENROLLMENT_EDIT: 'student_enrollment:edit',
+  STUDENT_ENROLLMENT_DELETE: 'student_enrollment:delete',
+  STUDENT_ENROLLMENT_EXPORT: 'student_enrollment:export',
 }
 
 // 角色权限映射
@@ -40,6 +50,8 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.CATEGORY_EDIT,
     PERMISSIONS.CATEGORY_DELETE,
     PERMISSIONS.PRODUCT_VIEW,
+    PERMISSIONS.PRODUCT_CREATE,
+    PERMISSIONS.PRODUCT_EDIT,
     PERMISSIONS.PRODUCT_AUDIT,
     PERMISSIONS.PRODUCT_PUBLISH,
     PERMISSIONS.PRODUCT_REJECT,
@@ -47,7 +59,14 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.USER_VIEW,
     PERMISSIONS.USER_BAN,
     PERMISSIONS.USER_UNBAN,
+    PERMISSIONS.SYSTEM_CONFIG,
     PERMISSIONS.SYSTEM_THEME,
+    PERMISSIONS.EXCEL_IMPORT,
+    PERMISSIONS.STUDENT_ENROLLMENT_VIEW,
+    PERMISSIONS.STUDENT_ENROLLMENT_CREATE,
+    PERMISSIONS.STUDENT_ENROLLMENT_EDIT,
+    PERMISSIONS.STUDENT_ENROLLMENT_DELETE,
+    PERMISSIONS.STUDENT_ENROLLMENT_EXPORT,
   ],
   
   // 审核员 - 只能审核商品
@@ -79,7 +98,10 @@ export const MENU_PERMISSIONS = {
   '/categories': PERMISSIONS.CATEGORY_VIEW,
   '/products': PERMISSIONS.PRODUCT_VIEW,
   '/users': PERMISSIONS.USER_VIEW,
-  '/settings': PERMISSIONS.SYSTEM_CONFIG,
+  '/settings': PERMISSIONS.SYSTEM_THEME,
+  '/oss-config': PERMISSIONS.SYSTEM_CONFIG,
+  '/excel-import': PERMISSIONS.EXCEL_IMPORT,
+  '/student-enrollment': PERMISSIONS.STUDENT_ENROLLMENT_VIEW,
 }
 
 /**
