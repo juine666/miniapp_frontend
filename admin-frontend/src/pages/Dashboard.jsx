@@ -71,7 +71,8 @@ export default function Dashboard() {
   }
 
   const initViewsChart = () => {
-    const chart = echarts.init(viewsChartRef.current)
+    if (!viewsChartRef.current) return
+    const chart = echarts.getInstanceByDom(viewsChartRef.current) || echarts.init(viewsChartRef.current)
     const option = {
       title: { 
         text: '浏览量趋势',
@@ -104,8 +105,15 @@ export default function Dashboard() {
           smooth: true,
           name: '浏览量',
           itemStyle: { color: '#1890ff' },
-          areaStyle: { color: 'rgba(24, 144, 255, 0.2)' },
-          lineStyle: { width: 3 }
+          areaStyle: { 
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(24, 144, 255, 0.3)' },
+              { offset: 1, color: 'rgba(24, 144, 255, 0.05)' }
+            ])
+          },
+          lineStyle: { width: 3 },
+          symbolSize: 6,
+          symbol: 'circle'
         }
       ],
       grid: { left: 40, right: 20, top: 80, bottom: 20 }
@@ -115,7 +123,8 @@ export default function Dashboard() {
   }
 
   const initSalesChart = () => {
-    const chart = echarts.init(salesChartRef.current)
+    if (!salesChartRef.current) return
+    const chart = echarts.getInstanceByDom(salesChartRef.current) || echarts.init(salesChartRef.current)
     const option = {
       title: { 
         text: '销售额趋势',
@@ -167,7 +176,8 @@ export default function Dashboard() {
   }
 
   const initRepurchaseChart = () => {
-    const chart = echarts.init(repurchaseChartRef.current)
+    if (!repurchaseChartRef.current) return
+    const chart = echarts.getInstanceByDom(repurchaseChartRef.current) || echarts.init(repurchaseChartRef.current)
     const option = {
       title: { 
         text: '复购趋势',
@@ -197,13 +207,13 @@ export default function Dashboard() {
         {
           data: stats.repurchaseTrend.map(d => d.repurchase),
           type: 'line',
-          smooth: true,
+          smooth: false,
           name: '复购人数',
           itemStyle: { color: '#52c41a' },
-          areaStyle: { color: 'rgba(82, 196, 26, 0.2)' },
-          lineStyle: { width: 3 },
-          symbolSize: 6,
-          symbol: 'circle'
+          lineStyle: { width: 4, color: '#52c41a' },
+          symbolSize: 8,
+          symbol: 'circle',
+          showSymbol: true
         }
       ],
       grid: { left: 40, right: 20, top: 80, bottom: 20 }
@@ -213,7 +223,8 @@ export default function Dashboard() {
   }
 
   const initCategoryChart = () => {
-    const chart = echarts.init(categoryChartRef.current)
+    if (!categoryChartRef.current) return
+    const chart = echarts.getInstanceByDom(categoryChartRef.current) || echarts.init(categoryChartRef.current)
     const colors = ['#1890ff', '#52c41a', '#faad14', '#f5222d', '#13c2c2']
     const option = {
       title: { 
@@ -310,22 +321,22 @@ export default function Dashboard() {
       children: (
         <Row gutter={16} style={{ marginBottom: '0' }}>
           <Col xs={24} lg={12}>
-            <Card style={{ height: '500px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)', padding: '16px' }}>
-              <div ref={viewsChartRef} style={{ width: '100%', height: '100%' }} />
+            <Card style={{ height: '500px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+              <div ref={viewsChartRef} style={{ width: '100%', height: '500px' }} />
             </Card>
           </Col>
           <Col xs={24} lg={12}>
-            <Card style={{ height: '500px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)', padding: '16px' }}>
-              <div ref={salesChartRef} style={{ width: '100%', height: '100%' }} />
+            <Card style={{ height: '500px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+              <div ref={salesChartRef} style={{ width: '100%', height: '500px' }} />
             </Card>
           </Col>
           <Col xs={24} lg={12}>
-            <Card style={{ height: '580px', marginTop: '16px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)', padding: '16px' }}>
-              <div ref={repurchaseChartRef} style={{ width: '100%', height: '100%' }} />
+            <Card style={{ height: '580px', marginTop: '16px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
+              <div ref={repurchaseChartRef} style={{ width: '100%', height: '580px' }} />
             </Card>
           </Col>
           <Col xs={24} lg={12}>
-            <Card style={{ height: '580px', marginTop: '16px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)', padding: '16px' }}>
+            <Card style={{ height: '580px', marginTop: '16px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)' }}>
               <div ref={categoryChartRef} style={{ width: '100%', height: '580px' }} />
             </Card>
           </Col>
