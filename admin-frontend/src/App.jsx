@@ -188,50 +188,105 @@ function Shell() {
   }
   
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
       <Sider 
-        width={200} 
+        width={240} 
         theme="dark"
         style={{ 
-          background: theme.siderBg 
+          background: 'linear-gradient(180deg, rgba(26, 26, 46, 0.95) 0%, rgba(26, 26, 46, 0.98) 100%)',
+          boxShadow: '4px 0 24px rgba(0, 0, 0, 0.1)',
+          backdropFilter: 'blur(10px)',
+          borderRight: '1px solid rgba(255, 255, 255, 0.1)'
         }}
       >
         <div style={{ 
-          height: 64, 
+          height: 80, 
           display: 'flex', 
+          flexDirection: 'column',
           alignItems: 'center', 
           justifyContent: 'center',
-          color: theme.siderTextColor,
-          fontSize: 18,
-          fontWeight: 'bold'
+          padding: '20px',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
         }}>
-          StyleMirror Admin
+          <div style={{
+            fontSize: 24,
+            fontWeight: '800',
+            background: 'linear-gradient(135deg, #fff 0%, #f0f0f0 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '1px'
+          }}>
+            StyleMirror
+          </div>
+          <div style={{
+            fontSize: 12,
+            color: 'rgba(255, 255, 255, 0.6)',
+            marginTop: '4px',
+            letterSpacing: '2px'
+          }}>
+            ADMIN SYSTEM
+          </div>
         </div>
         <Menu
           theme="dark"
           mode="inline"
           selectedKeys={[selectedKey]}
-          style={{ background: theme.siderBg }}
-          items={menuItems}
+          style={{ 
+            background: 'transparent',
+            border: 'none',
+            marginTop: '16px',
+            padding: '0 12px'
+          }}
+          items={menuItems.map(item => ({
+            ...item,
+            style: {
+              borderRadius: '12px',
+              margin: '4px 0',
+              height: '48px',
+              lineHeight: '48px'
+            }
+          }))}
         />
       </Sider>
       <Layout>
         <Header style={{ 
-          background: theme.headerBg, 
-          padding: '0 24px',
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(20px)',
+          padding: '0 32px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 24px rgba(31, 38, 135, 0.15)',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
+          height: '72px'
         }}>
-          <Text strong style={{ fontSize: 18, color: theme.headerTextColor }}>管理后台</Text>
-          <Space>
-            <Text type="secondary" style={{ color: theme.headerTextColor }}>
-              欢迎，{user?.username || '管理员'} ({user?.role || 'ADMIN'})
-            </Text>
+          <Text strong style={{ 
+            fontSize: 24, 
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            fontWeight: '700'
+          }}>管理后台</Text>
+          <Space size="large">
+            <div style={{
+              padding: '8px 20px',
+              background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%)',
+              borderRadius: '12px',
+              border: '1px solid rgba(102, 126, 234, 0.2)'
+            }}>
+              <Text style={{ color: '#666', fontSize: '14px' }}>
+                欢迎，<Text strong style={{ color: '#667eea' }}>{user?.username || '管理员'}</Text> ({user?.role || 'ADMIN'})
+              </Text>
+            </div>
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Avatar 
-                style={{ cursor: 'pointer' }}
+                size={48}
+                style={{ 
+                  cursor: 'pointer',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+                }}
                 icon={<UserOutlined />}
               />
             </Dropdown>
@@ -239,8 +294,8 @@ function Shell() {
         </Header>
         <Content style={{ 
           margin: 24, 
-          padding: 24, 
-          background: theme.contentBg,
+          padding: 0,
+          background: 'transparent',
           minHeight: 280
         }}>
           <React.Suspense fallback={<PageLoadingFallback />}>

@@ -360,119 +360,210 @@ export default function Dashboard() {
   ]
 
   return (
-    <div style={{ minHeight: '100vh', background: '#f0f2f5', padding: '24px' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '24px' 
+    }}>
       <Spin spinning={loading}>
+        {/* 欢迎横幅 */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%)',
+          borderRadius: '16px',
+          padding: '32px',
+          marginBottom: '24px',
+          boxShadow: '0 8px 32px rgba(31, 38, 135, 0.15)',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(255, 255, 255, 0.3)'
+        }}>
+          <h1 style={{ 
+            fontSize: '32px', 
+            fontWeight: '700', 
+            color: '#1a1a2e',
+            marginBottom: '8px',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent'
+          }}>数据概览 Dashboard</h1>
+          <p style={{ fontSize: '16px', color: '#666', margin: 0 }}>实时监控您的业务数据 📊</p>
+        </div>
+
         {/* 统计卡片 */}
         <Row gutter={24} style={{ marginBottom: '24px' }}>
           <Col xs={24} sm={12} lg={6}>
             <Card 
               style={{ 
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: '16px',
                 border: 'none',
-                borderLeft: '4px solid #1890ff',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
+                boxShadow: '0 8px 24px rgba(102, 126, 234, 0.3)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)'
-                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(102, 126, 234, 0.4)'
+                e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
-                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(102, 126, 234, 0.3)'
+                e.currentTarget.style.transform = 'translateY(0) scale(1)'
               }}
             >
-              <Statistic
-                title="总浏览量"
-                value={stats.totalViews}
-                prefix={<EyeOutlined style={{ color: '#1890ff', marginRight: '8px' }} />}
-                valueStyle={{ color: '#1890ff', fontSize: '28px', fontWeight: 'bold' }}
-              />
+              <div style={{ padding: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '16px'
+                  }}>
+                    <EyeOutlined style={{ fontSize: '28px', color: '#fff' }} />
+                  </div>
+                  <div>
+                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', marginBottom: '4px' }}>总浏览量</div>
+                    <div style={{ color: '#fff', fontSize: '32px', fontWeight: '700' }}>{stats.totalViews.toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
             <Card 
               style={{ 
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                background: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+                borderRadius: '16px',
                 border: 'none',
-                borderLeft: '4px solid #52c41a',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
+                boxShadow: '0 8px 24px rgba(17, 153, 142, 0.3)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)'
-                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(17, 153, 142, 0.4)'
+                e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
-                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(17, 153, 142, 0.3)'
+                e.currentTarget.style.transform = 'translateY(0) scale(1)'
               }}
             >
-              <Statistic
-                title="复购人数"
-                value={stats.totalRepurchase}
-                prefix={<RedditOutlined style={{ color: '#52c41a', marginRight: '8px' }} />}
-                valueStyle={{ color: '#52c41a', fontSize: '28px', fontWeight: 'bold' }}
-              />
+              <div style={{ padding: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '16px'
+                  }}>
+                    <RedditOutlined style={{ fontSize: '28px', color: '#fff' }} />
+                  </div>
+                  <div>
+                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', marginBottom: '4px' }}>复购人数</div>
+                    <div style={{ color: '#fff', fontSize: '32px', fontWeight: '700' }}>{stats.totalRepurchase.toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
             <Card 
               style={{ 
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                background: 'linear-gradient(135deg, #fa8c16 0%, #fadb14 100%)',
+                borderRadius: '16px',
                 border: 'none',
-                borderLeft: '4px solid #faad14',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
+                boxShadow: '0 8px 24px rgba(250, 140, 22, 0.3)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)'
-                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(250, 140, 22, 0.4)'
+                e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
-                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(250, 140, 22, 0.3)'
+                e.currentTarget.style.transform = 'translateY(0) scale(1)'
               }}
             >
-              <Statistic
-                title="销售额"
-                value={stats.totalSalesAmount.toFixed(2)}
-                prefix={<DollarOutlined style={{ color: '#faad14', marginRight: '8px' }} />}
-                suffix="元"
-                valueStyle={{ color: '#faad14', fontSize: '28px', fontWeight: 'bold' }}
-              />
+              <div style={{ padding: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '16px'
+                  }}>
+                    <DollarOutlined style={{ fontSize: '28px', color: '#fff' }} />
+                  </div>
+                  <div>
+                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', marginBottom: '4px' }}>销售额</div>
+                    <div style={{ color: '#fff', fontSize: '32px', fontWeight: '700' }}>¥{stats.totalSalesAmount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                  </div>
+                </div>
+              </div>
             </Card>
           </Col>
           <Col xs={24} sm={12} lg={6}>
             <Card 
               style={{ 
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+                background: 'linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%)',
+                borderRadius: '16px',
                 border: 'none',
-                borderLeft: '4px solid #722ed1',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
+                boxShadow: '0 8px 24px rgba(142, 45, 226, 0.3)',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 0, 0, 0.12)'
-                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(142, 45, 226, 0.4)'
+                e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)'
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.08)'
-                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(142, 45, 226, 0.3)'
+                e.currentTarget.style.transform = 'translateY(0) scale(1)'
               }}
             >
-              <Statistic
-                title="商品数"
-                value={stats.totalProducts}
-                prefix={<ShoppingOutlined style={{ color: '#722ed1', marginRight: '8px' }} />}
-                valueStyle={{ color: '#722ed1', fontSize: '28px', fontWeight: 'bold' }}
-              />
+              <div style={{ padding: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginRight: '16px'
+                  }}>
+                    <ShoppingOutlined style={{ fontSize: '28px', color: '#fff' }} />
+                  </div>
+                  <div>
+                    <div style={{ color: 'rgba(255,255,255,0.8)', fontSize: '14px', marginBottom: '4px' }}>商品数</div>
+                    <div style={{ color: '#fff', fontSize: '32px', fontWeight: '700' }}>{stats.totalProducts.toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
             </Card>
           </Col>
         </Row>
 
         {/* 时间范围选择 */}
-        <Card style={{ marginBottom: '24px', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)', border: 'none' }}>
+        <Card style={{ 
+          marginBottom: '24px', 
+          boxShadow: '0 8px 24px rgba(31, 38, 135, 0.1)', 
+          border: 'none',
+          borderRadius: '16px',
+          background: 'rgba(255, 255, 255, 0.95)'
+        }}>
           <Space>
             <span style={{ fontWeight: 'bold', color: '#262626' }}>时间周期：</span>
             <Select value={timeRange} onChange={setTimeRange} style={{ width: 150 }} size="large">
@@ -484,7 +575,12 @@ export default function Dashboard() {
         </Card>
 
         {/* 图表标签页 */}
-        <Card style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)', border: 'none' }}>
+        <Card style={{ 
+          boxShadow: '0 8px 24px rgba(31, 38, 135, 0.1)', 
+          border: 'none',
+          borderRadius: '16px',
+          background: 'rgba(255, 255, 255, 0.95)'
+        }}>
           <Tabs items={items} />
         </Card>
       </Spin>
