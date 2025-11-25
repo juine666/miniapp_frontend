@@ -4,10 +4,12 @@
   left: 0;
   right: 0;
   height: 98rpx;
-  background: white;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20rpx);
   display: flex;
   padding-bottom: env(safe-area-inset-bottom);
-  border-top: 1rpx solid rgba(0, 0, 0, 0.08);
+  border-top: none;
+  box-shadow: 0 -4rpx 16rpx rgba(102, 126, 234, 0.08);
   z-index: 9999;
 }
 
@@ -42,10 +44,11 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 60rpx;
-  height: 4rpx;
-  background: linear-gradient(135deg, #fed500 0%, #fcc822 100%);
-  border-radius: 0 0 4rpx 4rpx;
+  width: 48rpx;
+  height: 6rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 0 0 6rpx 6rpx;
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.4);
 }
 
 .tab-bar-icon-wrapper {
@@ -64,7 +67,8 @@
 }
 
 .tab-bar-item-selected .tab-bar-icon {
-  transform: scale(1.2);
+  transform: scale(1.15);
+  filter: drop-shadow(0 2rpx 8rpx rgba(102, 126, 234, 0.3));
 }
 
 .tab-bar-text {
@@ -75,7 +79,7 @@
 }
 
 .tab-bar-item-selected .tab-bar-text {
-  color: #fed500;
+  color: #667eea;
   font-weight: 600;
   font-size: 21rpx;
 }
@@ -90,26 +94,28 @@
 }
 
 .publish-btn {
-  width: 100rpx;
-  height: 100rpx;
-  background: linear-gradient(135deg, #fed500 0%, #fcc822 100%);
+  width: 108rpx;
+  height: 108rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   position: absolute;
-  top: -40rpx;
+  top: -44rpx;
   left: 50%;
   transform: translateX(-50%);
-  box-shadow: 0 6rpx 16rpx rgba(254, 213, 0, 0.4);
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.45);
   z-index: 10;
+  border: 6rpx solid rgba(255, 255, 255, 0.95);
 }
 
 .publish-icon {
-  font-size: 64rpx;
+  font-size: 56rpx;
   color: #fff;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1;
+  text-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
 }
 
 .special-item .tab-bar-text {
@@ -123,7 +129,8 @@
 }
 
 .publish-btn:active {
-  opacity: 0.9;
-  transform: translateX(-50%) scale(0.95);
+  opacity: 0.95;
+  transform: translateX(-50%) scale(0.92);
+  box-shadow: 0 4rpx 16rpx rgba(102, 126, 234, 0.35);
 }
 
