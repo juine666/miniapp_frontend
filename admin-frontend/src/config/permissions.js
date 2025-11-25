@@ -36,6 +36,12 @@ export const PERMISSIONS = {
   STUDENT_ENROLLMENT_EDIT: 'student_enrollment:edit',
   STUDENT_ENROLLMENT_DELETE: 'student_enrollment:delete',
   STUDENT_ENROLLMENT_EXPORT: 'student_enrollment:export',
+  
+  // 权限管理
+  PERMISSION_MANAGE: 'permission:manage',
+  ROLE_CREATE: 'role:create',
+  ROLE_EDIT: 'role:edit',
+  ROLE_DELETE: 'role:delete',
 }
 
 // 角色权限映射
@@ -67,6 +73,10 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.STUDENT_ENROLLMENT_EDIT,
     PERMISSIONS.STUDENT_ENROLLMENT_DELETE,
     PERMISSIONS.STUDENT_ENROLLMENT_EXPORT,
+    PERMISSIONS.PERMISSION_MANAGE,
+    PERMISSIONS.ROLE_CREATE,
+    PERMISSIONS.ROLE_EDIT,
+    PERMISSIONS.ROLE_DELETE,
   ],
   
   // 审核员 - 只能审核商品
@@ -102,6 +112,7 @@ export const MENU_PERMISSIONS = {
   '/oss-config': PERMISSIONS.SYSTEM_CONFIG,
   '/excel-import': PERMISSIONS.EXCEL_IMPORT,
   '/student-enrollment': PERMISSIONS.STUDENT_ENROLLMENT_VIEW,
+  '/permission-manage': PERMISSIONS.PERMISSION_MANAGE,
 }
 
 /**

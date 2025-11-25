@@ -16,7 +16,8 @@ import {
   SettingOutlined,
   FileExcelOutlined,
   FileTextOutlined,
-  DashboardOutlined
+  DashboardOutlined,
+  SafetyOutlined
 } from '@ant-design/icons'
 import Login from './pages/Login'
 const Dashboard = React.lazy(() => import('./pages/Dashboard'))
@@ -27,6 +28,7 @@ const Settings = React.lazy(() => import('./pages/Settings'))
 const ExcelImport = React.lazy(() => import('./pages/ExcelImport'))
 const StudentEnrollment = React.lazy(() => import('./pages/StudentEnrollment'))
 const SystemConfig = React.lazy(() => import('./pages/SystemConfig'))
+const PermissionManage = React.lazy(() => import('./pages/PermissionManage'))
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { PermissionCheck } from './components/PermissionCheck'
 import { MENU_PERMISSIONS, PERMISSIONS } from './config/permissions'
@@ -81,6 +83,7 @@ function Shell() {
     if (location.pathname.startsWith('/users')) return '3'
     if (location.pathname.startsWith('/settings')) return '4-1'
     if (location.pathname.startsWith('/oss-config')) return '4-2'
+    if (location.pathname.startsWith('/permission-manage')) return '4-3'
     if (location.pathname.startsWith('/excel-import')) return '5'
     if (location.pathname.startsWith('/student-enrollment')) return '6'
     return '0'
@@ -126,6 +129,11 @@ function Shell() {
           key: '4-2',
           label: <Link to="/oss-config">OSS 配置</Link>,
           permission: PERMISSIONS.SYSTEM_CONFIG
+        },
+        {
+          key: '4-3',
+          label: <Link to="/permission-manage">权限管理</Link>,
+          permission: PERMISSIONS.PERMISSION_MANAGE
         }
       ]
     },
@@ -354,6 +362,16 @@ function Shell() {
                 <ProtectedRoute>
                   <PermissionCheck permission={PERMISSIONS.SYSTEM_CONFIG}>
                     <SystemConfig />
+                  </PermissionCheck>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/permission-manage" 
+              element={
+                <ProtectedRoute>
+                  <PermissionCheck permission={PERMISSIONS.PERMISSION_MANAGE}>
+                    <PermissionManage />
                   </PermissionCheck>
                 </ProtectedRoute>
               } 
