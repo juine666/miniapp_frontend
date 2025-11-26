@@ -28,8 +28,8 @@ export default function Dashboard() {
   const repurchaseChartRef = useRef(null)
   const categoryChartRef = useRef(null)
 
-  // 加载数据
-  const loadDashboardData = async (range) => {
+  // 加载数据（带重试机制）
+  const loadDashboardData = async (range, retryCount = 0) => {
     setLoading(true)
     try {
       const response = await api.get(`/api/admin/statistics/dashboard?timeRange=${range}`)
@@ -42,7 +42,18 @@ export default function Dashboard() {
       }
     } catch (error) {
       console.error('加载数据失败', error)
-      message.error('加载数据失败')
+      
+      // 如果是超时错误且未超过重试次数，自动重试
+      if (error.code === 'ECONNABORTED' && retryCount < 2) {
+        console.log(`请求超时，第${retryCount + 1}次重试...`)
+        message.warning('数据加载较慢，正在重试...')
+        setTimeout(() => {
+          loadDashboardData(range, retryCount + 1)
+        }, 1000)
+        return
+      }
+      
+      message.error('加载数据失败，请点击刷新按钮重试')
     } finally {
       setLoading(false)
     }

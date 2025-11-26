@@ -14,10 +14,8 @@ export default function Login() {
   const onFinish = async (values) => {
     const success = await login(values.username, values.password)
     if (success) {
-      // 登录成功，跳转到首页
-      setTimeout(() => {
-        navigate('/dashboard')
-      }, 500)
+      // 登录成功，直接跳转到首页（不延迟，避免闪现）
+      navigate('/dashboard', { replace: true })
     }
   }
 

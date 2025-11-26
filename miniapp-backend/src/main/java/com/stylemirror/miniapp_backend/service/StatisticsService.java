@@ -33,42 +33,45 @@ public class StatisticsService {
      * 获取仪表板数据
      */
     public Map<String, Object> getDashboardData(String timeRange) {
+        log.info("========== 收到Dashboard请求,timeRange={} ==========", timeRange);
         LocalDate endDate = LocalDate.now();
         LocalDate startDate;
         int days;
         
         switch (timeRange) {
             case "week":
-                startDate = endDate.minusDays(7);
+                startDate = endDate.minusDays(6);  // 改为6天,加上今天就是7天
                 days = 7;
                 break;
             case "month":
-                startDate = endDate.minusDays(30);
+                startDate = endDate.minusDays(29);  // 改为29天,加上今天就是30天
                 days = 30;
                 break;
             case "year":
-                startDate = endDate.minusDays(365);
+                startDate = endDate.minusDays(364);  // 改为364天,加上今天就是365天
                 days = 365;
                 break;
             default:
-                startDate = endDate.minusDays(7);
+                startDate = endDate.minusDays(6);
                 days = 7;
         }
         
-        log.info("查询统计数据，起始日期: {}, 结束日期: {}", startDate, endDate);
+        log.info("\n=== 日期范围 ===");
+        log.info("startDate: {}", startDate);
+        log.info("endDate: {}", endDate);
+        
+        // 转换为字符串格式传递给MyBatis
+        String startDateStr = startDate.toString();
+        String endDateStr = endDate.toString();
+        log.info("startDateStr: {}, endDateStr: {}", startDateStr, endDateStr);
         
         // 获取日统计数据
-        List<DailyStatistics> dailyStats = dailyStatisticsMapper.getStatisticsByDateRange(startDate, endDate);
-        log.info("查询到 {} 条日统计数据", dailyStats.size());
-        
-        // 如果没有查询到数据，返回测试数据
-        if (dailyStats.isEmpty()) {
-            log.warn("未查询到日期范围内的统计数据，返回测试数据");
-            return getTestDashboardData(days);
-        }
-        
+        List<DailyStatistics> dailyStats = dailyStatisticsMapper.getStatisticsByDateRange(startDateStr, endDateStr);
+        log.info("\n=== 查询结果 ===");
+        log.info("MyBatis查询到: {} 条记录", dailyStats.size());
         if (!dailyStats.isEmpty()) {
-            log.info("第一条数据: 日期={}, 浏览量={}", dailyStats.get(0).getStatisticDate(), dailyStats.get(0).getTotalViews());
+            DailyStatistics first = dailyStats.get(0);
+            log.info("\u7b2c一条: date={}, views={}", first.getStatisticDate(), first.getTotalViews());
         }
         
         Map<String, Object> result = new HashMap<>();
@@ -118,7 +121,7 @@ public class StatisticsService {
         result.put("repurchaseTrend", repurchaseTrend);
         
         // 获取热销商品
-        List<ProductStatistics> topProducts = productStatisticsMapper.getTopProductsByDateRange(startDate, endDate, 5);
+        List<ProductStatistics> topProducts = productStatisticsMapper.getTopProductsByDateRange(startDateStr, endDateStr, 5);
         List<Map<String, Object>> topProductsList = topProducts.stream()
                 .map(p -> {
                     Map<String, Object> m = new HashMap<>();
@@ -151,17 +154,6 @@ public class StatisticsService {
                     return stat;
                 })
                 .collect(Collectors.toList());
-        
-        // 如果没有真实数据，返回测试数据
-        if (categoryStats.isEmpty()) {
-            categoryStats = List.of(
-                    Map.of("name", "女装", "value", 45),
-                    Map.of("name", "男装", "value", 38),
-                    Map.of("name", "鞋类", "value", 32),
-                    Map.of("name", "配饰", "value", 28),
-                    Map.of("name", "其他", "value", 13)
-            );
-        }
         
         result.put("categoryStats", categoryStats);
         

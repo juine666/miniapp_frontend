@@ -54,6 +54,15 @@ public class CategoryService {
         wrapper.orderByDesc("id");
         
         Page<Category> result = categoryMapper.selectPage(pageObj, wrapper);
+        log.info("\n========== CategoryService.findPage ==========");
+        log.info("查询参数: page={}, size={}, keyword={}", page, size, keyword);
+        log.info("selectPage返回: total={}, records.size={}", result.getTotal(), result.getRecords().size());
+        if (!result.getRecords().isEmpty()) {
+            for (int i = 0; i < result.getRecords().size(); i++) {
+                Category cat = result.getRecords().get(i);
+                log.info("  记录[{}]: id={}, name={}", i, cat.getId(), cat.getName());
+            }
+        }
         return PageResponse.of(result.getRecords(), (int) result.getCurrent(), (int) result.getSize(), result.getTotal());
     }
 

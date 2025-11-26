@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Table, Button, Space, Modal, Form, Input, Select, Tag, message, Transfer, Divider } from 'antd'
-import { PlusOutlined, EditOutlined, DeleteOutlined, SafetyOutlined, KeyOutlined } from '@ant-design/icons'
+import { Card, Table, Button, Space, Modal, Form, Input, Select, Tag, message, Transfer, Divider, Tabs } from 'antd'
+import { PlusOutlined, EditOutlined, DeleteOutlined, SafetyOutlined, KeyOutlined, AppstoreAddOutlined } from '@ant-design/icons'
 import { PERMISSIONS, ROLE_PERMISSIONS } from '../config/permissions'
 
 const { Option } = Select
@@ -39,6 +39,13 @@ const PERMISSION_GROUPS = {
     { key: PERMISSIONS.STUDENT_ENROLLMENT_DELETE, label: '删除登记' },
     { key: PERMISSIONS.STUDENT_ENROLLMENT_EXPORT, label: '导出登记' },
   ],
+  '订单管理': [
+    { key: PERMISSIONS.ORDER_VIEW, label: '查看订单' },
+    { key: PERMISSIONS.ORDER_CREATE, label: '创建订单' },
+    { key: PERMISSIONS.ORDER_EDIT, label: '编辑订单' },
+    { key: PERMISSIONS.ORDER_DELETE, label: '删除订单' },
+    { key: PERMISSIONS.ORDER_EXPORT, label: '导出订单' },
+  ],
 }
 
 // 获取所有权限列表
@@ -57,17 +64,23 @@ const getAllPermissions = () => {
 }
 
 export default function PermissionManage() {
+  const [activeTab, setActiveTab] = useState('roles')
   const [roles, setRoles] = useState([])
+  const [permissions, setPermissions] = useState([])
   const [loading, setLoading] = useState(false)
   const [modalVisible, setModalVisible] = useState(false)
   const [permissionModalVisible, setPermissionModalVisible] = useState(false)
+  const [permissionDefineModalVisible, setPermissionDefineModalVisible] = useState(false)
   const [editingRole, setEditingRole] = useState(null)
+  const [editingPermission, setEditingPermission] = useState(null)
   const [targetKeys, setTargetKeys] = useState([])
   const [form] = Form.useForm()
+  const [permissionForm] = Form.useForm()
 
   // 加载角色数据
   useEffect(() => {
     loadRoles()
+    loadPermissions()
   }, [])
 
   const loadRoles = () => {
@@ -107,6 +120,19 @@ export default function PermissionManage() {
       },
     ]
     setRoles(mockRoles)
+  }
+
+  // 加载权限定义
+  const loadPermissions = () => {
+    const mockPermissions = getAllPermissions().map((perm, index) => ({
+      id: index + 1,
+      code: perm.key,
+      name: perm.title,
+      group: perm.group,
+      description: `${perm.group} - ${perm.title}`,
+      createdAt: '2024-01-01'
+    }))
+    setPermissions(mockPermissions)
   }
 
   // 打开新建/编辑角色弹窗
@@ -164,6 +190,113 @@ export default function PermissionManage() {
       }
     })
   }
+
+  // 打开权限定义弹窗
+  const handleOpenPermissionDefineModal = (permission = null) => {
+    setEditingPermission(permission)
+    if (permission) {
+      permissionForm.setFieldsValue({
+        code: permission.code,
+        name: permission.name,
+        group: permission.group,
+        description: permission.description
+      })
+    } else {
+      permissionForm.resetFields()
+    }
+    setPermissionDefineModalVisible(true)
+  }
+
+  // 保存权限定义
+  const handleSavePermissionDefine = async () => {
+    try {
+      const values = await permissionForm.validateFields()
+      console.log('保存权限定义:', values)
+      // await api.post('/api/admin/permissions', values)
+      message.success(editingPermission ? '权限更新成功' : '权限创建成功')
+      setPermissionDefineModalVisible(false)
+      loadPermissions()
+    } catch (error) {
+      message.error('保存失败')
+    }
+  }
+
+  // 删除权限定义
+  const handleDeletePermission = (permission) => {
+    Modal.confirm({
+      title: '确认删除',
+      content: `确定要删除权限 "${permission.name}" 吗？`,
+      onOk: async () => {
+        try {
+          // await api.delete(`/api/admin/permissions/${permission.id}`)
+          message.success('权限已删除')
+          loadPermissions()
+        } catch (error) {
+          message.error('删除失败')
+        }
+      }
+    })
+  }
+
+  // 权限定义列表列配置
+  const permissionColumns = [
+    {
+      title: 'ID',
+      dataIndex: 'id',
+      width: 80
+    },
+    {
+      title: '权限代码',
+      dataIndex: 'code',
+      width: 250,
+      render: (text) => <Tag color="purple">{text}</Tag>
+    },
+    {
+      title: '权限名称',
+      dataIndex: 'name',
+      width: 150
+    },
+    {
+      title: '所属分组',
+      dataIndex: 'group',
+      width: 120,
+      render: (text) => <Tag color="blue">{text}</Tag>
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      ellipsis: true
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'createdAt',
+      width: 150
+    },
+    {
+      title: '操作',
+      width: 200,
+      fixed: 'right',
+      render: (_, record) => (
+        <Space>
+          <Button 
+            size="small" 
+            icon={<EditOutlined />}
+            onClick={() => handleOpenPermissionDefineModal(record)}
+          >
+            编辑
+          </Button>
+          <Button 
+            size="small" 
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDeletePermission(record)}
+          >
+            删除
+          </Button>
+        </Space>
+      )
+    }
+  ]
 
   const columns = [
     {
@@ -252,22 +385,41 @@ export default function PermissionManage() {
           }}>
             <SafetyOutlined /> 权限管理
           </h2>
-          <Button 
-            type="primary"
-            size="large"
-            icon={<PlusOutlined />}
-            onClick={() => handleOpenModal()}
-            style={{
-              borderRadius: '12px',
-              height: '48px',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              border: 'none',
-              boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)',
-              fontWeight: '600'
-            }}
-          >
-            新建角色
-          </Button>
+          {activeTab === 'roles' ? (
+            <Button 
+              type="primary"
+              size="large"
+              icon={<PlusOutlined />}
+              onClick={() => handleOpenModal()}
+              style={{
+                borderRadius: '12px',
+                height: '48px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)',
+                fontWeight: '600'
+              }}
+            >
+              新建角色
+            </Button>
+          ) : (
+            <Button 
+              type="primary"
+              size="large"
+              icon={<AppstoreAddOutlined />}
+              onClick={() => handleOpenPermissionDefineModal()}
+              style={{
+                borderRadius: '12px',
+                height: '48px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                border: 'none',
+                boxShadow: '0 4px 16px rgba(102, 126, 234, 0.3)',
+                fontWeight: '600'
+              }}
+            >
+              新建权限
+            </Button>
+          )}
         </div>
       </Card>
 
@@ -281,16 +433,55 @@ export default function PermissionManage() {
           border: '1px solid rgba(255, 255, 255, 0.3)'
         }}
       >
-        <Table
-          rowKey="id"
-          columns={columns}
-          dataSource={roles}
-          loading={loading}
-          pagination={{
-            showSizeChanger: true,
-            showQuickJumper: true,
-            showTotal: (total) => `共 ${total} 个角色`
-          }}
+        <Tabs 
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          items={[
+            {
+              key: 'roles',
+              label: (
+                <span>
+                  <SafetyOutlined />
+                  角色管理
+                </span>
+              ),
+              children: (
+                <Table
+                  rowKey="id"
+                  columns={columns}
+                  dataSource={roles}
+                  loading={loading}
+                  pagination={{
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 个角色`
+                  }}
+                />
+              )
+            },
+            {
+              key: 'permissions',
+              label: (
+                <span>
+                  <KeyOutlined />
+                  权限定义
+                </span>
+              ),
+              children: (
+                <Table
+                  rowKey="id"
+                  columns={permissionColumns}
+                  dataSource={permissions}
+                  loading={loading}
+                  pagination={{
+                    showSizeChanger: true,
+                    showQuickJumper: true,
+                    showTotal: (total) => `共 ${total} 个权限`
+                  }}
+                />
+              )
+            }
+          ]}
         />
       </Card>
 
@@ -378,6 +569,55 @@ export default function PermissionManage() {
             )
           })}
         </div>
+      </Modal>
+
+      {/* 权限定义弹窗 */}
+      <Modal
+        title={editingPermission ? '编辑权限' : '新建权限'}
+        open={permissionDefineModalVisible}
+        onOk={handleSavePermissionDefine}
+        onCancel={() => setPermissionDefineModalVisible(false)}
+        width={600}
+      >
+        <Form form={permissionForm} layout="vertical">
+          <Form.Item
+            label="权限代码"
+            name="code"
+            rules={[
+              { required: true, message: '请输入权限代码' },
+              { pattern: /^[a-z_:]+$/, message: '只能包含小写字母、下划线和冒号' }
+            ]}
+            extra="例如: order:view, product:create"
+          >
+            <Input placeholder="例如: order:view" disabled={!!editingPermission} />
+          </Form.Item>
+          <Form.Item
+            label="权限名称"
+            name="name"
+            rules={[{ required: true, message: '请输入权限名称' }]}
+            extra="例如: 查看订单, 创建商品"
+          >
+            <Input placeholder="例如: 查看订单" />
+          </Form.Item>
+          <Form.Item
+            label="所属分组"
+            name="group"
+            rules={[{ required: true, message: '请选择所属分组' }]}
+          >
+            <Select placeholder="请选择所属分组">
+              {Object.keys(PERMISSION_GROUPS).map(group => (
+                <Option key={group} value={group}>{group}</Option>
+              ))}
+              <Option value="其他">其他</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            label="描述"
+            name="description"
+          >
+            <Input.TextArea rows={3} placeholder="权限描述" />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   )

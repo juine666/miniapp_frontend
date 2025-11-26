@@ -17,7 +17,8 @@ import {
   FileExcelOutlined,
   FileTextOutlined,
   DashboardOutlined,
-  SafetyOutlined
+  SafetyOutlined,
+  ShoppingCartOutlined
 } from '@ant-design/icons'
 import Login from './pages/Login'
 const Dashboard = React.lazy(() => import('./pages/Dashboard'))
@@ -29,6 +30,7 @@ const ExcelImport = React.lazy(() => import('./pages/ExcelImport'))
 const StudentEnrollment = React.lazy(() => import('./pages/StudentEnrollment'))
 const SystemConfig = React.lazy(() => import('./pages/SystemConfig'))
 const PermissionManage = React.lazy(() => import('./pages/PermissionManage'))
+const Orders = React.lazy(() => import('./pages/Orders'))
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { PermissionCheck } from './components/PermissionCheck'
 import { MENU_PERMISSIONS, PERMISSIONS } from './config/permissions'
@@ -86,6 +88,7 @@ function Shell() {
     if (location.pathname.startsWith('/permission-manage')) return '4-3'
     if (location.pathname.startsWith('/excel-import')) return '5'
     if (location.pathname.startsWith('/student-enrollment')) return '6'
+    if (location.pathname.startsWith('/orders')) return '7'
     return '0'
   })()
   
@@ -148,6 +151,12 @@ function Shell() {
       icon: <FileTextOutlined />,
       label: <Link to="/student-enrollment">学生登记</Link>,
       permission: MENU_PERMISSIONS['/student-enrollment']
+    },
+    {
+      key: '7',
+      icon: <ShoppingCartOutlined />,
+      label: <Link to="/orders">订单管理</Link>,
+      permission: MENU_PERMISSIONS['/orders']
     }
   ].filter(item => !item.permission || hasPermission(item.permission)).map(item => {
     if (item.children) {
@@ -175,6 +184,21 @@ function Shell() {
   // 如果未登录，显示登录页面
   if (!isAuthenticated || !token) {
     return <Login />
+  }
+  
+  // 权限加载中，显示loading
+  if (!user) {
+    return (
+      <div style={{ 
+        display: 'flex', 
+        height: '100vh', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        flexDirection: 'column'
+      }}>
+        <Spin tip="加载权限中..." />
+      </div>
+    )
   }
   
   // 如果没有管理员权限，显示无权限提示
@@ -246,15 +270,7 @@ function Shell() {
             marginTop: '16px',
             padding: '0 12px'
           }}
-          items={menuItems.map(item => ({
-            ...item,
-            style: {
-              borderRadius: '12px',
-              margin: '4px 0',
-              height: '48px',
-              lineHeight: '48px'
-            }
-          }))}
+          items={menuItems}
         />
       </Sider>
       <Layout>
@@ -392,6 +408,16 @@ function Shell() {
                 <ProtectedRoute>
                   <PermissionCheck permission={PERMISSIONS.STUDENT_ENROLLMENT_VIEW}>
                     <StudentEnrollment />
+                  </PermissionCheck>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/orders" 
+              element={
+                <ProtectedRoute>
+                  <PermissionCheck permission={PERMISSIONS.ORDER_VIEW}>
+                    <Orders />
                   </PermissionCheck>
                 </ProtectedRoute>
               } 

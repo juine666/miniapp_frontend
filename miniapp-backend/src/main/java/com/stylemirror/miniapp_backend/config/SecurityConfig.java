@@ -34,8 +34,10 @@ public class SecurityConfig {
                                 "/actuator/health",
                                 "/api/auth/**",
                                 "/api/admin/auth/**",
+                                "/api/admin/permissions/**",
                                 "/api/admin/statistics/**",
                                 "/api/admin/student-enrollment/**",
+                                "/api/admin/categories/**",
                                 "/api/oss/**",
                                 "/api/categories/**",
                                 "/api/products/**"

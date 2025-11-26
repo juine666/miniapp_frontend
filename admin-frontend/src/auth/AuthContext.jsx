@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from 'react'
 import axios from 'axios'
 import { message } from 'antd'
-import { getPermissionsByRole } from '../config/permissions'
+import { loadPermissionConfig, ROLE_PERMISSIONS } from '../config/permissions'
 
 const AuthCtx = createContext(null)
 
@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
   const api = useMemo(() => {
     const instance = axios.create({ 
       baseURL: 'http://localhost:8081',
-      timeout: 10000
+      timeout: 60000  // 增加到60秒,给首次查询足够时间
     })
     
     // 请求拦截器：添加token
@@ -57,7 +57,7 @@ export function AuthProvider({ children }) {
     return instance
   }, [token])
 
-  // 从token中解析用户信息（简单实现，实际应该从后端获取）
+  // 从token中解析用户信息（直接使用本地配置）
   useEffect(() => {
     if (token) {
       try {
@@ -66,8 +66,8 @@ export function AuthProvider({ children }) {
         const role = payload.role || 'ADMIN'
         const username = payload.sub?.replace('admin:', '') || 'admin'
         
-        // 根据角色获取权限列表
-        const permissions = getPermissionsByRole(role)
+        // 直接使用本地的角色权限配置，不调用后端 API
+        const permissions = ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS['ADMIN']
         
         setUser({
           username,
@@ -78,10 +78,11 @@ export function AuthProvider({ children }) {
         })
       } catch (e) {
         console.error('解析token失败', e)
+        // 降级方案:给ADMIN完整权限
         setUser({ 
           username: 'admin', 
           role: 'ADMIN',
-          permissions: getPermissionsByRole('ADMIN')
+          permissions: ROLE_PERMISSIONS['ADMIN']
         })
       }
     } else {

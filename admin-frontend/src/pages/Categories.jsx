@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Button, Modal, Form, Input, Space, Table, message, Card, Popconfirm } from 'antd'
 import { SearchOutlined, PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import { useAuth } from '../auth/AuthContext'
@@ -21,7 +21,7 @@ export default function Categories() {
   })
   const [keyword, setKeyword] = useState('')
 
-  const load = async (page = 0, size = 20) => {
+  const load = useCallback(async (page = 0, size = 20) => {
     setLoading(true)
     try {
       const params = {
@@ -48,7 +48,7 @@ export default function Categories() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [keyword, api])
 
   useEffect(() => {
     load(0, pagination.pageSize)
