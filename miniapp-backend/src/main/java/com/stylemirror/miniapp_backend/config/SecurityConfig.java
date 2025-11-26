@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/api/admin/statistics/**",
                                 "/api/admin/student-enrollment/**",
                                 "/api/admin/categories/**",
+                                "/api/admin/products/**",
                                 "/api/oss/**",
                                 "/api/categories/**",
                                 "/api/products/**"

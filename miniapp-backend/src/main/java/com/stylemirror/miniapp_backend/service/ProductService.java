@@ -29,7 +29,11 @@ public class ProductService {
      * 查询所有商品
      */
     public List<Product> findAll() {
-        return productMapper.selectList(null);
+        QueryWrapper<Product> wrapper = new QueryWrapper<>();
+        // 只返回已发布的商品
+        wrapper.eq("status", "PUBLISHED");
+        wrapper.orderByDesc("created_at");
+        return productMapper.selectList(wrapper);
     }
 
     /**
@@ -80,6 +84,9 @@ public class ProductService {
     public PageResponse<Product> findAll(int page, int size, String sortBy, String sortOrder) {
         Page<Product> pageObj = new Page<>(page, size);
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
+        
+        // 只查询已发布的商品
+        wrapper.eq("status", "PUBLISHED");
         
         // 设置排序 - 使用数据库字段名
         if ("price".equals(sortBy)) {
@@ -150,6 +157,8 @@ public class ProductService {
     public PageResponse<Product> findByCategoryId(Long categoryId, int page, int size, String sortBy, String sortOrder) {
         QueryWrapper<Product> wrapper = new QueryWrapper<>();
         wrapper.eq("category_id", categoryId);
+        // 只查询已发布的商品
+        wrapper.eq("status", "PUBLISHED");
         
         // 设置排序 - 使用数据库字段名
         if ("price".equals(sortBy)) {
@@ -194,6 +203,8 @@ public class ProductService {
         if (StringUtils.hasText(keyword)) {
             wrapper.like("name", keyword);
         }
+        // 只查询已发布的商品
+        wrapper.eq("status", "PUBLISHED");
         wrapper.orderByDesc("created_at");
         Page<Product> pageObj = new Page<>(page, size);
         Page<Product> result = productMapper.selectPage(pageObj, wrapper);

@@ -153,6 +153,10 @@ public class ProductController {
         Product product = productService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("商品不存在"));
         
+        // 验证商品是否已发布（小程序只能查看已发布的商品）
+        if (!"PUBLISHED".equals(product.getStatus())) {
+            throw new IllegalArgumentException("商品不可用");
+        }
         Map<String, Object> result = new HashMap<>();
         result.put("id", product.getId());
         result.put("name", product.getName());
@@ -242,6 +246,7 @@ public class ProductController {
         
         // 使用Haversine公式计算距离，过滤并排序
         List<Map<String, Object>> result = all.stream()
+                .filter(p -> "PUBLISHED".equals(p.getStatus()))  // 只查询已发布的商品
                 .filter(p -> p.getLatitude() != null && p.getLongitude() != null)
                 .map(p -> {
                     double distance = calculateDistance(lat, lng, p.getLatitude(), p.getLongitude());

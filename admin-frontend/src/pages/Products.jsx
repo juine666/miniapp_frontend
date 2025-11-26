@@ -40,7 +40,7 @@ export default function Products() {
   })
   const [filters, setFilters] = useState({
     keyword: '',
-    status: undefined,
+    status: '',  // 改为空字符串，表示显示所有状态
     categoryId: undefined
   })
 
@@ -67,7 +67,7 @@ export default function Products() {
         page,
         size,
         ...(filters.keyword && { keyword: filters.keyword }),
-        ...(filters.status && { status: filters.status }),
+        ...(filters.status !== '' && filters.status && { status: filters.status }),
         ...(filters.categoryId && { categoryId: filters.categoryId })
       }
       const res = await api.get('/api/admin/products', { params })
