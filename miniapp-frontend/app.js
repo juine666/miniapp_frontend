@@ -7,7 +7,7 @@ const ENV_CONFIG = {
 };
 
 // 当前环境：开发时使用 development，发布时改为 production
-const CURRENT_ENV = 'production';
+const CURRENT_ENV = 'development';
 
 App({
   globalData: {

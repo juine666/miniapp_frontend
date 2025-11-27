@@ -105,14 +105,10 @@
             <version>${aliyun-oss.version}</version>
         </dependency>
 
-        <!-- Aliyun Green (内容安全) - 可选，需要时取消注释并配置 -->
-        <!--
-        <dependency>
-            <groupId>com.aliyun</groupId>
-            <artifactId>green20220302</artifactId>
-            <version>2.0.24</version>
-        </dependency>
-        -->
+        <!-- 注：阿里云翻译和TTS使用HTTP API调用，无需额外SDK -->
+        <!-- Aliyun Speech Recognition (语音识别) - 可选，使用HTTP API -->
+        <!-- Aliyun Machine Translation (机器翻译) - 使用HTTP API -->
+        <!-- Aliyun Speech Synthesis (文字转语音/TTS) - 使用HTTP API -->
 
         <!-- MySQL Driver -->
         <dependency>
@@ -126,6 +122,13 @@
             <groupId>com.alibaba</groupId>
             <artifactId>easyexcel</artifactId>
             <version>3.3.2</version>
+        </dependency>
+
+        <!-- FastJSON2 -->
+        <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>2.0.48</version>
         </dependency>
 
         <!-- Lombok -->
@@ -202,6 +205,18 @@
             <id>central</id>
             <name>Maven Central Repository</name>
             <url>https://repo1.maven.org/maven2</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <!-- Aliyun Official Repository -->
+        <repository>
+            <id>aliyunmaven</id>
+            <name>Aliyun Maven Repository</name>
+            <url>https://maven.aliyun.com/repository/public</url>
             <releases>
                 <enabled>true</enabled>
             </releases>

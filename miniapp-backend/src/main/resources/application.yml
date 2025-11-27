@@ -100,6 +100,13 @@ oss:
   bucket: ${OSS_BUCKET:twoshop}
   publicBaseUrl: ${OSS_PUBLIC_BASE_URL:https://twoshop.oss-cn-shenzhen.aliyuncs.com}
 
+aliyun:
+  access-key-id: ${ALIYUN_ACCESS_KEY_ID:替换为你的AccessKeyId}
+  access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:替换为你的AccessKeySecret}
+  region-id: ${ALIYUN_REGION_ID:cn-hangzhou}
+  tts:
+    app-key: ${ALIYUN_TTS_APP_KEY:替换为你的TTS AppKey}
+
 # 测试模式配置
 test:
   mode: false  # 是否启用测试模式（允许无认证访问）- 生产环境请设置为false

@@ -15,9 +15,10 @@
       <view class="goods-content">
         <image class="goods-img" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
         <view class="goods-title">{{item.name}}</view>
-        <view class="goods-meta">
+        <!-- 下架了价格收费提示 -->
+        <!-- <view class="goods-meta">
           <view class="goods-price">￥{{item.price}}</view>
-        </view>
+        </view> -->
         <view class="status-row">
           <view class="status {{item.status === 'PUBLISHED' ? 'on' : 'off'}}">{{item.status === 'PUBLISHED' ? '已上架' : '已下架'}}</view>
           <view wx:if="{{activeTab === 0}}" class="toggle-btn" catchtap="toggleStatus" data-id="{{item.id}}" data-status="{{item.status}}">{{item.status === 'PUBLISHED' ? '下架' : '上架'}}</view>

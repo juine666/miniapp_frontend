@@ -16,7 +16,8 @@
         <image class="goods-img" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
         <view class="goods-title">{{item.name}}</view>
         <view class="goods-meta">
-          <view class="goods-price">￥{{item.price}}</view>
+          <!-- 下架了价格显示 -->
+          <!-- <view class="goods-price">￥{{item.price}}</view> -->
           <view wx:if="{{item.distanceText}}" class="goods-distance">{{item.distanceText}}</view>
         </view>
       </view>
@@ -29,7 +30,7 @@
         </view>
       </view>
     </view>
-    <view wx:if="{{!loading && !goodsList.length && location}}" class="empty-tip">附近暂无商品</view>
+    <view wx:if="{{!loading && !goodsList.length && location}}" class="empty-tip">附近暂无体验</view>
     <view wx:if="{{loading}}" class="loading-tip">加载中...</view>
   </view>
 </view>

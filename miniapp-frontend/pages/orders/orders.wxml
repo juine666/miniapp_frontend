@@ -1,53 +1,9 @@
 <view class="container">
-  <!-- 订单列表 -->
-  <view wx:for="{{list}}" wx:key="id" class="order-card">
-    <!-- 订单头部 -->
-    <view class="order-header">
-      <view class="order-id">订单号：{{item.id}}</view>
-      <view class="order-status {{item.status}}">{{item.statusText}}</view>
-    </view>
-    
-    <!-- 商品信息 -->
-    <view class="order-product" wx:if="{{item.product}}" catchtap="goToDetail" data-id="{{item.product.id}}">
-      <image class="product-img" src="{{item.product.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
-      <view class="product-info">
-        <view class="product-name">{{item.product.name || '商品已下架'}}</view>
-        <view class="product-meta">
-          <text class="product-price">￥{{item.product.price || item.totalAmount}}</text>
-          <text class="product-date">{{item.formattedDate}}</text>
-        </view>
-      </view>
-      <view class="arrow">›</view>
-    </view>
-    
-    <!-- 订单底部 -->
-    <view class="order-footer">
-      <view class="order-amount">
-        <text class="amount-label">实付：</text>
-        <text class="amount-value">￥{{item.totalAmount}}</text>
-      </view>
-      <view class="order-actions">
-        <view wx:if="{{item.status === 'CREATED'}}" class="action-btn pay-btn" catchtap="handlePay" data-id="{{item.id}}">立即支付</view>
-        <view wx:if="{{item.status === 'PAID' || item.status === 'SHIPPED'}}" class="action-btn detail-btn" catchtap="handleDetail" data-id="{{item.id}}">查看详情</view>
-        <view wx:if="{{item.status === 'COMPLETED'}}" class="action-btn review-btn" catchtap="handleReview" data-id="{{item.id}}">评价</view>
-      </view>
-    </view>
-  </view>
-  
-  <!-- 空状态 -->
-  <view wx:if="{{!list.length && !loading}}" class="empty-state">
+  <!-- 订单功能已禁用，显示空状态 -->
+  <view class="empty-state">
     <image class="empty-icon" src="https://img.yzcdn.cn/vant/cat.jpeg" mode="aspectFit"/>
-    <view class="empty-text">暂无订单</view>
-    <view class="empty-desc">快去逛逛，发现好物吧~</view>
-    <button class="empty-btn" bindtap="goShopping">去逛逛</button>
-  </view>
-  
-  <!-- 加载更多 -->
-  <view wx:if="{{loading}}" class="loading">
-    <text>加载中...</text>
-  </view>
-  <view wx:if="{{!hasMore && list.length > 0}}" class="no-more">
-    <text>没有更多了</text>
+    <view class="empty-text">功能即将推出</view>
+    <view class="empty-desc">敬请期待~</view>
   </view>
 </view>
 

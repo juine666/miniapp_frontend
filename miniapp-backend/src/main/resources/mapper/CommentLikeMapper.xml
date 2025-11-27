@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stylemirror.miniapp_backend.repository.CommentLikeMapper">
+
+    <!-- 检查用户是否已点赞该评论 -->
+    <select id="isLiked" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM comment_likes 
+        WHERE comment_id = #{commentId} AND user_id = #{userId}
+    </select>
+
+    <!-- 获取评论的点赞数 -->
+    <select id="countLikes" resultType="int">
+        SELECT COUNT(*) FROM comment_likes 
+        WHERE comment_id = #{commentId}
+    </select>
+
+    <!-- 获取点赞该评论的所有用户ID -->
+    <select id="selectUserIdsByCommentId" resultType="long">
+        SELECT user_id FROM comment_likes 
+        WHERE comment_id = #{commentId}
+    </select>
+
+</mapper>

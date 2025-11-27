@@ -54,9 +54,9 @@
   </view>
 
   <view wx:if="{{isLoggedIn}}" class="tabs">
-    <view class="tab-item {{currentTab === 'published' ? 'active' : ''}}" bindtap="switchTab" data-tab="published">我发布的</view>
-    <view wx:if="{{false}}" class="tab-item {{currentTab === 'sold' ? 'active' : ''}}" bindtap="switchTab" data-tab="sold">我卖出的</view>
-    <view class="tab-item {{currentTab === 'bought' ? 'active' : ''}}" bindtap="switchTab" data-tab="bought">我关注的</view>
+    <view class="tab-item {{currentTab === 'published' ? 'active' : ''}}" bindtap="switchTab" data-tab="published">我的分享</view>
+    <!-- <view wx:if="{{false}}" class="tab-item {{currentTab === 'sold' ? 'active' : ''}}" bindtap="switchTab" data-tab="sold">我卖出的</view> -->
+    <view class="tab-item {{currentTab === 'bought' ? 'active' : ''}}" bindtap="switchTab" data-tab="bought">我的收藏</view>
   </view>
 
   <view wx:if="{{isLoggedIn}}" class="products-section">
@@ -65,13 +65,14 @@
         <image class="cover" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
         <view class="info">
           <view class="name">{{item.name}}</view>
-          <view class="price">￥{{item.price}}</view>
+          <!-- 隐藏价格 -->
+          <!-- <view class="price">￥{{item.price}}</view> -->
           <view class="status-row" wx:if="{{currentTab === 'published'}}">
             <view class="status {{item.status === 'PUBLISHED' ? 'on' : 'off'}}">{{item.status === 'PUBLISHED' ? '已上架' : '已下架'}}</view>
             <view class="toggle-btn" catchtap="toggleStatus" data-id="{{item.id}}">{{item.status === 'PUBLISHED' ? '下架' : '上架'}}</view>
           </view>
-          <view wx:if="{{currentTab === 'sold'}}" class="sold-tag">已售出</view>
-          <view wx:if="{{currentTab === 'bought'}}" class="bought-tag">已关注</view>
+          <view wx:if="{{currentTab === 'sold'}}" class="sold-tag">已分享</view>
+          <view wx:if="{{currentTab === 'bought'}}" class="bought-tag">已收藏</view>
         </view>
       </view>
     </view>

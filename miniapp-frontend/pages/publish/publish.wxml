@@ -40,13 +40,14 @@
     
     <view class="desc-section">
       <view class="desc-label">详细说明<text class="optional-text">（选填）</text></view>
-      <textarea class="xy-input desc" placeholder="请输入商品详细描述信息" value="{{form.description}}" bindinput="onInput" data-key="description" maxlength="140" auto-height="{{true}}" cursor-spacing="20"></textarea>
+      <textarea class="xy-input desc" placeholder="请描述你的体验感受..." value="{{form.description}}" bindinput="onInput" data-key="description" maxlength="140" auto-height="{{true}}" cursor-spacing="20"></textarea>
     </view>
-    <view class="xy-input-group price-group">
+    <!-- 下架了价格字段 -->
+    <!-- <view class="xy-input-group price-group">
       <text class="xy-label">价格</text>
       <input class="xy-input price" placeholder="请输入价格" type="digit" bindinput="onInput" data-key="price" value="{{form.price}}" maxlength="8"/>
       <text class="xy-label" style="min-width: auto; margin-left: 8rpx;">元</text>
-    </view>
+    </view> -->
     
     <!-- 位置选择 - 已隐藏 -->
     <!--
@@ -64,7 +65,7 @@
     </view>
     -->
     
-    <button class="xy-btn-primary" bindtap="submit">{{productId ? '确认修改' : '发布闲置'}}</button>
+    <button class="xy-btn-primary" bindtap="submit">{{productId ? '确认修改' : '分享体验'}}</button>
   </view>
 </view>
 

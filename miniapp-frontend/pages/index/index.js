@@ -12,9 +12,9 @@ Page({
     searchKeyword: '', // 搜索关键词
     // 排序相关
     sortOptions: [
-      { label: '最新', sortBy: 'latest', sortOrder: 'desc' },
-      { label: '价格从低到高', sortBy: 'price', sortOrder: 'asc' },
-      { label: '价格从高到低', sortBy: 'price', sortOrder: 'desc' }
+      { label: '最新', sortBy: 'latest', sortOrder: 'desc'}
+      // { label: '价格从低到高', sortBy: 'price', sortOrder: 'asc' },
+      // { label: '价格从高到低', sortBy: 'price', sortOrder: 'desc' }
     ],
     sortIndex: 0,
     sortBy: 'latest',

@@ -52,7 +52,7 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "用于展示附近的二手商品"
+      "desc": "用于展示附近的产品交流"
     }
   }
 }

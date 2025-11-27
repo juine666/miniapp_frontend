@@ -6,108 +6,100 @@ Page({
     item: {}, 
     isFavorited: false,
     sellerInfo: { nickname: '卖家', avatarUrl: 'https://img.yzcdn.cn/vant/cat.jpeg' },
-    sellerContact: null,  // 卖家联系方式
+    sellerContact: null,
     categoryName: '未分类',
     loading: false,
-    imageList: [],  // 商品图片列表
-    currentImageIndex: 0,  // 当前图片索引
-    currentUserId: null,  // 当前用户ID
-    isMyProduct: false  // 是否是自己的商品
+    imageList: [],
+    currentImageIndex: 0,
+    currentUserId: null,
+    isMyProduct: false,
+    // 评论相关
+    comments: [],
+    showCommentModal: false,
+    commentInput: '',
+    showPublishComment: false,
+    selectedEmotion: null,
+    emotions: ['😀', '😂', '😍', '😱', '👍', '❤️', '🔥', '😢'],
+    expandedTranslateIds: [],
+    contextMenu: { visible: false, commentId: null, x: 0, y: 0 },
+    // 语音相关
+    voices: [],
+    showVoiceInput: false,
+    isRecording: false,
+    recordingTime: 0,
+    recordingTimer: null
   },
+
   onLoad(query) {
-    console.log('详情页onLoad，query:', query);
     const id = query.id || query.productId;
     if (!id) {
       wx.showToast({ title: '商品ID不存在', icon: 'none' });
-      console.error('详情页缺少商品ID，query:', query);
       return;
     }
     
-    console.log('详情页商品ID:', id, '类型:', typeof id);
     const newId = String(id);
+    this.setData({ id: newId });
     
-    // 如果ID发生变化，清空旧数据并重新加载
-    if (this.data.id !== newId) {
-      this.setData({ 
-        id: newId,
-        item: {},
-        imageList: [],
-        sellerInfo: { nickname: '卖家', avatarUrl: 'https://img.yzcdn.cn/vant/cat.jpeg' },
-        sellerContact: null,
-        categoryName: '未分类',
-        isFavorited: false
-      });
-    } else {
-      this.setData({ id: newId });
-    }
-    
-    // 启用分享菜单
     wx.showShareMenu({
       withShareTicket: true,
       menus: ['shareAppMessage', 'shareTimeline']
     });
     
+    // 页面初始化时加载数据
     this.loadCurrentUser();
     this.loadDetail();
     this.checkFavorite();
+    this.loadComments();
+    this.loadVoices();
   },
+
   onShow() {
-    // 每次显示页面时，重新加载数据（确保数据是最新的）
-    // 这样可以防止从其他页面返回时显示旧数据
     const id = this.data.id;
     if (id) {
-      console.log('详情页onShow，重新加载商品ID:', id);
-      this.loadDetail();
+      // 返回页面时仅重新检查收藏状态，不重新加载评论和语音
       this.checkFavorite();
     }
   },
+
+  async loadCurrentUser() {
+    try {
+      const res = await request({ url: '/api/user/me' });
+      if (res.code === 0 && res.data) {
+        this.setData({ currentUserId: res.data.id });
+      }
+    } catch (e) {
+      console.warn('加载当前用户失败:', e.message);
+    }
+  },
+
   async loadDetail() {
     const id = this.data.id;
-    if (!id) {
-      wx.showToast({ title: '商品ID不存在', icon: 'none' });
-      console.error('loadDetail: 商品ID不存在');
-      return;
-    }
-    
-    console.log('开始加载商品详情，ID:', id);
+    if (!id) return;
     
     try {
       this.setData({ loading: true });
       wx.showLoading({ title: '加载中...' });
       
       const res = await request({ url: `/api/products/${id}` });
-      console.log('详情页API响应:', res);
-      console.log('响应数据:', JSON.stringify(res, null, 2));
       
       if (res.code === 0 && res.data) {
         const data = res.data;
-        console.log('商品详情数据:', data);
-        console.log('数据字段:', Object.keys(data));
         
-        // 处理图片列表：优先使用imageUrls，否则使用coverUrl
+        // 处理图片列表
         let imageList = [];
         if (data.imageUrls && Array.isArray(data.imageUrls) && data.imageUrls.length > 0) {
           imageList = data.imageUrls;
-          console.log('使用imageUrls:', imageList);
         } else if (data.coverUrl) {
-          // 如果coverUrl是JSON格式，尝试解析
           try {
             if (typeof data.coverUrl === 'string' && data.coverUrl.startsWith('[')) {
               imageList = JSON.parse(data.coverUrl);
-              console.log('解析coverUrl JSON成功:', imageList);
             } else {
               imageList = [data.coverUrl];
-              console.log('使用单张coverUrl:', imageList);
             }
           } catch (e) {
             imageList = [data.coverUrl];
-            console.warn('解析coverUrl失败，使用单张:', imageList);
           }
-        } else {
-          console.warn('没有图片数据');
         }
-        
-        console.log('最终图片列表:', imageList);
         
         // 设置商品信息
         this.setData({ 
@@ -126,88 +118,40 @@ Page({
           currentImageIndex: 0
         });
         
-        console.log('商品信息已设置:', this.data.item);
-        
-        // 设置卖家信息（后端已返回）
+        // 加载卖家信息和联系方式
         if (data.seller) {
           this.setData({ sellerInfo: data.seller });
-          console.log('卖家信息已设置:', data.seller);
         } else if (data.sellerId) {
-          // 如果没有seller对象，尝试加载
-          console.log('尝试加载卖家信息，sellerId:', data.sellerId);
-          await this.loadSellerInfo(data.sellerId);
-        } else {
-          console.warn('商品数据中没有sellerId:', data);
-          // 设置默认卖家信息
-          this.setData({ sellerInfo: { nickname: '卖家', avatarUrl: 'https://img.yzcdn.cn/vant/cat.jpeg' } });
+          this.loadSellerInfo(data.sellerId);
         }
         
-        // 加载卖家联系方式
         if (data.sellerId) {
-          await this.loadSellerContact(data.sellerId);
+          this.loadSellerContact(data.sellerId);
         }
         
-        // 设置分类名称（后端已返回）
+        // 设置分类名称
         if (data.categoryName) {
           this.setData({ categoryName: data.categoryName });
         } else if (data.categoryId) {
-          // 如果没有categoryName，尝试加载
-          await this.loadCategoryInfo(data.categoryId);
-        } else {
-          this.setData({ categoryName: '未分类' });
-        }
-        
-        // 格式化时间
-        if (data.createdAt) {
-          this.formatTime(data.createdAt);
-        } else {
-          this.setData({ 'item.createdAt': '刚刚' });
-        }
-        
-        // 验证关键数据
-        if (!data.sellerId) {
-          console.error('警告：商品数据缺少sellerId，聊天功能可能无法使用');
+          this.loadCategoryInfo(data.categoryId);
         }
         
         // 判断是否是自己的商品
-        const isMyProduct = this.data.currentUserId && data.sellerId && String(this.data.currentUserId) === String(data.sellerId);
-        this.setData({ isMyProduct });
-        console.log('是否是自己的商品:', isMyProduct, 'currentUserId:', this.data.currentUserId, 'sellerId:', data.sellerId);
-        
-        this.setData({ loading: false });
+        const isMyProduct = this.data.currentUserId && data.sellerId && 
+                          String(this.data.currentUserId) === String(data.sellerId);
+        this.setData({ isMyProduct, loading: false });
       } else {
-        console.error('详情页加载失败，响应:', res);
-        console.error('错误码:', res.code, '错误信息:', res.message);
-        wx.showToast({ title: res.message || '加载失败', icon: 'none', duration: 3000 });
-        // 即使加载失败，也显示默认内容
-        this.setData({ 
-          loading: false,
-          item: { 
-            name: res.message || '加载失败', 
-            price: 0, 
-            description: '请稍后重试',
-            status: 'OFFLINE'
-          }
-        });
+        this.setData({ loading: false });
+        wx.showToast({ title: res.message || '加载失败', icon: 'none' });
       }
     } catch (e) {
-      console.error('加载商品详情异常:', e);
-      console.error('异常堆栈:', e.stack);
-      wx.showToast({ title: '加载失败，请重试: ' + (e.message || '未知错误'), icon: 'none', duration: 3000 });
-      // 即使出错，也显示默认内容
-      this.setData({ 
-        loading: false,
-        item: { 
-          name: '加载失败', 
-          price: 0, 
-          description: e.message || '请稍后重试',
-          status: 'OFFLINE'
-        }
-      });
+      this.setData({ loading: false });
+      wx.showToast({ title: '加载失败', icon: 'none' });
     } finally {
       wx.hideLoading();
     }
   },
+
   async loadSellerInfo(sellerId) {
     try {
       const res = await request({ url: `/api/user/${sellerId}` });
@@ -215,20 +159,21 @@ Page({
         this.setData({ sellerInfo: res.data });
       }
     } catch (e) {
-      console.error('加载卖家信息失败', e);
+      console.warn('加载卖家信息失败:', e.message);
     }
   },
+
   async loadSellerContact(sellerId) {
     try {
       const res = await request({ url: `/api/user/${sellerId}/contact` });
       if (res.code === 0 && res.data) {
         this.setData({ sellerContact: res.data });
-        console.log('卖家联系方式已加载:', res.data);
       }
     } catch (e) {
-      console.error('加载卖家联系方式失败', e);
+      console.warn('加载卖家联系方式失败:', e.message);
     }
   },
+
   async loadCategoryInfo(categoryId) {
     try {
       const res = await request({ url: `/api/categories` });
@@ -239,295 +184,348 @@ Page({
         }
       }
     } catch (e) {
-      console.error('加载分类信息失败', e);
+      console.warn('加载分类信息失败:', e.message);
     }
   },
-  // 轮播图切换事件
-  onSwiperChange(e) {
-    this.setData({
-      currentImageIndex: e.detail.current
-    });
-  },
-  // 预览图片
-  previewImage(e) {
-    const index = e.currentTarget.dataset.index || 0;
-    const urls = this.data.imageList;
-    if (urls && urls.length > 0) {
-      wx.previewImage({
-        current: urls[index],
-        urls: urls
-      });
-    }
-  },
-  formatTime(timestamp) {
-    if (!timestamp) return;
-    try {
-      // 处理ISO格式的时间字符串或数字时间戳
-      const date = typeof timestamp === 'string' ? new Date(timestamp) : new Date(Number(timestamp));
-      if (isNaN(date.getTime())) return;
-      
-      const now = new Date();
-      const diff = now - date;
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      
-      let timeStr = '';
-      if (days === 0) {
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        if (hours === 0) {
-          const minutes = Math.floor(diff / (1000 * 60));
-          timeStr = minutes <= 0 ? '刚刚' : `${minutes}分钟前`;
-        } else {
-          timeStr = `${hours}小时前`;
-        }
-      } else if (days < 7) {
-        timeStr = `${days}天前`;
-      } else if (days < 30) {
-        timeStr = `${days}天前`;
-      } else {
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        timeStr = `${month}月${day}日`;
-      }
-      
-      this.setData({ 'item.createdAt': timeStr });
-    } catch (e) {
-      console.error('格式化时间失败', e);
-    }
-  },
+
   async checkFavorite() {
+    const id = this.data.id;
+    if (!id) return;
     try {
-      const res = await request({ url: `/api/favorites/${this.data.id}/check` });
+      const res = await request({ url: `/api/favorites/check/${id}` });
       if (res.code === 0) {
         this.setData({ isFavorited: res.data });
       }
     } catch (e) {
-      // 忽略错误
+      console.warn('检查收藏状态失败:', e.message);
     }
   },
-  async toggleFavorite() {
-    // 如果是自己的商品，不允许收藏
-    if (this.data.isMyProduct) {
-      wx.showToast({ title: '不能收藏自己的商品', icon: 'none' });
-      return;
-    }
-    
-    const { id, isFavorited } = this.data;
-    try {
-      if (isFavorited) {
-        await request({ url: `/api/favorites/${id}`, method: 'DELETE' });
-        wx.showToast({ title: '已取消收藏', icon: 'none' });
-      } else {
-        await request({ url: `/api/favorites/${id}`, method: 'POST' });
-        wx.showToast({ title: '已收藏', icon: 'none' });
-      }
-      this.setData({ isFavorited: !isFavorited });
-    } catch (e) {
-      wx.showToast({ title: '操作失败', icon: 'none' });
-    }
+
+  onSwiperChange(e) {
+    this.setData({ currentImageIndex: e.detail.current });
   },
-  async onBuy() {
-    console.log('点击我想要按钮，商品ID:', this.data.id);
-    
-    // 如果是自己的商品，不允许购买
-    if (this.data.isMyProduct) {
-      wx.showToast({ title: '不能购买自己的商品', icon: 'none' });
-      return;
-    }
-    
-    if (!this.data.id) {
-      wx.showToast({ title: '商品信息不完整', icon: 'none' });
-      return;
-    }
-    
-    try {
-      wx.showLoading({ title: '创建订单中...' });
-      
-      const create = await request({ 
-        url: '/api/orders', 
-        method: 'POST', 
-        data: { productId: this.data.id, quantity: 1 } 
-      });
-      
-      wx.hideLoading();
-      
-      if (create.code === 0 && create.data) {
-        const orderId = create.data.id;
-        console.log('订单创建成功，订单ID:', orderId);
-        
-        // 订单创建成功后，直接跳转到订单页面
-        wx.switchTab({ url: '/pages/orders/orders' });
-      } else {
-        wx.showToast({ 
-          title: create.message || '创建订单失败', 
-          icon: 'none' 
-        });
-      }
-    } catch (e) {
-      wx.hideLoading();
-      console.error('创建订单异常', e);
-      wx.showToast({ 
-        title: e.message || '操作失败，请重试', 
-        icon: 'none',
-        duration: 2000
-      });
-    }
+
+  previewImage(e) {
+    const index = e.currentTarget.dataset.index || 0;
+    wx.previewImage({
+      current: this.data.imageList[index],
+      urls: this.data.imageList
+    });
   },
-  async loadCurrentUser() {
-    try {
-      const res = await request({ url: '/api/user/me' });
-      if (res.code === 0 && res.data) {
-        this.setData({ currentUserId: res.data.id });
-        console.log('当前用户ID:', res.data.id);
-      }
-    } catch (e) {
-      console.error('获取当前用户信息失败', e);
-    }
-  },
-  // 编辑商品
-  goEdit() {
+
+  toggleFavorite() {
     const id = this.data.id;
-    console.log('点击编辑商品，ID:', id);
-    if (!id) {
-      wx.showToast({ title: '商品ID不存在', icon: 'none' });
-      return;
-    }
-    // 使用全局数据传递商品ID，因为publish页面在tabBar中
-    const app = getApp();
-    app.globalData.editingProductId = Number(id);
-    wx.switchTab({ 
-      url: '/pages/publish/publish',
-      success: () => {
-        console.log('跳转到编辑页面成功');
-      },
-      fail: (err) => {
-        console.error('跳转编辑页面失败:', err);
-        wx.showToast({ title: '跳转失败', icon: 'none' });
-      }
-    });
-  },
-  async onChat() {
-    console.log('点击聊天按钮，当前数据:', {
-      id: this.data.id,
-      sellerId: this.data.item.sellerId,
-      item: this.data.item,
-      isMyProduct: this.data.isMyProduct
-    });
-    
-    // 如果是自己的商品，不允许聊天
-    if (this.data.isMyProduct) {
-      wx.showToast({ title: '不能和自己的商品聊天', icon: 'none' });
-      return;
-    }
-    
-    const { id, item } = this.data;
-    const app = getApp();
-    
-    if (!item.sellerId) {
-      wx.showToast({ title: '卖家信息不完整', icon: 'none' });
-      console.error('卖家ID不存在', item);
-      return;
-    }
-    
-    if (!id) {
-      wx.showToast({ title: '商品信息不完整', icon: 'none' });
-      return;
-    }
+    if (!id) return;
     
     try {
-      // 因为是tabBar页面，不能通过URL传参，使用全局数据传递
-      app.globalData.chatParams = {
-        userId: item.sellerId,
-        productId: id,
-        productName: item.name || '商品'
-      };
-      
-      console.log('设置聊天参数到全局数据:', app.globalData.chatParams);
-      console.log('准备跳转到消息页面（tabBar）');
-      
-      // 使用 switchTab 跳转到 tabBar 页面
-      wx.switchTab({ 
-        url: '/pages/message/message',
-        success: () => {
-          console.log('跳转成功');
-        },
-        fail: (err) => {
-          console.error('跳转失败', err);
-          wx.showToast({ title: '跳转失败: ' + (err.errMsg || '未知错误'), icon: 'none' });
+      request({
+        url: this.data.isFavorited ? `/api/favorites/${id}` : '/api/favorites',
+        method: this.data.isFavorited ? 'DELETE' : 'POST',
+        data: this.data.isFavorited ? {} : { productId: id }
+      }).then(res => {
+        if (res.code === 0) {
+          this.setData({ isFavorited: !this.data.isFavorited });
         }
       });
     } catch (e) {
-      console.error('聊天按钮异常', e);
-      wx.showToast({ title: '操作失败', icon: 'none' });
+      console.error('切换收藏失败', e);
     }
   },
-  onShare() {
-    const { id, item } = this.data;
-    if (!id) {
-      wx.showToast({ title: '商品信息不完整', icon: 'none' });
+
+  onChat() {
+    if (!this.data.item.sellerId) {
+      wx.showToast({ title: '卖家信息不存在', icon: 'none' });
       return;
     }
-    
-    // 显示操作菜单
-    wx.showActionSheet({
-      itemList: ['分享给好友', '复制链接'],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          // 分享给好友 - 提示用户点击右上角菜单
-          wx.showToast({ 
-            title: '请点击右上角菜单分享', 
-            icon: 'none',
-            duration: 2000
-          });
-          // 确保分享菜单已启用
-          wx.showShareMenu({
-            withShareTicket: true,
-            menus: ['shareAppMessage', 'shareTimeline']
-          });
-        } else if (res.tapIndex === 1) {
-          // 复制链接
-          const sharePath = `/pages/share/share?productId=${id}`;
-          wx.setClipboardData({
-            data: sharePath,
-            success: () => {
-              wx.showToast({ 
-                title: '链接已复制', 
-                icon: 'success',
-                duration: 1500
-              });
-            },
-            fail: () => {
-              wx.showToast({ title: '复制失败', icon: 'none' });
-            }
-          });
+    wx.navigateTo({
+      url: `/pages/message/message?userId=${this.data.item.sellerId}&userName=${this.data.sellerInfo.nickname}`
+    });
+  },
+
+  goEdit() {
+    wx.navigateTo({
+      url: `/pages/publish/publish?id=${this.data.id}`
+    });
+  },
+
+  // ========== 评论相关方法 ==========
+  showCommentModal() {
+    this.setData({ showCommentModal: true });
+  },
+
+  hideCommentModal() {
+    this.setData({ showCommentModal: false, showPublishComment: false, commentInput: '' });
+  },
+
+  togglePublishComment() {
+    this.setData({ showPublishComment: !this.data.showPublishComment, showVoiceInput: false, commentInput: '', recordingTime: 0 });
+  },
+
+  switchInputMode(e) {
+    const mode = e.currentTarget.dataset.mode;
+    this.setData({ showVoiceInput: mode === 'voice', commentInput: '', recordingTime: 0 });
+  },
+
+  onCommentInput(e) {
+    this.setData({ commentInput: e.detail.value });
+  },
+
+  onSelectEmotion(e) {
+    const emotion = e.currentTarget.dataset.emotion;
+    this.setData({ selectedEmotion: emotion });
+  },
+
+  async loadComments() {
+    if (!this.data.id) return;
+    try {
+      const res = await request({ url: `/api/comments/product/${this.data.id}` });
+      if (res.code === 0 && res.data) {
+        const comments = res.data.records || [];
+        this.setData({ comments: comments });
+      }
+    } catch (e) {
+      console.warn('加载评论失败:', e.message);
+    }
+  },
+
+  async publishComment() {
+    const { commentInput, selectedEmotion, id } = this.data;
+    if (!commentInput.trim()) {
+      wx.showToast({ title: '请输入评论', icon: 'none' });
+      return;
+    }
+    try {
+      wx.showLoading({ title: '发送中...' });
+      const res = await request({
+        url: '/api/comments',
+        method: 'POST',
+        data: {
+          productId: id,
+          content: commentInput,
+          emotion: selectedEmotion || '',
+          parentId: null
         }
-      },
-      fail: (err) => {
-        console.log('取消分享', err);
+      });
+      wx.hideLoading();
+      if (res.code === 0) {
+        wx.showToast({ title: '发表成功', icon: 'success' });
+        this.setData({ showPublishComment: false, commentInput: '', selectedEmotion: null });
+        this.loadComments();
+      }
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: '发表失败', icon: 'none' });
+    }
+  },
+
+  showCommentMenu(e) {
+    const commentId = e.currentTarget.dataset.commentId;
+    const touches = e.touches[0];
+    this.setData({
+      contextMenu: {
+        visible: true,
+        commentId: commentId,
+        x: touches.clientX - 100,
+        y: touches.clientY - 50
+      }
+    });
+    setTimeout(() => {
+      this.setData({ contextMenu: { visible: false } });
+    }, 3000);
+  },
+
+  copyCommentText(e) {
+    const text = e.currentTarget.dataset.text;
+    wx.setClipboardData({
+      data: text,
+      success: () => {
+        wx.showToast({ title: '已复制', icon: 'success' });
+        this.setData({ contextMenu: { visible: false } });
       }
     });
   },
-  onShareAppMessage() {
-    return {
-      title: this.data.item.name || '分享商品',
-      path: `/pages/share/share?productId=${this.data.id}`,
-      imageUrl: this.data.item.coverUrl || ''
-    };
+
+  toggleTranslate(e) {
+    const commentId = e.currentTarget.dataset.commentId;
+    let expandedIds = this.data.expandedTranslateIds;
+    const index = expandedIds.indexOf(commentId);
+    if (index > -1) {
+      expandedIds.splice(index, 1);
+    } else {
+      expandedIds.push(commentId);
+      this.translateComment(commentId);
+    }
+    this.setData({ expandedTranslateIds: expandedIds, contextMenu: { visible: false } });
   },
-  // 复制联系方式
+
+  async translateComment(commentId) {
+    try {
+      const comment = this.data.comments.find(c => c.id === commentId);
+      if (!comment) return;
+      const res = await request({
+        url: `/api/comments/${commentId}/translate`,
+        method: 'POST',
+        data: { text: comment.content }
+      });
+      if (res.code === 0) {
+        const comments = this.data.comments.map(c => {
+          if (c.id === commentId) {
+            c.translatedText = res.data;
+          }
+          return c;
+        });
+        this.setData({ comments: comments });
+      }
+    } catch (e) {
+      console.warn('翻译失败:', e.message);
+    }
+  },
+
+  async playTranslationVoice(e) {
+    const commentId = e.currentTarget.dataset.commentId;
+    const voice = e.currentTarget.dataset.voice;
+    const comment = this.data.comments.find(c => c.id === commentId);
+    if (comment && comment.translatedText) {
+      this.synthesizeAndPlay(comment.translatedText, voice === 'female' ? 'joanna' : 'joey');
+    }
+  },
+
+  async synthesizeAndPlay(text, voice) {
+    if (!text) return;
+    try {
+      wx.showLoading({ title: '合成中...' });
+      const res = await request({
+        url: '/api/tts/synthesize',
+        method: 'POST',
+        data: { text: text, voice: voice, language: 'en-US' }
+      });
+      wx.hideLoading();
+      if (res.code === 0 && res.data) {
+        const audioContext = wx.createInnerAudioContext();
+        audioContext.src = res.data;
+        audioContext.play();
+      }
+    } catch (e) {
+      wx.hideLoading();
+      console.warn('合成失败:', e.message);
+    }
+  },
+
+  likeComment(e) {
+    const commentId = e.currentTarget.dataset.commentId;
+    this.toggleLike(commentId);
+  },
+
+  async toggleLike(commentId) {
+    try {
+      const res = await request({
+        url: `/api/comments/${commentId}/like`,
+        method: 'POST'
+      });
+      if (res.code === 0) {
+        this.loadComments();
+      }
+    } catch (e) {
+      console.warn('点赞失败:', e.message);
+    }
+  },
+
+  // ========== 语音相关方法 ==========
+  async loadVoices() {
+    if (!this.data.id) return;
+    try {
+      const res = await request({ url: `/api/voices/product/${this.data.id}` });
+      if (res.code === 0 && res.data) {
+        this.setData({ voices: res.data });
+      }
+    } catch (e) {
+      console.warn('加载语音失败:', e.message);
+    }
+  },
+
+  toggleVoiceInput() {
+    this.setData({ showVoiceInput: !this.data.showVoiceInput });
+  },
+
+  startRecording() {
+    const recorderManager = wx.getRecorderManager();
+    recorderManager.onStart(() => {
+      this.setData({ isRecording: true, recordingTime: 0 });
+      this.recordingTimer = setInterval(() => {
+        this.setData({ recordingTime: this.data.recordingTime + 1 });
+      }, 1000);
+    });
+    recorderManager.start({ format: 'mp3' });
+  },
+
+  stopRecording() {
+    const recorderManager = wx.getRecorderManager();
+    clearInterval(this.recordingTimer);
+    recorderManager.stop();
+    this.setData({ isRecording: false });
+    recorderManager.onStop((res) => {
+      if (res.tempFilePath) {
+        this.recognizeVoice(res.tempFilePath);
+      }
+    });
+  },
+
+  async recognizeVoice(filePath) {
+    try {
+      wx.showLoading({ title: '正在识别...' });
+      const res = await request({
+        url: '/api/voices/recognize',
+        method: 'POST',
+        data: { voiceFile: filePath }
+      });
+      wx.hideLoading();
+      if (res.code === 0 && res.data) {
+        此处设置识别的文字到输入框
+        this.setData({ commentInput: res.data });
+      } else {
+        wx.showToast({ title: '识别失败', icon: 'none' });
+      }
+    } catch (e) {
+      wx.hideLoading();
+      wx.showToast({ title: '识别失败', icon: 'none' });
+    }
+  },
+
+  playVoice(e) {
+    const url = e.currentTarget.dataset.url;
+    if (!url) return;
+    const audioContext = wx.createInnerAudioContext();
+    audioContext.src = url;
+    audioContext.play();
+  },
+
+  async uploadVoice(filePath) {
+    try {
+      wx.showLoading({ title: '上传中...' });
+      // TODO: 实际应该使用OSS上传
+      const res = await request({
+        url: '/api/voices',
+        method: 'POST',
+        data: { productId: this.data.id, voiceUrl: 'https://placeholder-url' }
+      });
+      wx.hideLoading();
+      if (res.code === 0) {
+        this.setData({ showVoiceInput: false });
+        this.loadVoices();
+      }
+    } catch (e) {
+      wx.hideLoading();
+      console.warn('上传语音失败:', e.message);
+    }
+  },
+
   copyContact(e) {
     const value = e.currentTarget.dataset.value;
-    const type = e.currentTarget.dataset.type;
-    if (!value) {
-      return;
-    }
+    if (!value) return;
     wx.setClipboardData({
       data: value,
       success: () => {
-        wx.showToast({ 
-          title: '已复制到剪贴板', 
-          icon: 'success',
-          duration: 1500
-        });
+        wx.showToast({ title: '已复制到剪贴板', icon: 'success', duration: 1500 });
       },
       fail: () => {
         wx.showToast({ title: '复制失败', icon: 'none' });
@@ -535,4 +533,3 @@ Page({
     });
   }
 });
-

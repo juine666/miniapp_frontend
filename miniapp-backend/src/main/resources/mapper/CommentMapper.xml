@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.stylemirror.miniapp_backend.repository.CommentMapper">
+
+    <!-- 获取产品的一级评论（分页，按热度排序） -->
+    <select id="selectProductCommentsByHot" resultType="com.stylemirror.miniapp_backend.domain.Comment">
+        SELECT * FROM comments 
+        WHERE product_id = #{productId} AND parent_id IS NULL 
+        ORDER BY likes DESC, created_at DESC
+    </select>
+
+    <!-- 获取一级评论的所有二级回复（按时间倒序） -->
+    <select id="selectRepliesByParentId" resultType="com.stylemirror.miniapp_backend.domain.Comment">
+        SELECT * FROM comments 
+        WHERE parent_id = #{parentId} 
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 获取产品的所有评论（包含一级和二级） -->
+    <select id="selectAllCommentsByProductId" resultType="com.stylemirror.miniapp_backend.domain.Comment">
+        SELECT * FROM comments 
+        WHERE product_id = #{productId} 
+        ORDER BY 
+            CASE WHEN parent_id IS NULL THEN 0 ELSE 1 END,
+            CASE WHEN parent_id IS NULL THEN likes ELSE 0 END DESC,
+            created_at DESC
+    </select>
+
+</mapper>

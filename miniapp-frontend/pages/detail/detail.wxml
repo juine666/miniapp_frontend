@@ -4,104 +4,174 @@
     <text>加载中...</text>
   </view>
   
-  <!-- 商品内容（始终显示，即使加载失败也显示默认内容） -->
-  <!-- 商品图片区域 -->
-  <view class="image-section">
-    <!-- 多张图片轮播 -->
-    <swiper wx:if="{{imageList.length > 0}}" class="image-swiper" indicator-dots="{{imageList.length > 1}}" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff" autoplay="{{false}}" circular="{{false}}" bindchange="onSwiperChange">
-      <swiper-item wx:for="{{imageList}}" wx:key="index">
-        <image mode="aspectFill" src="{{item}}" class="main-image" bindtap="previewImage" data-index="{{index}}"/>
-      </swiper-item>
-    </swiper>
-    <!-- 单张图片或默认图片 -->
-    <image wx:elif="{{item.coverUrl}}" mode="aspectFill" src="{{item.coverUrl}}" class="main-image" bindtap="previewImage" data-index="0"/>
-    <image wx:else mode="aspectFill" src="https://img.yzcdn.cn/vant/cat.jpeg" class="main-image"/>
-    <view wx:if="{{!isMyProduct}}" class="favorite-btn {{isFavorited ? 'favorited' : ''}}" catchtap="toggleFavorite">
-      <text class="favorite-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
+  <!-- 商品内容 -->
+  <view class="content">
+    <!-- 商品图片区域（带评论按钮） -->
+    <view class="image-section">
+      <swiper wx:if="{{imageList.length > 0}}" class="image-swiper" indicator-dots="{{imageList.length > 1}}" autoplay="{{false}}" circular="{{false}}" bindchange="onSwiperChange">
+        <swiper-item wx:for="{{imageList}}" wx:key="index">
+          <image mode="aspectFill" src="{{item}}" class="main-image" bindtap="previewImage" data-index="{{index}}"/>
+        </swiper-item>
+      </swiper>
+      <image wx:elif="{{item.coverUrl}}" mode="aspectFill" src="{{item.coverUrl}}" class="main-image" bindtap="previewImage" data-index="0"/>
+      <image wx:else mode="aspectFill" src="https://img.yzcdn.cn/vant/cat.jpeg" class="main-image"/>
+      
+      <!-- 右下角收藏按钮 -->
+      <view wx:if="{{!isMyProduct}}" class="favorite-btn {{isFavorited ? 'favorited' : ''}}" catchtap="toggleFavorite">
+        <text class="favorite-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
+      </view>
+      
+      <!-- 右下角评论按钮 -->
+      <view class="comment-btn" catchtap="showCommentModal">
+        <text class="comment-icon">💬</text>
+        <text class="comment-count">{{comments.length}}</text>
+      </view>
+      
+      <!-- 图片数量指示器 -->
+      <view wx:if="{{imageList.length > 1}}" class="image-indicator">{{currentImageIndex + 1}}/{{imageList.length}}</view>
     </view>
-    <!-- 图片数量指示器 -->
-    <view wx:if="{{imageList.length > 1}}" class="image-indicator">{{currentImageIndex + 1}}/{{imageList.length}}</view>
-  </view>
 
-  <!-- 价格和标题 -->
-  <view class="price-section">
-    <view class="price">￥<text class="price-main">{{item.price || 0}}</text></view>
-    <view class="title">{{item.name || '商品名称'}}</view>
-  </view>
+    <!-- 商品信息 -->
+    <view class="info-section">
+      <view class="title">{{item.name || '商品名称'}}</view>
+      <view class="description">{{item.description}}</view>
+      
+      <view class="meta-row">
+        <text class="meta-label">分类：</text>
+        <text class="meta-value">{{categoryName}}</text>
+      </view>
+      
+      <view class="meta-row">
+        <text class="meta-label">发布时间：</text>
+        <text class="meta-value">{{item.createdAt || '刚刚'}}</text>
+      </view>
+    </view>
 
-  <!-- 商品信息卡片 -->
-  <view class="info-card">
-    <view class="info-row" wx:if="{{item.description}}">
-      <view class="info-label">商品描述</view>
-      <view class="info-value">{{item.description}}</view>
-    </view>
-    <view class="info-row">
-      <view class="info-label">分类</view>
-      <view class="info-value">{{categoryName || '未分类'}}</view>
-    </view>
-    <view class="info-row">
-      <view class="info-label">发布时间</view>
-      <view class="info-value">{{item.createdAt || '刚刚'}}</view>
-    </view>
-    <view class="info-row">
-      <view class="info-label">状态</view>
-      <view class="status-badge {{item.status === 'PUBLISHED' ? 'online' : 'offline'}}">
-        {{item.status === 'PUBLISHED' ? '在售' : '已下架'}}
+    <!-- 卖家信息 -->
+    <view class="seller-section">
+      <view class="seller-header">
+        <image class="seller-avatar" src="{{sellerInfo.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
+        <view class="seller-info">
+          <view class="seller-name">{{sellerInfo.nickname || '卖家'}}</view>
+          <view class="seller-tag">个人推荐者</view>
+        </view>
+        <view wx:if="{{!isMyProduct}}" class="contact-btn" catchtap="onChat">
+          <text>联系</text>
+        </view>
+        <view wx:if="{{isMyProduct}}" class="edit-btn" catchtap="goEdit">
+          <text>编辑</text>
+        </view>
       </view>
-    </view>
-  </view>
-
-  <!-- 卖家信息卡片 -->
-  <view class="seller-card">
-    <view class="seller-header">
-      <image class="seller-avatar" src="{{sellerInfo.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
-      <view class="seller-info">
-        <view class="seller-name">{{sellerInfo.nickname || '卖家'}}</view>
-        <view class="seller-tag">个人卖家</view>
-      </view>
-      <view wx:if="{{!isMyProduct}}" class="chat-btn-mini" catchtap="onChat">
-        <text class="chat-icon">💬</text>
-        <text>联系</text>
-      </view>
-      <view wx:if="{{isMyProduct}}" class="edit-btn-mini" catchtap="goEdit">
-        <text class="edit-icon">✏️</text>
-        <text>编辑</text>
-      </view>
-    </view>
-    <!-- 卖家联系方式 -->
-    <view wx:if="{{sellerContact}}" class="seller-contact">
-      <view wx:if="{{sellerContact.wechatId}}" class="contact-item">
-        <text class="contact-label">微信：</text>
-        <text class="contact-value">{{sellerContact.wechatId}}</text>
-        <text class="copy-btn" bindtap="copyContact" data-type="wechat" data-value="{{sellerContact.wechatId}}">复制</text>
-      </view>
-      <view wx:if="{{sellerContact.phone}}" class="contact-item">
-        <text class="contact-label">手机：</text>
-        <text class="contact-value">{{sellerContact.phone}}</text>
-        <text class="copy-btn" bindtap="copyContact" data-type="phone" data-value="{{sellerContact.phone}}">复制</text>
-      </view>
-      <view wx:if="{{sellerContact.email}}" class="contact-item">
-        <text class="contact-label">邮箱：</text>
-        <text class="contact-value">{{sellerContact.email}}</text>
-        <text class="copy-btn" bindtap="copyContact" data-type="email" data-value="{{sellerContact.email}}">复制</text>
+      
+      <!-- 卖家联系方式 -->
+      <view wx:if="{{sellerContact}}" class="seller-contact">
+        <view wx:if="{{sellerContact.wechatId}}" class="contact-item">
+          <text class="contact-label">微信：</text>
+          <text class="contact-value">{{sellerContact.wechatId}}</text>
+          <text class="copy-btn" bindtap="copyContact" data-type="wechat" data-value="{{sellerContact.wechatId}}">复制</text>
+        </view>
+        <view wx:if="{{sellerContact.phone}}" class="contact-item">
+          <text class="contact-label">手机：</text>
+          <text class="contact-value">{{sellerContact.phone}}</text>
+          <text class="copy-btn" bindtap="copyContact" data-type="phone" data-value="{{sellerContact.phone}}">复制</text>
+        </view>
+        <view wx:if="{{sellerContact.email}}" class="contact-item">
+          <text class="contact-label">邮箱：</text>
+          <text class="contact-value">{{sellerContact.email}}</text>
+          <text class="copy-btn" bindtap="copyContact" data-type="email" data-value="{{sellerContact.email}}">复制</text>
+        </view>
       </view>
     </view>
   </view>
 
-  <!-- 底部操作栏（固定） -->
-  <view class="bottom-bar">
-    <view wx:if="{{!isMyProduct}}" class="bar-action" catchtap="toggleFavorite">
-      <text class="action-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
-      <text class="action-text">{{isFavorited ? '已收藏' : '收藏'}}</text>
+  <!-- 评论列表Modal -->
+  <view wx:if="{{showCommentModal}}" class="modal-overlay" catchtap="hideCommentModal">
+    <view class="modal-content" catchtap>
+      <!-- Modal头部 -->
+      <view class="modal-header">
+        <text class="modal-title">评论 ({{comments.length}})</text>
+        <text class="modal-close" bindtap="hideCommentModal">✕</text>
+      </view>
+
+      <!-- 发表评论按钮 -->
+      <view class="comment-input-header">
+        <button class="publish-btn" bindtap="togglePublishComment">发表评论</button>
+      </view>
+
+      <!-- 发表评论框 -->
+      <view wx:if="{{showPublishComment}}" class="comment-input-box">
+        <view class="emotion-bar">
+          <text class="emotion-label">表情：</text>
+          <view class="emotion-list">
+            <text wx:for="{{emotions}}" wx:key="*this" class="emotion-btn {{selectedEmotion === item ? 'selected' : ''}}" bindtap="onSelectEmotion" data-emotion="{{item}}">{{item}}</text>
+          </view>
+        </view>
+        
+        <!-- 输入方式切换 -->
+        <view class="input-mode-tabs">
+          <view class="tab {{!showVoiceInput ? 'active' : ''}}" bindtap="switchInputMode" data-mode="text">⌨️ 文字</view>
+          <view class="tab {{showVoiceInput ? 'active' : ''}}" bindtap="switchInputMode" data-mode="voice">🎤 语音</view>
+        </view>
+        
+        <!-- 文字输入 -->
+        <view wx:if="{{!showVoiceInput}}">
+          <textarea class="comment-input" placeholder="说说你的想法..." value="{{commentInput}}" bindchange="onCommentInput" maxlength="500"/>
+        </view>
+        
+        <!-- 语音输入（按住说话） -->
+        <view wx:if="{{showVoiceInput}}" class="voice-input-section">
+          <view class="voice-record-btn {{isRecording ? 'recording' : ''}}" bindtouchstart="startRecording" bindtouchend="stopRecording">
+            <text class="record-text">{{isRecording ? '🔴 正在录音... ' + recordingTime + '秒' : '🎤 按住说话'}}</text>
+          </view>
+          <view wx:if="{{commentInput}}" class="voice-preview">
+            <text class="preview-label">已识别文字：</text>
+            <text class="preview-text">{{commentInput}}</text>
+          </view>
+        </view>
+        
+        <view class="input-actions">
+          <button class="cancel-btn" bindtap="togglePublishComment">取消</button>
+          <button class="submit-btn" bindtap="publishComment">发表</button>
+        </view>
+      </view>
+
+      <!-- 评论列表 -->
+      <view class="comments-list">
+        <view wx:if="{{comments.length === 0}}" class="empty-tip">暂无评论</view>
+        
+        <view wx:for="{{comments}}" wx:key="id" class="comment-item" bindlongpress="showCommentMenu" data-comment-id="{{item.id}}">
+          <!-- 长按菜单 -->
+          <view wx:if="{{contextMenu.visible && contextMenu.commentId === item.id}}" class="context-menu" style="top: {{contextMenu.y}}px; left: {{contextMenu.x}}px;">
+            <view class="menu-item" bindtap="copyCommentText" data-text="{{item.content}}">复制</view>
+            <view class="menu-item" bindtap="toggleTranslate" data-comment-id="{{item.id}}">翻译</view>
+          </view>
+
+          <!-- 评论内容 -->
+          <image class="avatar" src="{{item.user.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}"/>
+          <view class="comment-main">
+            <view class="user-name">{{item.user.nickname || '用户'}}</view>
+            <view class="comment-text">
+              <text wx:if="{{item.emotion}}">{{item.emotion}} </text>
+              <text>{{item.content}}</text>
+            </view>
+            
+            <!-- 翻译结果 -->
+            <view wx:if="{{expandedTranslateIds.indexOf(item.id) > -1 && item.translatedText}}" class="translate-box">
+              <view class="translate-header">
+                <text class="translate-label">英文翻译</text>
+                <button class="play-voice-btn" bindtap="playTranslationVoice" data-comment-id="{{item.id}}" data-voice="female">🔊 女声</button>
+                <button class="play-voice-btn" bindtap="playTranslationVoice" data-comment-id="{{item.id}}" data-voice="male">🔊 男声</button>
+              </view>
+              <text class="translate-text">{{item.translatedText}}</text>
+            </view>
+
+            <view class="comment-meta">
+              <text class="comment-time">{{item.createdAt}}</text>
+              <text class="like-btn" bindtap="likeComment" data-comment-id="{{item.id}}">👍 {{item.likes}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
     </view>
-    <button wx:if="{{false}}" class="bar-action share-btn" open-type="share">
-      <text class="action-icon">📤</text>
-      <text class="action-text">分享</text>
-    </button>
-    <button wx:if="{{!isMyProduct}}" class="bar-btn chat" bindtap="onChat" hover-class="bar-btn-hover">聊一聊</button>
-    <button wx:if="{{isMyProduct}}" class="bar-btn edit" bindtap="goEdit" hover-class="bar-btn-hover">编辑商品</button>
-    <!-- 隐藏"我想要"按钮 -->
-    <!-- <button wx:if="{{!isMyProduct}}" class="bar-btn buy" bindtap="onBuy" hover-class="bar-btn-hover">我想要</button> -->
   </view>
 </view>
-

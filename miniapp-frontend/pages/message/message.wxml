@@ -21,7 +21,7 @@
       <view wx:if="{{!conversations.length && !loading}}" class="empty-conversations">
         <view class="empty-icon">💬</view>
         <view class="empty-text">暂无消息</view>
-        <view class="empty-desc">快去和卖家聊聊吧～</view>
+        <view class="empty-desc">下载消息哟～</view>
       </view>
       
       <!-- 加载更多提示 -->
@@ -42,12 +42,20 @@
       <text class="chat-title">聊天</text>
     </view>
 
-    <!-- 商品信息卡片（参考闲鱼） -->
-    <view wx:if="{{productInfo}}" class="product-card" bindtap="goToProductDetail">
+    <!-- 下架了价格信息 -->
+    <!-- <view wx:if="{{productInfo}}" class="product-card" bindtap="goToProductDetail">
       <image class="product-img" src="{{productInfo.coverUrl}}" mode="aspectFill"/>
       <view class="product-info">
         <view class="product-name">{{productInfo.name}}</view>
         <view class="product-price">￥{{productInfo.price}}</view>
+      </view>
+      <view class="product-arrow">›</view>
+    </view> -->
+    <view wx:if="{{productInfo}}" class="product-card" bindtap="goToProductDetail">
+      <image class="product-img" src="{{productInfo.coverUrl}}" mode="aspectFill"/>
+      <view class="product-info">
+        <view class="product-name">{{productInfo.name}}</view>
+        <!-- 排沙买沙: 下架了价格信息 -->
       </view>
       <view class="product-arrow">›</view>
     </view>
@@ -81,14 +89,14 @@
 
     <!-- 快捷回复（参考闲鱼） -->
     <view wx:if="{{productInfo && !messages.length}}" class="quick-replies">
-      <view class="quick-item" bindtap="sendQuickMessage" data-content="你好，请问这个商品还在吗？">
-        <text>还在吗？</text>
+      <view class="quick-item" bindtap="sendQuickMessage" data-content="你好，你是噜验的作者吗？">
+        <text>是你吗？</text>
       </view>
-      <view class="quick-item" bindtap="sendQuickMessage" data-content="可以便宜点吗？">
-        <text>能便宜吗？</text>
+      <view class="quick-item" bindtap="sendQuickMessage" data-content="怎么比想？">
+        <text>有感受</text>
       </view>
-      <view class="quick-item" bindtap="sendQuickMessage" data-content="可以看下实物吗？">
-        <text>看实物</text>
+      <view class="quick-item" bindtap="sendQuickMessage" data-content="能详细描述一下吗？">
+        <text>详细一整</text>
       </view>
     </view>
 

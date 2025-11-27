@@ -71,14 +71,15 @@
           <text class="form-label">描述：</text>
           <textarea 
             class="desc-input" 
-            placeholder="商品描述"
+            placeholder="体验描述"
             value="{{item.description}}"
             bindinput="onDescriptionInput"
             data-index="{{index}}"
           ></textarea>
         </view>
         
-        <view class="form-row">
+        <!-- 下架了价格字段 -->
+        <!-- <view class="form-row">
           <text class="form-label">价格：</text>
           <input 
             class="price-input" 
@@ -89,19 +90,19 @@
             data-index="{{index}}"
           />
           <text class="unit">元</text>
-        </view>
+        </view> -->
         
-        <button class="publish-single-btn" bindtap="publishSingle" data-index="{{index}}">发布此商品</button>
+        <button class="publish-single-btn" bindtap="publishSingle" data-index="{{index}}}">分享此体验</button>
       </view>
     </view>
   </view>
   
-  <!-- 批量发布按钮 -->
-  <view class="batch-footer" wx:if="{{products.length > 0}}">
+  <!-- 轮流类提示：下空了批量发布功能并隠藏了价格字段 -->
+  <!-- <view class="batch-footer" wx:if="{{products.length > 0}}">
     <button class="batch-publish-btn" bindtap="batchPublish" disabled="{{publishing}}">
       {{publishing ? '发布中...' : '批量发布 (' + products.length + ')'}}
     </button>
-  </view>
+  </view> -->
   
   <!-- 空状态 -->
   <view class="empty-state" wx:if="{{products.length === 0}}">
