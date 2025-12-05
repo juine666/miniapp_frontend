@@ -343,6 +343,16 @@ Page({
     });
   },
 
+  goChat() {
+    if (!this.data.id) {
+      wx.showToast({ title: '商品ID不存在', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/chat/chat?productId=${this.data.id}`
+    });
+  },
+
   goEdit() {
     wx.navigateTo({
       url: `/pages/publish/publish?id=${this.data.id}`

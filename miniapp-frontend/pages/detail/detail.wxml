@@ -77,9 +77,15 @@
         </view>
       </view>
     </view>
-  </view>
 
-  <!-- 评论列表Modal -->
+    <!-- 聊天室入口 -->
+    <view class="chat-room-section">
+      <button class="chat-room-btn" catchtap="goChat">
+        <text class="chat-icon">💬</text>
+        <text class="chat-text">进入聊天室</text>
+      </button>
+    </view>
+  </view>
   <view wx:if="{{showCommentModal}}" class="modal-overlay" catchtap="hideCommentModal">
     <view class="modal-content" catchtap="noop">
       <!-- Modal头部 -->
