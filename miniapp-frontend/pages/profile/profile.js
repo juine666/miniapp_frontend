@@ -75,7 +75,7 @@ Page({
             policy: p, 
             OSSAccessKeyId: accessid, 
             signature, 
-            success_action_status: '200' 
+            success_action_status: '204' 
           },
           success: (res) => {
             console.log('头像上传成功', res);

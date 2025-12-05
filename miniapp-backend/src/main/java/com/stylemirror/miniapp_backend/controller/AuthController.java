@@ -4,6 +4,7 @@ import com.stylemirror.miniapp_backend.common.ApiResponse;
 import com.stylemirror.miniapp_backend.domain.User;
 import com.stylemirror.miniapp_backend.security.JwtUtil;
 import com.stylemirror.miniapp_backend.service.UserService;
+import com.stylemirror.miniapp_backend.service.SystemConfigService;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +38,14 @@ public class AuthController {
 
     private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final SystemConfigService systemConfigService;
     private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${wechat.appid}")
-    private String appid;
-    @Value("${wechat.secret}")
-    private String secret;
+    @Value("${wechat.appid:}")
+    private String appidProperty;
+    @Value("${wechat.secret:}")
+    private String secretProperty;
 
     /**
      * 微信登录请求
@@ -63,6 +65,24 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<Map<String, Object>>> login(@RequestBody LoginRequest req) {
         log.info("微信登录请求，code: {}", req.code());
+        
+        // 优先从数据库读取配置，没有则使用配置文件
+        String appid = systemConfigService.getConfigValue("wechat.appid");
+        String secret = systemConfigService.getConfigValue("wechat.secret");
+        
+        // 如果数据库没有配置，使用配置文件的值
+        if ((appid == null || appid.isEmpty()) && appidProperty != null && !appidProperty.isEmpty()) {
+            appid = appidProperty;
+        }
+        if ((secret == null || secret.isEmpty()) && secretProperty != null && !secretProperty.isEmpty()) {
+            secret = secretProperty;
+        }
+        
+        // 检查配置
+        if (appid == null || appid.isEmpty() || secret == null || secret.isEmpty()) {
+            log.error("微信AppID或Secret未配置");
+            return ResponseEntity.badRequest().body(ApiResponse.error(400, "服务器配置错误：微信AppID或Secret未配置"));
+        }
         
         String openid = null;
         

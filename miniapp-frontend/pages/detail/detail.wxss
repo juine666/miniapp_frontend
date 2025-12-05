@@ -52,30 +52,22 @@
 }
 
 /* 右下角按钮 */
-.favorite-btn,
 .comment-btn {
   position: absolute;
   bottom: 16rpx;
-  width: 80rpx;
-  height: 80rpx;
+  right: 16rpx;
+  width: 90rpx;
+  height: 90rpx;
   border-radius: 50%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  font-size: 40rpx;
+  font-size: 45rpx;
   background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
   z-index: 11;
   transition: all 0.3s;
-}
-
-.favorite-btn {
-  right: 80rpx;
-}
-
-.comment-btn {
-  right: 16rpx;
-  flex-direction: column;
   gap: 2rpx;
 }
 
@@ -387,6 +379,7 @@
   display: flex;
   flex-direction: column;
   animation: slideUp 0.3s ease;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 @keyframes slideUp {
@@ -418,25 +411,26 @@
   cursor: pointer;
 }
 
-.comment-input-header {
-  padding: 12rpx 24rpx;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-
-.publish-btn {
-  width: 100%;
-  background: #ffd93d;
-  color: #333;
-  border: none;
-  padding: 12rpx;
-  border-radius: 20rpx;
-  font-size: 26rpx;
-  font-weight: 600;
+/* 评论输入框 - 固定底部 */
+.comment-input-footer {
+  background: #fff;
+  border-top: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: 0;
+  padding: 0;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .comment-input-box {
+  background: #fff;
   padding: 16rpx 24rpx;
-  border-bottom: 1rpx solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  box-sizing: border-box;
 }
 
 .emotion-bar {
@@ -480,6 +474,62 @@
   box-sizing: border-box;
 }
 
+/* 富文本编辑器 */
+.rich-editor-wrapper {
+  margin-bottom: 12rpx;
+}
+
+.rich-editor {
+  width: 100%;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 12rpx;
+  padding: 12rpx;
+  font-size: 26rpx;
+  min-height: 150rpx;
+  background: #fafafa;
+  box-sizing: border-box;
+}
+
+.editor-toolbar {
+  display: flex;
+  gap: 12rpx;
+  padding: 12rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+  margin-top: 12rpx;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 8rpx;
+  border-right: 1rpx solid #f0f0f0;
+  padding-right: 12rpx;
+}
+
+.toolbar-group:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.toolbar-btn {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 8rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toolbar-btn:active {
+  background: #e0e0e0;
+  transform: scale(0.95);
+}
+
 .input-actions {
   display: flex;
   gap: 12rpx;
@@ -512,6 +562,7 @@
   display: flex;
   flex-direction: column;
   gap: 12rpx;
+  min-height: 200rpx;
 }
 
 .comment-item {
@@ -542,40 +593,52 @@
 }
 
 .translate-box {
-  background: #f0f0f0;
-  padding: 12rpx;
-  border-radius: 8rpx;
-  margin: 8rpx 0;
-  border-left: 3rpx solid #667eea;
+  background: linear-gradient(135deg, #e8eaf6 0%, #f3e5f5 100%);
+  padding: 16rpx 14rpx;
+  border-radius: 12rpx;
+  margin: 12rpx 0;
+  border-left: 4rpx solid #667eea;
+  box-shadow: 0 2rpx 8rpx rgba(102, 126, 234, 0.08);
 }
 
 .translate-header {
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  margin-bottom: 8rpx;
+  gap: 12rpx;
+  margin-bottom: 10rpx;
 }
 
 .translate-label {
-  font-size: 24rpx;
+  font-size: 20rpx;
   color: #667eea;
-  font-weight: 600;
+  font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: 0.5rpx;
 }
 
 .play-voice-btn {
   background: #667eea;
   color: #fff;
   border: none;
-  padding: 4rpx 12rpx;
+  padding: 6rpx 12rpx;
   border-radius: 8rpx;
-  font-size: 20rpx;
+  font-size: 18rpx;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.play-voice-btn:active {
+  background: #556dd4;
+  transform: scale(0.95);
 }
 
 .translate-text {
-  color: #666;
-  font-size: 26rpx;
-  line-height: 1.5;
+  color: #555;
+  font-size: 24rpx;
+  line-height: 1.6;
   word-break: break-all;
+  display: block;
+  font-weight: 500;
 }
 
 .comment-meta {
@@ -589,6 +652,18 @@
 .like-btn {
   cursor: pointer;
   color: #ff4757;
+}
+
+.translate-btn {
+  cursor: pointer;
+  color: #667eea;
+  padding: 0 8rpx;
+}
+
+.translate-voice-btn {
+  cursor: pointer;
+  color: #ff6b6b;
+  padding: 0 8rpx;
 }
 
 /* 长按菜单 */
@@ -613,12 +688,17 @@
   border-bottom: none;
 }
 
-/* 评论输入框 */
-.comment-input-box {
+/* 评论输入框 - 固定底部 */
+.comment-input-footer {
   background: #fff;
-  padding: 16rpx;
   border-top: 1rpx solid #f0f0f0;
-  margin-bottom: 0;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border-radius: 0;
+  padding: 0;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .emotion-bar {
@@ -649,11 +729,15 @@
   border-radius: 6rpx;
   transition: all 0.2s;
   cursor: pointer;
+  background: #f0f0f0;
+  border: 2rpx solid transparent;
 }
 
 .emotion-btn.selected {
   background: #667eea;
-  transform: scale(1.2);
+  color: #fff;
+  border-color: #667eea;
+  transform: scale(1.1);
 }
 
 /* 输入模式选项卡 */
@@ -766,6 +850,11 @@
   display: flex;
   gap: 12rpx;
   padding-top: 12rpx;
+  border-top: 1rpx solid #f0f0f0;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: #fff;
 }
 
 .cancel-btn,
@@ -795,5 +884,144 @@
 
 .submit-btn:active {
   background: #556dd4;
+}
+
+/* 二级回复列表 */
+.replies-section {
+  padding-left: 56rpx;
+  margin-top: 8rpx;
+  margin-bottom: 12rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.reply-item {
+  display: flex;
+  gap: 12rpx;
+  background: #f8f9ff;
+  padding: 14rpx 16rpx;
+  border-radius: 10rpx;
+  margin-bottom: 10rpx;
+  border-left: none;
+}
+
+.reply-item .avatar {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.reply-item .comment-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.reply-item .user-name {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #333;
+  display: block;
+}
+
+.reply-item .comment-text {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+  word-break: break-all;
+  display: block;
+}
+
+.reply-item .comment-meta {
+  font-size: 20rpx;
+  color: #999;
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  margin-top: 2rpx;
+}
+
+/* 展开/折叠回复按钮 */
+.expand-replies-btn {
+  padding: 12rpx 0;
+  color: #667eea;
+  font-size: 24rpx;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 56rpx;
+  transition: all 0.3s;
+}
+
+.expand-replies-btn:active {
+  opacity: 0.7;
+}
+
+.expand-replies-btn.collapse {
+  color: #999;
+}
+
+/* 三级回复列表 */
+.third-level-replies {
+  padding-left: 0;
+  margin-top: 0;
+  margin-bottom: 8rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.third-reply-item {
+  display: flex;
+  gap: 12rpx;
+  background: #f5f6ff;
+  padding: 12rpx 14rpx;
+  border-radius: 8rpx;
+  margin-bottom: 8rpx;
+}
+
+.third-reply-item .avatar {
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.third-reply-item .comment-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.third-reply-item .user-name {
+  font-size: 22rpx;
+  font-weight: 500;
+  color: #333;
+  display: block;
+}
+
+.third-reply-item .comment-text {
+  font-size: 22rpx;
+  color: #666;
+  line-height: 1.4;
+  word-break: break-all;
+  display: block;
+}
+
+.third-reply-item .comment-meta {
+  font-size: 18rpx;
+  color: #999;
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  margin-top: 2rpx;
+}
+
+.reply-to {
+  color: #999;
+  font-weight: normal;
 }
 

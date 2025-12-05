@@ -41,4 +41,21 @@ public interface CommentService extends IService<Comment> {
      * 获取单个评论详情（包含用户信息和二级回复）
      */
     Comment getCommentDetail(Long commentId, Long currentUserId);
+    
+    // ========== 后台管理接口 ==========
+    
+    /**
+     * 后台：获取所有评论（包含未审核）
+     */
+    Page<Comment> getAllComments(Integer pageNum, Integer pageSize);
+    
+    /**
+     * 后台：管理员♂删除评论
+     */
+    boolean deleteCommentByAdmin(Long commentId, Long adminId, String reason);
+    
+    /**
+     * 后台：审核评论抱庆
+     */
+    boolean reviewComment(Long commentId, String status, String reason, Long adminId);
 }

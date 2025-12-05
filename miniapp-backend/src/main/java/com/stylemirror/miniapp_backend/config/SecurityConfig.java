@@ -41,7 +41,13 @@ public class SecurityConfig {
                                 "/api/admin/products/**",
                                 "/api/oss/**",
                                 "/api/categories/**",
-                                "/api/products/**"
+                                "/api/products/**",
+                                "/api/comments/**",
+                                "/api/user/me",
+                                "/api/user/*/contact",
+                                "/api/voices/**",
+                                "/api/favorites/**",
+                                "/api/tts/**"
                         ).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

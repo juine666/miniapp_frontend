@@ -18,7 +18,8 @@ import {
   FileTextOutlined,
   DashboardOutlined,
   SafetyOutlined,
-  ShoppingCartOutlined
+  ShoppingCartOutlined,
+  FilterOutlined
 } from '@ant-design/icons'
 import Login from './pages/Login'
 const Dashboard = React.lazy(() => import('./pages/Dashboard'))
@@ -31,6 +32,7 @@ const StudentEnrollment = React.lazy(() => import('./pages/StudentEnrollment'))
 const SystemConfig = React.lazy(() => import('./pages/SystemConfig'))
 const PermissionManage = React.lazy(() => import('./pages/PermissionManage'))
 const Orders = React.lazy(() => import('./pages/Orders'))
+const BannedWords = React.lazy(() => import('./pages/BannedWords'))
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { PermissionCheck } from './components/PermissionCheck'
 import { MENU_PERMISSIONS, PERMISSIONS } from './config/permissions'
@@ -89,6 +91,7 @@ function Shell() {
     if (location.pathname.startsWith('/excel-import')) return '5'
     if (location.pathname.startsWith('/student-enrollment')) return '6'
     if (location.pathname.startsWith('/orders')) return '7'
+    if (location.pathname.startsWith('/banned-words')) return '4-4'
     return '0'
   })()
   
@@ -137,6 +140,11 @@ function Shell() {
           key: '4-3',
           label: <Link to="/permission-manage">权限管理</Link>,
           permission: PERMISSIONS.PERMISSION_MANAGE
+        },
+        {
+          key: '4-4',
+          label: <Link to="/banned-words">违禁词管理</Link>,
+          permission: PERMISSIONS.SYSTEM_CONFIG
         }
       ]
     },
@@ -418,6 +426,16 @@ function Shell() {
                 <ProtectedRoute>
                   <PermissionCheck permission={PERMISSIONS.ORDER_VIEW}>
                     <Orders />
+                  </PermissionCheck>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/banned-words" 
+              element={
+                <ProtectedRoute>
+                  <PermissionCheck permission={PERMISSIONS.SYSTEM_CONFIG}>
+                    <BannedWords />
                   </PermissionCheck>
                 </ProtectedRoute>
               } 

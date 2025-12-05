@@ -76,30 +76,32 @@ Page({
       
       const { accessid, host, policy: p, signature, dir } = policy.data;
       
-      // 上传所有图片
+      // 上传所有图片到OSS
       const uploadedUrls = [];
       for (let i = 0; i < compressedFiles.length; i++) {
         const filePath = compressedFiles[i];
-        const key = dir + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000) + '.jpg';
+        const filename = dir + 'image_' + Date.now() + '_' + i + '.jpg';
         
         await new Promise((resolve, reject) => {
           wx.uploadFile({
             url: host,
             filePath,
             name: 'file',
-            formData: { 
-              key, 
-              policy: p, 
-              OSSAccessKeyId: accessid, 
-              signature, 
-              success_action_status: '200' 
+            formData: {
+              key: filename,
+              policy: p,
+              OSSAccessKeyId: accessid,
+              signature: signature,
+              success_action_status: '200'
             },
             success: (res) => {
-              let url = host;
-              if (!url.endsWith('/')) url += '/';
-              url += key;
-              uploadedUrls.push(url);
-              resolve();
+              if (res.statusCode === 200 || res.statusCode === 204) {
+                const ossUrl = host.replace(/\/$/, '') + '/' + filename;
+                uploadedUrls.push(ossUrl);
+                resolve();
+              } else {
+                reject(new Error('上传到OSS失败'));
+              }
             },
             fail: reject
           });
@@ -270,26 +272,25 @@ Page({
       const uploadedUrls = [];
       for (let i = 0; i < compressedFiles.length; i++) {
         const filePath = compressedFiles[i];
-        const key = dir + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000) + '.jpg';
         
         await new Promise((resolve, reject) => {
           wx.uploadFile({
-            url: host,
+            url: 'http://192.168.101.4:8081/api/upload',
             filePath,
             name: 'file',
-            formData: { 
-              key, 
-              policy: p, 
-              OSSAccessKeyId: accessid, 
-              signature, 
-              success_action_status: '200' 
-            },
+            formData: {},
             success: (res) => {
-              let url = host;
-              if (!url.endsWith('/')) url += '/';
-              url += key;
-              uploadedUrls.push(url);
-              resolve();
+              try {
+                const response = JSON.parse(res.data);
+                if (response.code === 0 && response.data && response.data.url) {
+                  uploadedUrls.push(response.data.url);
+                  resolve();
+                } else {
+                  reject(new Error(response.message || '上传失败'));
+                }
+              } catch (e) {
+                reject(new Error('解析响应失败'));
+              }
             },
             fail: reject
           });

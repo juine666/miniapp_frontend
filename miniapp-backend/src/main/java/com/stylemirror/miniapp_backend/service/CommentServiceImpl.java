@@ -26,13 +26,22 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private final CommentMapper commentMapper;
     private final UserMapper userMapper;
     private final CommentLikeService commentLikeService;
+    private final ContentFilterService contentFilterService;
     
     @Override
     public Comment publishComment(Comment comment, Long userId) {
         comment.setUserId(userId);
         comment.setLikes(0);
+        // 如果parentId未设置，默认为0（表示一级评论）
+        if (comment.getParentId() == null) {
+            comment.setParentId(0L);
+        }
         comment.setCreatedAt(LocalDateTime.now());
         comment.setUpdatedAt(LocalDateTime.now());
+        
+        // 过滤违禁词
+        String filteredContent = contentFilterService.filterBannedWords(comment.getContent());
+        comment.setContent(filteredContent);
         
         this.save(comment);
         
@@ -126,8 +135,8 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         // 删除评论及其相关的点赞记录
         commentLikeService.deleteByCommentId(commentId);
         
-        // 如果是一级评论，还需要删除所有二级回复
-        if (comment.getParentId() == null) {
+        // 如果是一级评论（parentId = 0），还需要删除所有二级回复
+        if (comment.getParentId() == null || comment.getParentId() == 0) {
             QueryWrapper<Comment> wrapper = new QueryWrapper<>();
             wrapper.eq("parent_id", commentId);
             List<Comment> replies = this.list(wrapper);
@@ -159,12 +168,77 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             comment.setIsLiked(false);
         }
         
-        // 如果是一级评论，获取二级回复
-        if (comment.getParentId() == null) {
+        // 如果是一级评论（parentId = 0），获取二级回复
+        if (comment.getParentId() == null || comment.getParentId() == 0) {
             List<Comment> replies = getReplies(commentId, currentUserId);
             comment.setReplies(replies);
         }
         
         return comment;
+    }
+    
+    @Override
+    public Page<Comment> getAllComments(Integer pageNum, Integer pageSize) {
+        Page<Comment> page = new Page<>(pageNum, pageSize);
+        Page<Comment> result = this.page(page);
+        
+        // 为every comment 添addUser信息
+        result.getRecords().forEach(comment -> {
+            User user = userMapper.selectById(comment.getUserId());
+            comment.setUser(user);
+        });
+        
+        return result;
+    }
+    
+    @Override
+    public boolean deleteCommentByAdmin(Long commentId, Long adminId, String reason) {
+        Comment comment = this.getById(commentId);
+        if (comment == null) {
+            return false;
+        }
+        
+        // 管理员削除，记录削除事件
+        log.info("管理员 {} 删除了评论 {}, 原因: {}", adminId, commentId, reason);
+        
+        // 删除评论及其相关的点赞记录
+        commentLikeService.deleteByCommentId(commentId);
+        
+        // 如果是一级评论，也削除二级回复
+        if (comment.getParentId() == null || comment.getParentId() == 0) {
+            QueryWrapper<Comment> wrapper = new QueryWrapper<>();
+            wrapper.eq("parent_id", commentId);
+            List<Comment> replies = this.list(wrapper);
+            for (Comment reply : replies) {
+                commentLikeService.deleteByCommentId(reply.getId());
+            }
+            this.remove(wrapper);
+        }
+        
+        return this.removeById(commentId);
+    }
+    
+    @Override
+    public boolean reviewComment(Long commentId, String status, String reason, Long adminId) {
+        Comment comment = this.getById(commentId);
+        if (comment == null) {
+            return false;
+        }
+        
+        // 这里有两种处理方式：
+        // 1. 在Comment中添加status字段来记录审核状态
+        // 2. 或者幾中REJECTED时直接删除
+        
+        log.info("管理员 {} 对评论 {} 进行了审核，状态: {}", adminId, commentId, status);
+        
+        if ("REJECTED".equals(status)) {
+            // 驿回评论，直接删除
+            return this.deleteCommentByAdmin(commentId, adminId, reason);
+        } else if ("APPROVED".equals(status)) {
+            // 批准评论，什么都不用做（已经布了）
+            return true;
+        }
+        
+        return false;
     }
 }

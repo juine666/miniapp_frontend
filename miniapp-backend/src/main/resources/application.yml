@@ -32,9 +32,9 @@ spring:
       add-mappings: false
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST:47.106.94.2}
       port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
+      password: ${REDIS_PASSWORD:123456}
       database: ${REDIS_DATABASE:0}
       timeout: 3000ms
       lettuce:
@@ -61,6 +61,7 @@ logging:
   level:
     root: INFO
     org.springframework.web: INFO
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: WARN
     com.stylemirror.miniapp_backend: DEBUG
     com.stylemirror.miniapp_backend.controller.AuthController: DEBUG
     com.stylemirror.miniapp_backend.common.GlobalExceptionHandler: ERROR
@@ -106,6 +107,14 @@ aliyun:
   region-id: ${ALIYUN_REGION_ID:cn-hangzhou}
   tts:
     app-key: ${ALIYUN_TTS_APP_KEY:替换为你的TTS AppKey}
+
+tencent:
+  secret-id: ${TENCENT_SECRET_ID:替换为你的SecretId}
+  secret-key: ${TENCENT_SECRET_KEY:替换为你的SecretKey}
+  region: ${TENCENT_REGION:ap-beijing}
+
+upload:
+  path: ${UPLOAD_PATH:./uploads}
 
 # 测试模式配置
 test:

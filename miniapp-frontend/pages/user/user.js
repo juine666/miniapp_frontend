@@ -620,7 +620,7 @@ Page({
             policy: p, 
             OSSAccessKeyId: accessid, 
             signature, 
-            success_action_status: '200' 
+            success_action_status: '204' 
           },
           success: (res) => {
             let url = host;

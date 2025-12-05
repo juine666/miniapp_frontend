@@ -16,15 +16,10 @@
       <image wx:elif="{{item.coverUrl}}" mode="aspectFill" src="{{item.coverUrl}}" class="main-image" bindtap="previewImage" data-index="0"/>
       <image wx:else mode="aspectFill" src="https://img.yzcdn.cn/vant/cat.jpeg" class="main-image"/>
       
-      <!-- 右下角收藏按钮 -->
-      <view wx:if="{{!isMyProduct}}" class="favorite-btn {{isFavorited ? 'favorited' : ''}}" catchtap="toggleFavorite">
-        <text class="favorite-icon">{{isFavorited ? '❤️' : '🤍'}}</text>
-      </view>
-      
       <!-- 右下角评论按钮 -->
       <view class="comment-btn" catchtap="showCommentModal">
         <text class="comment-icon">💬</text>
-        <text class="comment-count">{{comments.length}}</text>
+        <text class="comment-count">{{totalCommentCount || comments.length}}</text>
       </view>
       
       <!-- 图片数量指示器 -->
@@ -86,89 +81,161 @@
 
   <!-- 评论列表Modal -->
   <view wx:if="{{showCommentModal}}" class="modal-overlay" catchtap="hideCommentModal">
-    <view class="modal-content" catchtap>
+    <view class="modal-content" catchtap="noop">
       <!-- Modal头部 -->
       <view class="modal-header">
-        <text class="modal-title">评论 ({{comments.length}})</text>
-        <text class="modal-close" bindtap="hideCommentModal">✕</text>
-      </view>
-
-      <!-- 发表评论按钮 -->
-      <view class="comment-input-header">
-        <button class="publish-btn" bindtap="togglePublishComment">发表评论</button>
-      </view>
-
-      <!-- 发表评论框 -->
-      <view wx:if="{{showPublishComment}}" class="comment-input-box">
-        <view class="emotion-bar">
-          <text class="emotion-label">表情：</text>
-          <view class="emotion-list">
-            <text wx:for="{{emotions}}" wx:key="*this" class="emotion-btn {{selectedEmotion === item ? 'selected' : ''}}" bindtap="onSelectEmotion" data-emotion="{{item}}">{{item}}</text>
-          </view>
-        </view>
-        
-        <!-- 输入方式切换 -->
-        <view class="input-mode-tabs">
-          <view class="tab {{!showVoiceInput ? 'active' : ''}}" bindtap="switchInputMode" data-mode="text">⌨️ 文字</view>
-          <view class="tab {{showVoiceInput ? 'active' : ''}}" bindtap="switchInputMode" data-mode="voice">🎤 语音</view>
-        </view>
-        
-        <!-- 文字输入 -->
-        <view wx:if="{{!showVoiceInput}}">
-          <textarea class="comment-input" placeholder="说说你的想法..." value="{{commentInput}}" bindchange="onCommentInput" maxlength="500"/>
-        </view>
-        
-        <!-- 语音输入（按住说话） -->
-        <view wx:if="{{showVoiceInput}}" class="voice-input-section">
-          <view class="voice-record-btn {{isRecording ? 'recording' : ''}}" bindtouchstart="startRecording" bindtouchend="stopRecording">
-            <text class="record-text">{{isRecording ? '🔴 正在录音... ' + recordingTime + '秒' : '🎤 按住说话'}}</text>
-          </view>
-          <view wx:if="{{commentInput}}" class="voice-preview">
-            <text class="preview-label">已识别文字：</text>
-            <text class="preview-text">{{commentInput}}</text>
-          </view>
-        </view>
-        
-        <view class="input-actions">
-          <button class="cancel-btn" bindtap="togglePublishComment">取消</button>
-          <button class="submit-btn" bindtap="publishComment">发表</button>
-        </view>
+        <text class="modal-title">评论 ({{totalCommentCount || comments.length}})</text>
+        <text class="modal-close" catchtap="hideCommentModal">✕</text>
       </view>
 
       <!-- 评论列表 -->
-      <view class="comments-list">
+      <view class="comments-list" bindscrolltoupper="onCommentsScrollTop" bindscrolltolower="onCommentsScrollBottom">
         <view wx:if="{{comments.length === 0}}" class="empty-tip">暂无评论</view>
         
-        <view wx:for="{{comments}}" wx:key="id" class="comment-item" bindlongpress="showCommentMenu" data-comment-id="{{item.id}}">
-          <!-- 长按菜单 -->
-          <view wx:if="{{contextMenu.visible && contextMenu.commentId === item.id}}" class="context-menu" style="top: {{contextMenu.y}}px; left: {{contextMenu.x}}px;">
-            <view class="menu-item" bindtap="copyCommentText" data-text="{{item.content}}">复制</view>
-            <view class="menu-item" bindtap="toggleTranslate" data-comment-id="{{item.id}}">翻译</view>
-          </view>
+        <!-- 遍历所有评论，每个评论后跟随其回复 -->
+        <view wx:for="{{comments}}" wx:key="id" class="comment-wrapper">
+          <!-- 一级评论 -->
+          <view class="comment-item" bindlongpress="showCommentMenu" data-comment-id="{{item.id}}" catchtap="startReply" data-comment-id="{{item.id}}">
+            <!-- 长按菜单 -->
+            <view wx:if="{{contextMenu.visible && contextMenu.commentId === item.id}}" class="context-menu" style="top: {{contextMenu.y}}px; left: {{contextMenu.x}}px;">
+              <view class="menu-item" catchtap="copyCommentText" data-text="{{item.content}}">复制</view>
+              <view class="menu-item" catchtap="toggleTranslate" data-comment-id="{{item.id}}">翻译</view>
+            </view>
 
-          <!-- 评论内容 -->
-          <image class="avatar" src="{{item.user.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}"/>
-          <view class="comment-main">
-            <view class="user-name">{{item.user.nickname || '用户'}}</view>
-            <view class="comment-text">
-              <text wx:if="{{item.emotion}}">{{item.emotion}} </text>
-              <text>{{item.content}}</text>
+            <!-- 评论内容 -->
+            <image class="avatar" src="{{item.user.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}"/>
+            <view class="comment-main">
+              <view class="user-name">{{item.user.nickname || '用户'}}</view>
+              <view class="comment-text">
+                <text wx:if="{{item.emotion}}">{{item.emotion}} </text>
+                <text>{{item.content}}</text>
+              </view>
+              
+              <!-- 翻译结果 -->
+              <view wx:if="{{item.translatedText}}" class="translate-box">
+                <view class="translate-header">
+                  <text class="translate-label">英文翻译</text>
+                </view>
+                <text class="translate-text">{{item.translatedText}}</text>
+              </view>
+
+              <view class="comment-meta">
+                <text class="comment-time">{{item.createdAt}}</text>
+                <text class="like-btn" catchtap="likeComment" data-comment-id="{{item.id}}">👍 {{item.likes}}</text>
+                <text class="translate-btn" catchtap="translateComment" data-comment-id="{{item.id}}">翻译</text>
+                <text class="translate-voice-btn" catchtap="translateAndSpeak" data-comment-id="{{item.id}}">🔊 朗诵</text>
+              </view>
+            </view>
+          </view>
+          
+          <!-- 二级回复列表 - 在一级评论下方 -->
+          <view wx:if="{{item.replies && item.replies.length > 0}}" class="replies-section">
+            <!-- 显示前2条回复或全部回复 (使用item.displayReplies控制) -->
+            <view wx:for="{{item.displayReplies || []}}" wx:key="id" class="reply-wrapper">
+              <!-- 二级回复 -->
+              <view class="reply-item" catchtap="startReply" data-comment-id="{{item.id}}">
+                <image class="avatar" src="{{item.user.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}"/>
+                <view class="comment-main">
+                  <view class="user-name">{{item.user.nickname || '用户'}}</view>
+                  <view class="comment-text">{{item.content}}</view>
+                  
+                  <!-- 翻译结果 -->
+                  <view wx:if="{{item.translatedText}}" class="translate-box">
+                    <view class="translate-header">
+                      <text class="translate-label">英文翻译</text>
+                    </view>
+                    <text class="translate-text">{{item.translatedText}}</text>
+                  </view>
+                  
+                  <view class="comment-meta">
+                    <text class="comment-time">{{item.createdAt}}</text>
+                    <text class="like-btn" catchtap="likeComment" data-comment-id="{{item.id}}">👍 {{item.likes}}</text>
+                    <text class="translate-btn" catchtap="translateComment" data-comment-id="{{item.id}}">翻译</text>
+                    <text class="translate-voice-btn" catchtap="translateAndSpeak" data-comment-id="{{item.id}}">🔊 朗诵</text>
+                  </view>
+                </view>
+              </view>
             </view>
             
-            <!-- 翻译结果 -->
-            <view wx:if="{{expandedTranslateIds.indexOf(item.id) > -1 && item.translatedText}}" class="translate-box">
-              <view class="translate-header">
-                <text class="translate-label">英文翻译</text>
-                <button class="play-voice-btn" bindtap="playTranslationVoice" data-comment-id="{{item.id}}" data-voice="female">🔊 女声</button>
-                <button class="play-voice-btn" bindtap="playTranslationVoice" data-comment-id="{{item.id}}" data-voice="male">🔊 男声</button>
+            <!-- 三级回复 - 平行显示，不在reply-wrapper内 -->
+            <view wx:for="{{item.displayReplies || []}}" wx:key="id" wx:for-item="secondReply" class="third-level-replies">
+              <view wx:if="{{secondReply.replies && secondReply.replies.length > 0}}" wx:for="{{secondReply.replies}}" wx:key="id" wx:for-item="thirdReply" class="third-reply-item" catchtap="startReply" data-comment-id="{{thirdReply.id}}">
+                <image class="avatar" src="{{thirdReply.user.avatarUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}"/>
+                <view class="comment-main">
+                  <view class="user-name">{{thirdReply.user.nickname || '用户'}} <text wx:if="{{thirdReply.parentUser}}" class="reply-to">› {{thirdReply.parentUser.nickname || '用户'}}</text></view>
+                  <view class="comment-text">{{thirdReply.content}}</view>
+                  
+                  <view class="comment-meta">
+                    <text class="comment-time">{{thirdReply.createdAt}}</text>
+                    <text class="like-btn" catchtap="likeComment" data-comment-id="{{thirdReply.id}}">👍 {{thirdReply.likes}}</text>
+                    <text class="translate-btn" catchtap="translateComment" data-comment-id="{{thirdReply.id}}">翻译</text>
+                    <text class="translate-voice-btn" catchtap="translateAndSpeak" data-comment-id="{{thirdReply.id}}">🔊 朗诵</text>
+                  </view>
+                </view>
               </view>
-              <text class="translate-text">{{item.translatedText}}</text>
             </view>
+            
+            <!-- 展开回复按钮 - 仅当未展开且回复总数>2时显示 -->
+            <view wx:if="{{!expandedReplies[item.id] && item.replies.length > 2}}" class="expand-replies-btn" catchtap="toggleReplies" data-comment-id="{{item.id}}">
+              <text>展开 {{item.replies.length - 2}} 条回复</text>
+            </view>
+            
+            <!-- 折叠按钮 - 仅当已展开时显示 -->
+            <view wx:if="{{expandedReplies[item.id] && item.replies.length > 2}}" class="expand-replies-btn collapse" catchtap="toggleReplies" data-comment-id="{{item.id}}">
+              <text>折叠回复</text>
+            </view>
+          </view>
+        </view>
+      </view>
 
-            <view class="comment-meta">
-              <text class="comment-time">{{item.createdAt}}</text>
-              <text class="like-btn" bindtap="likeComment" data-comment-id="{{item.id}}">👍 {{item.likes}}</text>
+      <!-- 发表评论输入框（固定到底部） -->
+      <view class="comment-input-footer">
+        <!-- 发表评论按钮 -->
+        <view wx:if="{{!showPublishComment}}" class="comment-input-header">
+          <button class="publish-btn" catchtap="togglePublishComment">发表评论</button>
+        </view>
+
+        <!-- 发表评论框 -->
+        <view wx:if="{{showPublishComment}}" class="comment-input-box">
+          <!-- 输入方式切换 -->
+          <view class="input-mode-tabs">
+            <view class="tab {{!showVoiceInput ? 'active' : ''}}" catchtap="switchInputMode" data-mode="text">⌨️ 文字</view>
+            <view class="tab {{showVoiceInput ? 'active' : ''}}" catchtap="switchInputMode" data-mode="voice">🎤 语音</view>
+          </view>
+          
+          <!-- 文字输入 - 富文本编辑器 -->
+          <view wx:if="{{!showVoiceInput}}" class="rich-editor-wrapper">
+            <editor id="richEditor" class="rich-editor" placeholder="说说你的想法..." bindstatuschange="onEditorStatusChange" bindinput="onEditorInput"></editor>
+            
+            <!-- 富文本工具栏 -->
+            <view class="editor-toolbar">
+              <view class="toolbar-group">
+                <text class="toolbar-btn" bindtap="formatText" data-format="bold" title="加粗">B</text>
+                <text class="toolbar-btn" bindtap="formatText" data-format="italic" title="斜体">I</text>
+                <text class="toolbar-btn" bindtap="formatText" data-format="underline" title="下划线">U</text>
+              </view>
+              <view class="toolbar-group">
+                <text class="toolbar-btn" bindtap="setTextColor" title="文字颜色">🎨</text>
+                <text class="toolbar-btn" bindtap="insertImage" title="插入图片">🖼️</text>
+              </view>
             </view>
+          </view>
+          
+          <!-- 语音输入（按住说话） -->
+          <view wx:if="{{showVoiceInput}}" class="voice-input-section">
+            <view class="voice-record-btn {{isRecording ? 'recording' : ''}}" bindtouchstart="startRecording" bindtouchend="stopRecording">
+              <text class="record-text">{{isRecording ? '🔴 正在录音... ' + recordingTime + '秒' : '🎤 按住说话'}}</text>
+            </view>
+            <view wx:if="{{commentInput}}" class="voice-preview">
+              <text class="preview-label">已识别文字：</text>
+              <text class="preview-text">{{commentInput}}</text>
+            </view>
+          </view>
+          
+          <!-- 操作按钮（始终显示在底部） -->
+          <view class="input-actions">
+            <button class="cancel-btn" catchtap="togglePublishComment">取消</button>
+            <button class="submit-btn" catchtap="publishComment">发表</button>
           </view>
         </view>
       </view>

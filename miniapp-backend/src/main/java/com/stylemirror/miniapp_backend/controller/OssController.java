@@ -1,7 +1,10 @@
 package com.stylemirror.miniapp_backend.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stylemirror.miniapp_backend.common.ApiResponse;
+import com.stylemirror.miniapp_backend.domain.SystemConfig;
+import com.stylemirror.miniapp_backend.mapper.SystemConfigMapper;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,20 +31,41 @@ import java.util.Map;
 @Slf4j
 public class OssController {
 
-    @Value("${oss.accessKeyId}")
-    private String accessKeyId;
-    @Value("${oss.accessKeySecret}")
-    private String accessKeySecret;
-    @Value("${oss.bucket}")
-    private String bucket;
-    @Value("${oss.endpoint}")
-    private String endpoint;
-    
+    private final SystemConfigMapper systemConfigMapper;
     private final ObjectMapper objectMapper;
+
+    @Value("${oss.accessKeyId:替换为你的AccessKeyId}")
+    private String defaultAccessKeyId;
+    @Value("${oss.accessKeySecret:替换为你的AccessKeySecret}")
+    private String defaultAccessKeySecret;
+    @Value("${oss.bucket:twoshop}")
+    private String defaultBucket;
+    @Value("${oss.endpoint:oss-cn-shenzhen.aliyuncs.com}")
+    private String defaultEndpoint;
 
     public record PolicyRequest(@NotBlank String dirPrefix) {}
     
     public record ImageCheckRequest(@NotBlank String image, String imageType) {}
+
+    /**
+     * 从数据库或配置读取值
+     */
+    private String getConfig(String configKey, String defaultValue) {
+        if (systemConfigMapper != null) {
+            try {
+                SystemConfig config = systemConfigMapper.selectOne(
+                        new QueryWrapper<SystemConfig>()
+                                .eq("config_key", configKey)
+                );
+                if (config != null && config.getConfigValue() != null && !config.getConfigValue().isEmpty()) {
+                    return config.getConfigValue();
+                }
+            } catch (Exception e) {
+                log.warn("从数据库读取配置失败，使用默认值: {}", configKey, e);
+            }
+        }
+        return defaultValue;
+    }
 
     /**
      * 图片内容安全检测
@@ -59,15 +83,13 @@ public class OssController {
             }
             
             // 如果图片数据太大，拒绝
-            // Base64编码后的数据大小约为原文件的4/3
             int imageSize = req.image().length();
-            int maxSize = 5 * 1024 * 1024; // 5MB (Base64编码后)
+            int maxSize = 5 * 1024 * 1024;
             if (imageSize > maxSize) {
                 return ResponseEntity.badRequest()
                     .body(ApiResponse.error(400, "图片文件过大，请压缩后重试"));
             }
             
-            // 调用阿里云内容安全服务进行图片检测
             try {
                 boolean isSafe = checkImageContent(req.image());
                 if (!isSafe) {
@@ -77,8 +99,6 @@ public class OssController {
                 }
             } catch (Exception checkException) {
                 log.error("调用内容安全服务失败，允许通过", checkException);
-                // 如果内容安全服务调用失败，为了不影响用户体验，暂时允许通过
-                // 生产环境建议：记录日志并人工审核，或者拒绝上传
             }
             
             log.info("图片内容审核通过，图片大小: {} bytes", imageSize);
@@ -93,45 +113,23 @@ public class OssController {
     
     /**
      * 使用阿里云内容安全服务检测图片内容
-     * @param base64Image Base64编码的图片数据
-     * @return true表示安全，false表示包含违规内容
      */
     private boolean checkImageContent(String base64Image) throws Exception {
-        // 如果未配置阿里云内容安全服务，跳过检测
+        String accessKeyId = getConfig("oss.accessKeyId", defaultAccessKeyId);
+        String accessKeySecret = getConfig("oss.accessKeySecret", defaultAccessKeySecret);
+        
         if (accessKeyId == null || accessKeyId.isEmpty() || 
             accessKeySecret == null || accessKeySecret.isEmpty() ||
-            accessKeyId.equals("your_access_key_id")) {
+            accessKeyId.contains("替换")) {
             log.warn("阿里云内容安全服务未配置，跳过图片检测");
-            return true; // 未配置时允许通过
+            return true;
         }
         
         try {
-            // TODO: 集成阿里云内容安全服务（Green）
-            // 需要添加依赖：com.aliyun:green20220302
-            // 并实现实际的图片内容检测逻辑
-            // 
-            // 示例代码：
-            // Config config = new Config()
-            //     .setAccessKeyId(accessKeyId)
-            //     .setAccessKeySecret(accessKeySecret);
-            // config.setEndpoint("green.cn-shanghai.aliyuncs.com");
-            // Client client = new Client(config);
-            // 
-            // ImageModerationRequest request = new ImageModerationRequest();
-            // request.setService("baselineCheck");
-            // request.setServiceParameters(...);
-            // 
-            // ImageModerationResponse response = client.imageModeration(request);
-            // 解析返回结果，检查是否有porn、terrorism等违规标签
-            
-            // 目前暂时跳过实际检测，返回true
-            // 生产环境需要集成实际的图片内容安全服务
             log.info("图片内容检测（暂未实现实际检测逻辑）");
             return true;
-            
         } catch (Exception e) {
             log.error("调用内容安全服务异常", e);
-            // 异常时允许通过，避免影响正常使用
             return true;
         }
     }
@@ -140,6 +138,12 @@ public class OssController {
     public ResponseEntity<ApiResponse<Map<String, Object>>> policy(@RequestBody PolicyRequest req) {
         try {
             log.info("收到OSS凭证请求，目录: {}", req.dirPrefix());
+            
+            // 从数据库读取配置
+            String accessKeyId = getConfig("oss.accessKeyId", defaultAccessKeyId);
+            String accessKeySecret = getConfig("oss.accessKeySecret", defaultAccessKeySecret);
+            String bucket = getConfig("oss.bucket", defaultBucket);
+            String endpoint = getConfig("oss.endpoint", defaultEndpoint);
             
             // OSS要求的时间格式：yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
             String expiration = Instant.now().plus(30, ChronoUnit.MINUTES)
@@ -151,7 +155,6 @@ public class OssController {
             String policyBase64 = Base64.getEncoder().encodeToString(policy.getBytes(StandardCharsets.UTF_8));
             String signature = sign(policyBase64, accessKeySecret);
 
-            // endpoint格式: oss-cn-shenzhen.aliyuncs.com 或 oss-cn-hangzhou.aliyuncs.com
             String host = String.format("https://%s.%s", bucket, endpoint);
             
             Map<String, Object> resp = new HashMap<>();
@@ -174,7 +177,4 @@ public class OssController {
         mac.init(new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
         return Base64.getEncoder().encodeToString(mac.doFinal(data.getBytes(StandardCharsets.UTF_8)));
     }
-
 }
-
-

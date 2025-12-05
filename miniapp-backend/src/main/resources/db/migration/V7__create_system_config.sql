@@ -17,5 +17,12 @@ INSERT INTO system_config (config_key, config_value, description, group_name, is
 ('oss.bucket', 'twoshop', 'OSS 存储桶名称', 'oss', FALSE),
 ('oss.publicBaseUrl', 'https://twoshop.oss-cn-shenzhen.aliyuncs.com', 'OSS 公网访问地址', 'oss', FALSE),
 ('oss.accessKeyId', 'LTAI5tDwqnzSyDZSACU2h4XL123', 'OSS 访问密钥ID（敏感信息）', 'oss', TRUE),
-('oss.accessKeySecret', 'vg0aHIIEbaJhG1sK0ilA1xlI5i8f3R123', 'OSS 访问密钥Secret（敏感信息）', 'oss', TRUE)
+('oss.accessKeySecret', 'vg0aHIIEbaJhG1sK0ilA1xlI5i8f3R123', 'OSS 访问密钥Secret（敏感信息）', 'oss', TRUE),
+-- 初始化腾讯云配置
+('tencent.secretId', '', '腾讯云 API 密钥ID（敏感信息）', 'tencent', TRUE),
+('tencent.secretKey', '', '腾讯云 API 密钥Secret（敏感信息）', 'tencent', TRUE),
+('tencent.region', 'ap-beijing', '腾讯云服务区域', 'tencent', FALSE),
+-- 初始化微信小程序配置
+('wechat.appid', '', '微信小程序 AppID（敏感信息）', 'wechat', TRUE),
+('wechat.secret', '', '微信小程序 Secret（敏感信息）', 'wechat', TRUE)
 ON DUPLICATE KEY UPDATE config_value = VALUES(config_value);

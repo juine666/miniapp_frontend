@@ -6,7 +6,7 @@
     <!-- 获取产品的一级评论（分页，按热度排序） -->
     <select id="selectProductCommentsByHot" resultType="com.stylemirror.miniapp_backend.domain.Comment">
         SELECT * FROM comments 
-        WHERE product_id = #{productId} AND parent_id IS NULL 
+        WHERE product_id = #{productId} AND parent_id = 0
         ORDER BY likes DESC, created_at DESC
     </select>
 
@@ -22,8 +22,8 @@
         SELECT * FROM comments 
         WHERE product_id = #{productId} 
         ORDER BY 
-            CASE WHEN parent_id IS NULL THEN 0 ELSE 1 END,
-            CASE WHEN parent_id IS NULL THEN likes ELSE 0 END DESC,
+            CASE WHEN parent_id = 0 THEN 0 ELSE 1 END,
+            CASE WHEN parent_id = 0 THEN likes ELSE 0 END DESC,
             created_at DESC
     </select>
 

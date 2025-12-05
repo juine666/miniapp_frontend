@@ -1,7 +1,7 @@
 // 环境配置
 const ENV_CONFIG = {
   // 开发环境（本地开发）
-  development: 'http://localhost:8081',
+  development: 'http://192.168.101.4:8081',
   // 生产环境（部署到服务器后修改为你的服务器地址）
   production: "https://fxyw.work",  // 或 'http://your-server-ip:8081'
 };

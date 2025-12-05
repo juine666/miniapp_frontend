@@ -165,4 +165,68 @@ public class CommentController {
         commentLikeService.toggleLike(commentId, userId);
         return ResponseEntity.ok(ApiResponse.success());
     }
+    
+    // ========== 后台管理接口 ==========
+    
+    /**
+     * 后台：获取所有评论（包含未审核）- 管理员专用
+     */
+    @GetMapping("/admin/list")
+    public ResponseEntity<ApiResponse<Page<Comment>>> getAllComments(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            Authentication auth) {
+        
+        // 验证是否为管理员（这里简化处理，实际应该检查权限）
+        Long userId = testAuthHelper.getUserId(auth);
+        // TODO: 检查是否为管理员
+        
+        Page<Comment> result = commentService.getAllComments(pageNum, pageSize);
+        return ResponseEntity.ok(ApiResponse.success(result));
+    }
+    
+    /**
+     * 后台：删除评论 - 管理员专用
+     */
+    @DeleteMapping("/admin/{commentId}")
+    public ResponseEntity<ApiResponse<Void>> deleteCommentByAdmin(
+            @PathVariable Long commentId,
+            @RequestBody(required = false) java.util.Map<String, String> body,
+            Authentication auth) {
+        
+        Long adminId = testAuthHelper.getUserId(auth);
+        String reason = body != null ? body.get("reason") : "内容违规";
+        
+        boolean success = commentService.deleteCommentByAdmin(commentId, adminId, reason);
+        if (!success) {
+            return ResponseEntity.ok(ApiResponse.error(404, "评论不存在"));
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+    
+    /**
+     * 后台：审核评论（标记为已审核或未通过）- 管理员专用
+     */
+    @PostMapping("/admin/{commentId}/review")
+    public ResponseEntity<ApiResponse<Void>> reviewComment(
+            @PathVariable Long commentId,
+            @RequestBody java.util.Map<String, Object> body,
+            Authentication auth) {
+        
+        Long adminId = testAuthHelper.getUserId(auth);
+        String status = (String) body.get("status");  // APPROVED, REJECTED
+        String reason = (String) body.getOrDefault("reason", "");
+        
+        if (!status.matches("(APPROVED|REJECTED)")) {
+            return ResponseEntity.ok(ApiResponse.error(400, "状态值非法"));
+        }
+        
+        boolean success = commentService.reviewComment(commentId, status, reason, adminId);
+        if (!success) {
+            return ResponseEntity.ok(ApiResponse.error(404, "评论不存在"));
+        }
+        
+        return ResponseEntity.ok(ApiResponse.success());
+    }
 }

@@ -45,8 +45,16 @@ Page({
     } else {
       console.log('加载发布模式');
       wx.setNavigationBarTitle({ title: '发布商品' });
-      // 确保是新建模式，清除可能残留的数据
-      this.resetForm();
+      // 确保是新建模式，一定清除所有数据
+      this.setData({
+        productId: null,
+        'form.name': '',
+        'form.description': '',
+        'form.price': '',
+        'form.imageUrls': [],
+        location: null,
+        locationName: '未设置位置'
+      });
     }
   },
   onShow() {
@@ -308,36 +316,33 @@ Page({
       wx.showLoading({ title: '上传中...' });
       const uploadedUrls = [];
       
-      // 逐个上传图片
+      // 逐个上传图片到OSS
       for (let i = 0; i < compressedFiles.length; i++) {
         const filePath = compressedFiles[i];
-        const key = dir + Date.now() + '_' + i + '_' + Math.floor(Math.random()*1000) + '.jpg';
+        const filename = dir + 'image_' + Date.now() + '_' + i + '.jpg';
         
         await new Promise((resolve, reject) => {
           wx.uploadFile({
             url: host,
             filePath,
             name: 'file',
-            formData: { 
-              key, 
-              policy: p, 
-              OSSAccessKeyId: accessid, 
-              signature, 
-              success_action_status: '200' 
+            formData: {
+              key: filename,
+              policy: p,
+              OSSAccessKeyId: accessid,
+              signature: signature,
+              success_action_status: '200'
             },
             success: (res) => {
-              let url = host;
-              if (!url.endsWith('/')) {
-                url += '/';
+              if (res.statusCode === 200 || res.statusCode === 204) {
+                const ossUrl = host.replace(/\/$/, '') + '/' + filename;
+                uploadedUrls.push(ossUrl);
+                resolve();
+              } else {
+                reject(new Error('上传到OSS失败'));
               }
-              url += key;
-              uploadedUrls.push(url);
-              resolve();
             },
-            fail: (err) => {
-              console.error('OSS上传失败', err);
-              reject(err);
-            }
+            fail: reject
           });
         });
       }
@@ -443,46 +448,41 @@ Page({
       }
       
       const { accessid, host, policy: p, signature, dir } = policy.data;
+      const filename = dir + 'image_' + Date.now() + '.jpg';
       
       wx.showLoading({ title: '上传中...' });
-      const key = dir + Date.now() + '_' + index + '_' + Math.floor(Math.random()*1000) + '.jpg';
       
       await new Promise((resolve, reject) => {
         wx.uploadFile({
           url: host,
           filePath: compressedPath,
           name: 'file',
-          formData: { 
-            key, 
-            policy: p, 
-            OSSAccessKeyId: accessid, 
-            signature, 
-            success_action_status: '200' 
+          formData: {
+            key: filename,
+            policy: p,
+            OSSAccessKeyId: accessid,
+            signature: signature,
+            success_action_status: '200'
           },
           success: (res) => {
-            let url = host;
-            if (!url.endsWith('/')) {
-              url += '/';
+            if (res.statusCode === 200 || res.statusCode === 204) {
+              const ossUrl = host.replace(/\/$/, '') + '/' + filename;
+              const newImageUrls = [...currentImages];
+              newImageUrls[index] = ossUrl;
+              
+              this.setData({ 
+                'form.imageUrls': newImageUrls,
+                uploading: false
+              });
+              
+              wx.hideLoading();
+              wx.showToast({ title: '替换成功', icon: 'success' });
+              resolve();
+            } else {
+              reject(new Error('上传到OSS失败'));
             }
-            url += key;
-            
-            // 替换指定位置的图片
-            const newImageUrls = [...currentImages];
-            newImageUrls[index] = url;
-            
-            this.setData({ 
-              'form.imageUrls': newImageUrls,
-              uploading: false
-            });
-            
-            wx.hideLoading();
-            wx.showToast({ title: '替换成功', icon: 'success' });
-            resolve();
           },
-          fail: (err) => {
-            console.error('OSS上传失败', err);
-            reject(err);
-          }
+          fail: reject
         });
       });
     } catch (e) {
