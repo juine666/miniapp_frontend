@@ -26,7 +26,13 @@ public class MockTranslationService implements TranslationService {
     @Override
     public String translateToEnglish(String text) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isEmpty()) {
+                return text;
+            }
+            
+            // 检查去除首尾空白后是否为空
+            if (text.trim().isEmpty()) {
+                // 如果只有空白字符，直接返回原文
                 return text;
             }
 
@@ -78,5 +84,4 @@ public class MockTranslationService implements TranslationService {
             return text;
         }
     }
-// ... 删除不需要的辅助方法
 }

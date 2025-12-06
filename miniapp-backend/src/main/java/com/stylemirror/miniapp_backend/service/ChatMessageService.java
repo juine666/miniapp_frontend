@@ -19,18 +19,30 @@ public class ChatMessageService {
     /**
      * 发送聊天消息
      */
-    public ChatMessage sendMessage(Long productId, String userId, String nickname, String avatarUrl, String content) {
+    public ChatMessage sendMessage(Long productId, String userId, String nickname, String avatarUrl, String content, Long replyToId, String atUsernames) {
         ChatMessage message = new ChatMessage();
         message.setProductId(productId);
         message.setUserId(userId);
         message.setNickname(nickname);
         message.setAvatarUrl(avatarUrl);
         message.setContent(content);
+        message.setReplyToId(replyToId);
+        message.setAtUsernames(atUsernames);
+        
+        // 如果是回复消息，填充被回复消息的信息
+        if (replyToId != null) {
+            ChatMessage repliedMessage = chatMessageMapper.selectById(replyToId);
+            if (repliedMessage != null) {
+                message.setReplyToContent(repliedMessage.getContent());
+                message.setReplyToNickname(repliedMessage.getNickname());
+            }
+        }
+        
         message.setCreatedAt(LocalDateTime.now());
         message.setUpdatedAt(LocalDateTime.now());
         
         chatMessageMapper.insert(message);
-        log.info("发送消息成功，商品ID: {}，用户: {}", productId, userId);
+        log.info("发送消息成功，商品ID: {}，用户: {}，回复ID: {}，@用户: {}", productId, userId, replyToId, atUsernames);
         
         return message;
     }

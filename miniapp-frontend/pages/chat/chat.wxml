@@ -25,11 +25,17 @@
           
           <view class="message-content">
             <view class="nickname">{{item.nickname}}</view>
-            <view class="bubble received-bubble" bindlongpress="onLongPressMessage" data-message-id="{{item.id}}" data-content="{{item.content}}" data-user-id="{{item.userId}}">
+            <!-- 被回复的消息 -->
+            <view wx:if="{{item.replyToContent}}" class="reply-preview">
+              <text class="reply-nickname">@{{item.replyToNickname}}</text>
+              <text class="reply-content">: {{item.replyToContent}}</text>
+            </view>
+            <view class="bubble received-bubble" bindlongpress="onLongPressMessage" data-message-id="{{item.id}}" data-content="{{item.content}}" data-user-id="{{item.userId}}" data-is-translated="false">
               {{item.content}}
             </view>
-            <view wx:if="{{item.translatedText}}" class="translated-text">
-              {{item.translatedText}}
+            <view wx:if="{{item.translatedText}}" class="translated-text-container">
+              <view class="translated-text" bindlongpress="onLongPressTranslatedMessage" data-message-id="{{item.id}}" data-content="{{item.translatedText}}" data-user-id="{{item.userId}}" data-is-translated="true">{{item.translatedText}}</view>
+              <button class="speak-btn" bindtap="speakTranslatedText" data-message-id="{{item.id}}">🎤</button>
             </view>
             <view class="time">{{formatTime(item.createdAt)}}</view>
           </view>
@@ -38,11 +44,17 @@
         <!-- 发送的消息 -->
         <view wx:if="{{item.userId === currentUserId}}" class="sent-message">
           <view class="message-content">
-            <view class="bubble sent-bubble" bindlongpress="onLongPressMessage" data-message-id="{{item.id}}" data-content="{{item.content}}" data-user-id="{{item.userId}}">
+            <!-- 被回复的消息 -->
+            <view wx:if="{{item.replyToContent}}" class="reply-preview">
+              <text class="reply-nickname">@{{item.replyToNickname}}</text>
+              <text class="reply-content">: {{item.replyToContent}}</text>
+            </view>
+            <view class="bubble sent-bubble" bindlongpress="onLongPressMessage" data-message-id="{{item.id}}" data-content="{{item.content}}" data-user-id="{{item.userId}}" data-is-translated="false">
               {{item.content}}
             </view>
-            <view wx:if="{{item.translatedText}}" class="translated-text">
-              {{item.translatedText}}
+            <view wx:if="{{item.translatedText}}" class="translated-text-container">
+              <view class="translated-text" bindlongpress="onLongPressTranslatedMessage" data-message-id="{{item.id}}" data-content="{{item.translatedText}}" data-user-id="{{item.userId}}" data-is-translated="true">{{item.translatedText}}</view>
+              <button class="speak-btn" bindtap="speakTranslatedText" data-message-id="{{item.id}}">🎤</button>
             </view>
             <view class="time">{{formatTime(item.createdAt)}}</view>
           </view>
@@ -66,6 +78,7 @@
       <text class="reply-close" bindtap="cancelReply">×</text>
     </view>
     <view class="input-wrapper">
+      <button class="at-btn" bindtap="showAtUserList">@</button>
       <input 
         type="text" 
         class="input-box" 
@@ -87,6 +100,28 @@
       <button class="context-menu-item" bindtap="speakMessage">朗诵</button>
       <button class="context-menu-item" bindtap="copyMessage">复制</button>
       <button class="context-menu-item cancel" bindtap="closeContextMenu">取消</button>
+    </view>
+  </view>
+
+  <!-- @用户列表 -->
+  <view wx:if="{{showAtUserList}}" class="at-user-modal" bindtap="closeAtUserList">
+    <view class="at-user-content" catchtap="">
+      <view class="at-user-header">选择联系人</view>
+      <view class="at-user-list">
+        <view 
+          wx:for="{{onlineUsers}}" 
+          wx:key="userId" 
+          class="at-user-item" 
+          bindtap="selectAtUser"
+          data-user-id="{{item.userId}}"
+          data-nickname="{{item.nickname}}"
+        >
+          <image wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" class="at-user-avatar" mode="aspectFill" />
+          <view wx:else class="at-user-avatar-placeholder">👤</view>
+          <text class="at-user-name">{{item.nickname}}</text>
+        </view>
+      </view>
+      <button class="at-cancel-btn" bindtap="closeAtUserList">取消</button>
     </view>
   </view>
 </view>

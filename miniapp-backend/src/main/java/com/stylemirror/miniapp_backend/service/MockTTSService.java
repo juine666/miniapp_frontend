@@ -28,7 +28,13 @@ public class MockTTSService implements TTSService {
     @Override
     public String synthesizeVoice(String text, String voice, String language) {
         try {
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isEmpty()) {
+                return null;
+            }
+            
+            // 检查去除首尾空白后是否为空
+            if (text.trim().isEmpty()) {
+                // 如果只有空白字符，返回空音频
                 return null;
             }
 
@@ -63,10 +69,18 @@ public class MockTTSService implements TTSService {
             req.setSessionId("miniapp-" + UUID.randomUUID().toString());
             
             // 确定语音类型
-            long voiceType = 1001L;  // 默认女声
+            long voiceType = 1001L;  // 默认女声(中文)
             if ("male".equals(voice)) {
-                voiceType = 1002L;  // 男声
+                voiceType = 1002L;  // 男声(中文)
             }
+            
+            // 根据语言选择语音模型
+            if ("en-US".equals(language)) {
+                voiceType = "male".equals(voice) ? 1051L : 1050L;  // 英文男女声
+            } else if ("zh-CN".equals(language)) {
+                voiceType = "male".equals(voice) ? 1002L : 1001L;  // 中文男女声
+            }
+            
             req.setVoiceType(voiceType);
 
             // 调用API

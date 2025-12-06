@@ -26,6 +26,14 @@ public class ChatMessage {
     
     private String content;
     
+    private Long replyToId;
+    
+    private String replyToContent;
+    
+    private String replyToNickname;
+    
+    private String atUsernames;
+    
     private LocalDateTime createdAt;
     
     private LocalDateTime updatedAt;

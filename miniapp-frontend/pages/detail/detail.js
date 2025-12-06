@@ -42,7 +42,14 @@ Page({
     }
     
     const newId = String(id);
-    this.setData({ id: newId });
+    // 总是重新加载数据
+    this.setData({ 
+      id: newId,
+      item: {},
+      imageList: [],
+      comments: [],
+      voices: []
+    });
     
     wx.showShareMenu({
       withShareTicket: true,
@@ -148,8 +155,11 @@ Page({
   onShow() {
     const id = this.data.id;
     if (id) {
-      // 返回页面时仅重新检查收藏状态，不重新加载评论和语音
+      // 返回页面时重新加载数据
+      this.loadDetail();
       this.checkFavorite();
+      this.loadComments();
+      this.loadVoices();
     }
   },
 

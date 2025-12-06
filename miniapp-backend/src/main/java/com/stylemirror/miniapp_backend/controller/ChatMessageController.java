@@ -34,13 +34,15 @@ public class ChatMessageController {
             @RequestParam String userId,
             @RequestParam String nickname,
             @RequestParam(required = false) String avatarUrl,
-            @RequestParam String content) {
+            @RequestParam String content,
+            @RequestParam(required = false) Long replyToId,
+            @RequestParam(required = false) String atUsernames) {
         try {
             if (content == null || content.trim().isEmpty()) {
                 return ResponseEntity.ok(ApiResponse.error(400, "消息内容不能为空"));
             }
             
-            ChatMessage message = chatMessageService.sendMessage(productId, userId, nickname, avatarUrl, content);
+            ChatMessage message = chatMessageService.sendMessage(productId, userId, nickname, avatarUrl, content, replyToId, atUsernames);
             return ResponseEntity.ok(ApiResponse.success(message));
         } catch (Exception e) {
             log.error("发送消息失败", e);
@@ -81,8 +83,14 @@ public class ChatMessageController {
             @RequestBody Map<String, String> request) {
         try {
             String text = request.get("text");
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isEmpty()) {
                 return ResponseEntity.ok(ApiResponse.error(400, "文本不能为空"));
+            }
+            
+            // 检查去除首尾空白后是否为空
+            if (text.trim().isEmpty()) {
+                // 如果只有空白字符，返回原文
+                return ResponseEntity.ok(ApiResponse.success(text));
             }
             
             // 先从缓存查询
@@ -119,7 +127,13 @@ public class ChatMessageController {
             String voice = request.getOrDefault("voice", "female");
             String language = request.getOrDefault("language", "zh-CN");
             
-            if (text == null || text.trim().isEmpty()) {
+            if (text == null || text.isEmpty()) {
+                return ResponseEntity.ok(ApiResponse.error(400, "文本不能为空"));
+            }
+            
+            // 检查去除首尾空白后是否为空
+            if (text.trim().isEmpty()) {
+                // 如果只有空白字符，返回错误
                 return ResponseEntity.ok(ApiResponse.error(400, "文本不能为空"));
             }
             
