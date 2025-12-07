@@ -78,6 +78,10 @@
     </view>
     <view wx:if="{{!productList.length}}" class="empty">{{emptyText}}</view>
   </view>
+  
+  <!-- 系统配置管理入口 -->
+  <view wx:if="{{isLoggedIn}}" class="config-section">
+    <view class="config-entry" bindtap="goConfig">系统配置管理</view>
+  </view>
 
 </view>
-

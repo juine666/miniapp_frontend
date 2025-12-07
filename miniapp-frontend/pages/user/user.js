@@ -770,6 +770,14 @@ Page({
       return;
     }
     wx.navigateTo({ url: '/pages/profile/profile' }); 
+  },
+  
+  // 跳转到系统配置管理页面
+  goConfig() {
+    if (!this.data.isLoggedIn) {
+      this.handleLogin();
+      return;
+    }
+    wx.navigateTo({ url: '/pages/config/config' });
   }
 });
-
