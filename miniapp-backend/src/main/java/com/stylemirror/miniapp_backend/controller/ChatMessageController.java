@@ -137,8 +137,9 @@ public class ChatMessageController {
                 return ResponseEntity.ok(ApiResponse.error(400, "文本不能为空"));
             }
             
-            // 先从缓存查询
-            String cacheKey = "tts:chat:" + messageId + ":" + voice;
+            // 先从缓存查询 - 使用文本hash确保不同内容有不同缓存
+            String textHash = String.valueOf(text.hashCode());
+            String cacheKey = "tts:chat:" + messageId + ":" + voice + ":" + textHash;
             String cachedAudio = redisTemplate.opsForValue().get(cacheKey);
             if (cachedAudio != null) {
                 return ResponseEntity.ok(ApiResponse.success(cachedAudio));
