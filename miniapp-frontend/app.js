@@ -24,10 +24,15 @@ App({
     const token = wx.getStorageSync('token');
     const openid = wx.getStorageSync('openid');
     const userId = wx.getStorageSync('userId');
+    const serverUrl = wx.getStorageSync('serverUrl');
     if (token) {
       this.globalData.token = token;
       this.globalData.openid = openid;
       this.globalData.userId = userId;
+      // 如果有存储的服务器URL，则使用存储的URL
+      if (serverUrl) {
+        this.globalData.baseURL = serverUrl;
+      }
       // 登录后开始更新未读消息数
       this.updateUnreadCount();
       this.startUnreadTimer();
@@ -112,37 +117,43 @@ App({
               },
               success: (r) => {
                 if (r.data && r.data.code === 0) {
-                  const { token, openid, userId, nickname: savedNickname, avatarUrl: savedAvatarUrl } = r.data.data;
+                  const { token, openid, userId, nickname: savedNickname, avatarUrl: savedAvatarUrl, serverUrl } = r.data.data;
                   this.globalData.token = token;
                   this.globalData.openid = openid;
                   this.globalData.userId = userId;
+                  // 如果服务器返回了URL配置，则更新全局URL并存储到本地
+                  if (serverUrl) {
+                    this.globalData.baseURL = serverUrl;
+                    wx.setStorageSync('serverUrl', serverUrl);
+                  }
+                  // 保存登录状态
                   wx.setStorageSync('token', token);
                   wx.setStorageSync('openid', openid);
                   wx.setStorageSync('userId', userId);
-                  resolve({ token, openid, userId });
-                  // 登录成功后更新未读消息数
+                  wx.setStorageSync('nickname', savedNickname);
+                  wx.setStorageSync('avatarUrl', savedAvatarUrl);
+                  // 登录后开始更新未读消息数
                   this.updateUnreadCount();
                   this.startUnreadTimer();
+                  resolve(r.data);
                 } else {
                   reject(new Error(r.data?.message || '登录失败'));
                 }
               },
               fail: (err) => {
                 console.error('登录请求失败', err);
-                reject(err);
+                reject(new Error('网络错误，请检查网络连接'));
               }
             });
           } else {
-            console.error('wx.login失败，未获取到code');
-            reject(new Error('获取登录code失败'));
+            reject(new Error('登录失败，未能获取code'));
           }
         },
         fail: (err) => {
-          console.error('wx.login调用失败', err);
-          reject(err);
+          console.error('wx.login失败', err);
+          reject(new Error('登录失败'));
         }
       });
     });
   }
 });
-

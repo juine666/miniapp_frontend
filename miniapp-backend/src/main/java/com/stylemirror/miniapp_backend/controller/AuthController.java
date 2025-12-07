@@ -1,24 +1,16 @@
 package com.stylemirror.miniapp_backend.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.stylemirror.miniapp_backend.common.ApiResponse;
 import com.stylemirror.miniapp_backend.domain.User;
-import com.stylemirror.miniapp_backend.security.JwtUtil;
-import com.stylemirror.miniapp_backend.service.UserService;
 import com.stylemirror.miniapp_backend.service.SystemConfigService;
-import jakarta.validation.constraints.NotBlank;
+import com.stylemirror.miniapp_backend.service.UserService;
+import com.stylemirror.miniapp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
@@ -26,35 +18,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 微信登录控制器
- * 负责微信小程序登录相关功能
+ * 微信授权控制器
+ * 处理微信小程序登录流程
  */
 @RestController
 @RequestMapping("/api/auth/wechat")
-@Validated
 @RequiredArgsConstructor
 @Slf4j
 public class AuthController {
 
-    private final JwtUtil jwtUtil;
     private final UserService userService;
+    private final JwtUtil jwtUtil;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
     private final SystemConfigService systemConfigService;
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
+    // 从配置文件读取默认值
     @Value("${wechat.appid:}")
     private String appidProperty;
+    
     @Value("${wechat.secret:}")
     private String secretProperty;
-
-    /**
-     * 微信登录请求
-     */
-    public record LoginRequest(
-            @NotBlank String code,
-            String nickname,
-            String avatarUrl
-    ) {}
+    
+    @Value("${server.url:}")
+    private String serverUrlProperty;
 
     /**
      * 微信登录
@@ -69,6 +56,7 @@ public class AuthController {
         // 优先从数据库读取配置，没有则使用配置文件
         String appid = systemConfigService.getConfigValue("wechat.appid");
         String secret = systemConfigService.getConfigValue("wechat.secret");
+        String serverUrl = systemConfigService.getConfigValue("server.url");
         
         // 如果数据库没有配置，使用配置文件的值
         if ((appid == null || appid.isEmpty()) && appidProperty != null && !appidProperty.isEmpty()) {
@@ -76,6 +64,9 @@ public class AuthController {
         }
         if ((secret == null || secret.isEmpty()) && secretProperty != null && !secretProperty.isEmpty()) {
             secret = secretProperty;
+        }
+        if ((serverUrl == null || serverUrl.isEmpty()) && serverUrlProperty != null && !serverUrlProperty.isEmpty()) {
+            serverUrl = serverUrlProperty;
         }
         
         // 检查配置
@@ -197,9 +188,11 @@ public class AuthController {
         result.put("userId", user.getId());
         result.put("nickname", user.getNickname());
         result.put("avatarUrl", user.getAvatarUrl());
+        // 添加服务器URL到返回结果中
+        if (serverUrl != null && !serverUrl.isEmpty()) {
+            result.put("serverUrl", serverUrl);
+        }
         
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
-
-
