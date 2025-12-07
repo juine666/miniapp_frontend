@@ -7,10 +7,13 @@
     <view class="tab-item {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
       我关注的
     </view>
+    <view class="tab-item {{activeTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">
+      系统配置
+    </view>
   </view>
   
   <!-- 商品列表 -->
-  <view class="goods-list">
+  <view wx:if="{{activeTab !== 2}}" class="goods-list">
     <view wx:for="{{currentProducts}}" wx:key="id" class="goods-card" bindtap="goDetail" data-id="{{item.id}}" data-product="{{item}}">
       <view class="goods-content">
         <image class="goods-img" src="{{item.coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'}}" mode="aspectFill"/>
@@ -29,7 +32,55 @@
       {{activeTab === 0 ? '暂无发布的商品' : '暂无关注的商品'}}
     </view>
   </view>
+  
+  <!-- 系统配置 -->
+  <view wx:if="{{activeTab === 2}}" class="config-section">
+    <view class="config-form">
+      <view class="form-section">
+        <view class="section-title">微信配置</view>
+        <view class="form-item">
+          <view class="form-label">AppID</view>
+          <input class="form-input" placeholder="请输入微信AppID" value="{{wechatAppId}}" bindinput="onWechatAppIdChange" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">Secret</view>
+          <input class="form-input" password placeholder="请输入微信Secret" value="{{wechatSecret}}" bindinput="onWechatSecretChange" />
+        </view>
+      </view>
+      
+      <view class="form-section">
+        <view class="section-title">服务器配置</view>
+        <view class="form-item">
+          <view class="form-label">服务器URL</view>
+          <input class="form-input" placeholder="请输入服务器URL" value="{{serverUrl}}" bindinput="onServerUrlChange" />
+        </view>
+      </view>
+      
+      <view class="form-section">
+        <view class="section-title">OSS配置</view>
+        <view class="form-item">
+          <view class="form-label">Endpoint</view>
+          <input class="form-input" placeholder="请输入OSS Endpoint" value="{{ossEndpoint}}" bindinput="onOssEndpointChange" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">Bucket</view>
+          <input class="form-input" placeholder="请输入OSS Bucket" value="{{ossBucket}}" bindinput="onOssBucketChange" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">Access Key ID</view>
+          <input class="form-input" placeholder="请输入Access Key ID" value="{{ossAccessKeyId}}" bindinput="onOssAccessKeyIdChange" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">Access Key Secret</view>
+          <input class="form-input" password placeholder="请输入Access Key Secret" value="{{ossAccessKeySecret}}" bindinput="onOssAccessKeySecretChange" />
+        </view>
+        <view class="form-item">
+          <view class="form-label">Public Base URL</view>
+          <input class="form-input" placeholder="请输入Public Base URL" value="{{ossPublicBaseUrl}}" bindinput="onOssPublicBaseUrlChange" />
+        </view>
+      </view>
+      
+      <button class="save-btn" bindtap="saveConfig">保存配置</button>
+    </view>
+  </view>
 </view>
-
-
-

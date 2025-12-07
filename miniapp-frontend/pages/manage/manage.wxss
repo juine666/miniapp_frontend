@@ -155,3 +155,69 @@
   padding: 40rpx 0;
 }
 
+/* 配置管理样式 */
+.config-section {
+  padding: 20rpx;
+}
+
+.form-section {
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.08);
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 30rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-item:last-child {
+  margin-bottom: 0;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #666;
+  margin-bottom: 15rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 20rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 10rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  border-color: #007aff;
+}
+
+.save-btn {
+  width: 100%;
+  height: 80rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  font-size: 32rpx;
+  border-radius: 10rpx;
+  border: none;
+  margin-top: 30rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.1);
+}
+
+.save-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15);
+}
