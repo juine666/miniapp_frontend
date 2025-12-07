@@ -1,0 +1,52 @@
+<!-- 配置管理页面 -->
+<view class="container">
+  <view class="page-header">
+    <text class="page-title">系统配置管理</text>
+  </view>
+
+  <view class="config-section">
+    <view class="section-title">微信配置</view>
+    <view class="config-item">
+      <view class="config-label">AppID</view>
+      <input class="config-input" placeholder="请输入微信AppID" value="{{wechatAppId}}" bindinput="onWechatAppIdChange" />
+    </view>
+    <view class="config-item">
+      <view class="config-label">Secret</view>
+      <input class="config-input" password placeholder="请输入微信Secret" value="{{wechatSecret}}" bindinput="onWechatSecretChange" />
+    </view>
+  </view>
+
+  <view class="config-section">
+    <view class="section-title">服务器配置</view>
+    <view class="config-item">
+      <view class="config-label">服务器URL</view>
+      <input class="config-input" placeholder="请输入服务器URL" value="{{serverUrl}}" bindinput="onServerUrlChange" />
+    </view>
+  </view>
+
+  <view class="config-section">
+    <view class="section-title">OSS配置</view>
+    <view class="config-item">
+      <view class="config-label">Endpoint</view>
+      <input class="config-input" placeholder="请输入OSS Endpoint" value="{{ossEndpoint}}" bindinput="onOssEndpointChange" />
+    </view>
+    <view class="config-item">
+      <view class="config-label">Bucket</view>
+      <input class="config-input" placeholder="请输入OSS Bucket" value="{{ossBucket}}" bindinput="onOssBucketChange" />
+    </view>
+    <view class="config-item">
+      <view class="config-label">Access Key ID</view>
+      <input class="config-input" placeholder="请输入Access Key ID" value="{{ossAccessKeyId}}" bindinput="onOssAccessKeyIdChange" />
+    </view>
+    <view class="config-item">
+      <view class="config-label">Access Key Secret</view>
+      <input class="config-input" password placeholder="请输入Access Key Secret" value="{{ossAccessKeySecret}}" bindinput="onOssAccessKeySecretChange" />
+    </view>
+    <view class="config-item">
+      <view class="config-label">Public Base URL</view>
+      <input class="config-input" placeholder="请输入Public Base URL" value="{{ossPublicBaseUrl}}" bindinput="onOssPublicBaseUrlChange" />
+    </view>
+  </view>
+
+  <button class="save-btn" bindtap="saveConfig">保存配置</button>
+</view>
