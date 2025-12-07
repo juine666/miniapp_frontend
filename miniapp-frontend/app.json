@@ -13,8 +13,7 @@
     "pages/manage/manage",
     "pages/favorite/favorite",
     "pages/profile/profile",
-    "pages/batch-publish/batch-publish",
-    "pages/config/config"
+    "pages/batch-publish/batch-publish"
   ],
   "window": {
     "navigationBarTitleText": "StyleMirror",
