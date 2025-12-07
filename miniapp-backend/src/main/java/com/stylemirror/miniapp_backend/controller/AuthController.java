@@ -5,7 +5,8 @@ import com.stylemirror.miniapp_backend.common.ApiResponse;
 import com.stylemirror.miniapp_backend.domain.User;
 import com.stylemirror.miniapp_backend.service.SystemConfigService;
 import com.stylemirror.miniapp_backend.service.UserService;
-import com.stylemirror.miniapp_backend.util.JwtUtil;
+import com.stylemirror.miniapp_backend.security.JwtUtil;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -195,4 +196,6 @@ public class AuthController {
         
         return ResponseEntity.ok(ApiResponse.success(result));
     }
+
+    public record LoginRequest(@NotBlank String code, String nickname, String avatarUrl) {}
 }
