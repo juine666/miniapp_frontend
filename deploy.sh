@@ -25,7 +25,7 @@ if [ -d ".git" ]; then
     git pull origin main
 else
     echo "📥 克隆代码仓库..."
-    git clone git@github.com:juine666/miniapp_frontend.git .
+    git clone https://github.com/juine666/miniapp_frontend.git .
 fi
 
 # 进入后端目录
@@ -57,7 +57,7 @@ mkdir -p logs
 # 检查服务文件是否存在
 if [ ! -f "/etc/systemd/system/$SERVICE_NAME.service" ]; then
     echo "サービсファイルを作成します..."
-    sudo cp $APP_DIR/miniapp-backend/miniapp-backend.service /etc/systemd/system/$SERVICE_NAME.service
+    sudo cp $APP_DIR/miniapp-backend.service /etc/systemd/system/$SERVICE_NAME.service
     sudo systemctl daemon-reload
 fi
 
