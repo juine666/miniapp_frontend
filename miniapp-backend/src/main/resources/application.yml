@@ -14,7 +14,7 @@ spring:
     deserialization:
       fail-on-unknown-properties: false
   datasource:
-    url: ${DATASOURCE_URL:jdbc:mysql://47.106.94.2}:3306/miniapp?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
+    url: ${DATASOURCE_URL:jdbc:mysql://47.106.94.2:3306/miniapp?useSSL=false&useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true}
     username: ${DATASOURCE_USERNAME:root}
     password: ${DATASOURCE_PASSWORD:root}
     driver-class-name: com.mysql.cj.jdbc.Driver
