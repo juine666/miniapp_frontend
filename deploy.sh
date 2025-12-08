@@ -56,6 +56,14 @@ sleep 2
 # 进入后端目录
 cd $APP_DIR/miniapp-backend
 
+# 检查并修复数据库连接问题
+echo "🔧 检查并修复数据库连接问题..."
+if [ -f "$APP_DIR/fix_db_connection.sh" ]; then
+    bash $APP_DIR/fix_db_connection.sh
+else
+    echo "⚠️ 未找到数据库修复脚本"
+fi
+
 # 编译打包
 echo "🔨 编译打包..."
 mvn clean package -DskipTests
