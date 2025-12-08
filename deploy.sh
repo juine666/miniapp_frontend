@@ -59,6 +59,10 @@ if [ ! -f "/etc/systemd/system/$SERVICE_NAME.service" ]; then
     echo "サービсファイルを作成します..."
     sudo cp $APP_DIR/miniapp-backend.service /etc/systemd/system/$SERVICE_NAME.service
     sudo systemctl daemon-reload
+else
+    # 更新服务文件
+    sudo cp $APP_DIR/miniapp-backend.service /etc/systemd/system/$SERVICE_NAME.service
+    sudo systemctl daemon-reload
 fi
 
 # 重启服务
@@ -77,6 +81,7 @@ sleep 3
 if systemctl is-active --quiet $SERVICE_NAME; then
     echo "✅ 服务运行正常！"
     echo "📊 查看日志: sudo journalctl -u $SERVICE_NAME -f"
+    echo "📝 日志文件路径: $APP_DIR/miniapp-backend/logs/miniapp-backend.log"
 else
     echo "❌ 服务启动失败！"
     echo "📋 查看错误日志: sudo journalctl -u $SERVICE_NAME -n 50"
