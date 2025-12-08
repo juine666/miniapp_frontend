@@ -54,6 +54,13 @@ fi
 # 创建日志目录
 mkdir -p logs
 
+# 检查服务文件是否存在
+if [ ! -f "/etc/systemd/system/$SERVICE_NAME.service" ]; then
+    echo "サービсファイルを作成します..."
+    sudo cp $APP_DIR/miniapp-backend/miniapp-backend.service /etc/systemd/system/$SERVICE_NAME.service
+    sudo systemctl daemon-reload
+fi
+
 # 重启服务
 if systemctl is-active --quiet $SERVICE_NAME; then
     echo "🔄 重启服务..."
@@ -77,4 +84,3 @@ else
 fi
 
 echo "🎉 部署完成！"
-
