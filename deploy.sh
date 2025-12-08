@@ -33,7 +33,9 @@ echo "🔪 杀掉原来运行的程序..."
 pids=$(ps aux | grep "miniapp-backend" | grep -v grep | awk '{print $2}')
 if [ -n "$pids" ]; then
     echo "找到运行中的进程: $pids"
-    kill -9 $pids 2>/dev/null || echo "警告: 无法杀掉某些进程"
+    for pid in $pids; do
+        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉进程 $pid"
+    done
     echo "已尝试杀掉原有进程"
 else
     echo "未找到运行中的进程"
@@ -41,10 +43,12 @@ fi
 
 # 杀掉占用8081端口的进程
 echo "🔌 杀掉占用8081端口的进程..."
-port_pids=$(lsof -ti:8081 2>/dev/null)
+port_pids=$(lsof -ti:8081 2>/dev/null || echo "")
 if [ -n "$port_pids" ]; then
     echo "找到占用8081端口的进程: $port_pids"
-    kill -9 $port_pids 2>/dev/null || echo "警告: 无法杀掉占用8081端口的进程"
+    for pid in $port_pids; do
+        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉占用8081端口的进程 $pid"
+    done
     echo "已尝试杀掉占用8081端口的进程"
 else
     echo "未找到占用8081端口的进程"
