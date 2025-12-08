@@ -41,7 +41,7 @@ fi
 
 # 杀掉占用8081端口的进程
 echo "🔌 杀掉占用8081端口的进程..."
-port_pids=$(lsof -ti:8081 2>/dev/null || echo "")
+port_pids=$(lsof -ti:8081 2>/dev/null)
 if [ -n "$port_pids" ]; then
     echo "找到占用8081端口的进程: $port_pids"
     kill -9 $port_pids 2>/dev/null || echo "警告: 无法杀掉占用8081端口的进程"
