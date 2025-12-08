@@ -7,7 +7,7 @@ const ENV_CONFIG = {
 };
 
 // 当前环境：开发时使用 development，发布时改为 production
-const CURRENT_ENV = 'development';
+const CURRENT_ENV = 'production';
 
 App({
   globalData: {
@@ -24,15 +24,11 @@ App({
     const token = wx.getStorageSync('token');
     const openid = wx.getStorageSync('openid');
     const userId = wx.getStorageSync('userId');
-    const serverUrl = wx.getStorageSync('serverUrl');
+    // 注意：不再从本地缓存读取serverUrl，而是始终使用环境配置
     if (token) {
       this.globalData.token = token;
       this.globalData.openid = openid;
       this.globalData.userId = userId;
-      // 如果有存储的服务器URL，则使用存储的URL
-      if (serverUrl) {
-        this.globalData.baseURL = serverUrl;
-      }
       // 登录后开始更新未读消息数
       this.updateUnreadCount();
       this.startUnreadTimer();
@@ -121,11 +117,7 @@ App({
                   this.globalData.token = token;
                   this.globalData.openid = openid;
                   this.globalData.userId = userId;
-                  // 如果服务器返回了URL配置，则更新全局URL并存储到本地
-                  if (serverUrl) {
-                    this.globalData.baseURL = serverUrl;
-                    wx.setStorageSync('serverUrl', serverUrl);
-                  }
+                  // 注意：不再使用服务器返回的URL覆盖全局URL，而是始终使用环境配置
                   // 保存登录状态
                   wx.setStorageSync('token', token);
                   wx.setStorageSync('openid', openid);
