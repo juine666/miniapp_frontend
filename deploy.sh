@@ -41,12 +41,25 @@ else
     echo "未找到运行中的进程"
 fi
 
+# 杀掉占用8080端口的进程
+echo "🔌 杀掉占用8080端口的进程..."
+port_pids_8080=$(lsof -ti:8080 2>/dev/null || echo "")
+if [ -n "$port_pids_8080" ]; then
+    echo "找到占用8080端口的进程: $port_pids_8080"
+    for pid in $port_pids_8080; do
+        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉占用8080端口的进程 $pid"
+    done
+    echo "已尝试杀掉占用8080端口的进程"
+else
+    echo "未找到占用8080端口的进程"
+fi
+
 # 杀掉占用8081端口的进程
 echo "🔌 杀掉占用8081端口的进程..."
-port_pids=$(lsof -ti:8081 2>/dev/null || echo "")
-if [ -n "$port_pids" ]; then
-    echo "找到占用8081端口的进程: $port_pids"
-    for pid in $port_pids; do
+port_pids_8081=$(lsof -ti:8081 2>/dev/null || echo "")
+if [ -n "$port_pids_8081" ]; then
+    echo "找到占用8081端口的进程: $port_pids_8081"
+    for pid in $port_pids_8081; do
         sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉占用8081端口的进程 $pid"
     done
     echo "已尝试杀掉占用8081端口的进程"
