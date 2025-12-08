@@ -19,7 +19,8 @@ import {
   DashboardOutlined,
   SafetyOutlined,
   ShoppingCartOutlined,
-  FilterOutlined
+  FilterOutlined,
+  MessageOutlined
 } from '@ant-design/icons'
 import Login from './pages/Login'
 const Dashboard = React.lazy(() => import('./pages/Dashboard'))
@@ -33,6 +34,7 @@ const SystemConfig = React.lazy(() => import('./pages/SystemConfig'))
 const PermissionManage = React.lazy(() => import('./pages/PermissionManage'))
 const Orders = React.lazy(() => import('./pages/Orders'))
 const BannedWords = React.lazy(() => import('./pages/BannedWords'))
+const Comments = React.lazy(() => import('./pages/Comments'))
 import { AuthProvider, useAuth } from './auth/AuthContext'
 import { PermissionCheck } from './components/PermissionCheck'
 import { MENU_PERMISSIONS, PERMISSIONS } from './config/permissions'
@@ -92,6 +94,7 @@ function Shell() {
     if (location.pathname.startsWith('/student-enrollment')) return '6'
     if (location.pathname.startsWith('/orders')) return '7'
     if (location.pathname.startsWith('/banned-words')) return '4-4'
+    if (location.pathname.startsWith('/comments')) return '8'
     return '0'
   })()
   
@@ -119,6 +122,12 @@ function Shell() {
       icon: <UserOutlined />,
       label: <Link to="/users">用户管理</Link>,
       permission: MENU_PERMISSIONS['/users']
+    },
+    {
+      key: '8',
+      icon: <MessageOutlined />,
+      label: <Link to="/comments">评论管理</Link>,
+      permission: PERMISSIONS.COMMENT_MANAGE
     },
     {
       key: '4',
@@ -371,6 +380,16 @@ function Shell() {
               } 
             />
             <Route 
+              path="/comments" 
+              element={
+                <ProtectedRoute>
+                  <PermissionCheck permission={PERMISSIONS.COMMENT_MANAGE}>
+                    <Comments />
+                  </PermissionCheck>
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/settings" 
               element={
                 <ProtectedRoute>
@@ -458,19 +477,3 @@ export default function App() {
     </AuthProvider>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -79,6 +79,10 @@ function getDefaultPermissionConfig() {
     USER_BAN: 'user:ban',
     USER_UNBAN: 'user:unban',
     
+    // 评论管理
+    COMMENT_MANAGE: 'comment:manage',
+    COMMENT_DELETE: 'comment:delete',
+    
     // 系统管理
     SYSTEM_CONFIG: 'system:config',
     SYSTEM_THEME: 'system:theme',
@@ -162,6 +166,7 @@ export const MENU_PERMISSIONS = {
   '/categories': PERMISSIONS.CATEGORY_VIEW,
   '/products': PERMISSIONS.PRODUCT_VIEW,
   '/users': PERMISSIONS.USER_VIEW,
+  '/comments': PERMISSIONS.COMMENT_MANAGE,
   '/settings': PERMISSIONS.SYSTEM_THEME,
   '/oss-config': PERMISSIONS.SYSTEM_CONFIG,
   '/excel-import': PERMISSIONS.EXCEL_IMPORT,
@@ -208,4 +213,3 @@ export function hasAllPermissions(userPermissions, permissions) {
   }
   return permissions.every(permission => hasPermission(userPermissions, permission))
 }
-
