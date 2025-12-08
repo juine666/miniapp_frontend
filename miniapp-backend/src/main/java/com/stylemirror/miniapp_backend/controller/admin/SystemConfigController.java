@@ -47,6 +47,33 @@ public class SystemConfigController {
     }
     
     /**
+     * 获取所有配置（按分组分类）
+     */
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<Map<String, List<SystemConfig>>>> getAllConfigs() {
+        try {
+            List<SystemConfig> allConfigs = systemConfigService.getAllConfigs();
+            
+            // 敏感信息不返回真实值
+            allConfigs.forEach(config -> {
+                if (config.getIsSensitive() != null && config.getIsSensitive()) {
+                    config.setConfigValue("***hidden***");
+                }
+            });
+            
+            // 按分组分类
+            Map<String, List<SystemConfig>> groupedConfigs = allConfigs.stream()
+                    .collect(Collectors.groupingBy(SystemConfig::getGroupName));
+            
+            return ResponseEntity.ok(ApiResponse.success(groupedConfigs));
+        } catch (Exception e) {
+            log.error("获取所有系统配置失败", e);
+            return ResponseEntity.status(500)
+                    .body(ApiResponse.error(500, "获取配置失败"));
+        }
+    }
+    
+    /**
      * 更新配置
      */
     @PutMapping

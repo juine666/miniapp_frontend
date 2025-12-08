@@ -35,6 +35,14 @@ public class SystemConfigService extends ServiceImpl<SystemConfigMapper, SystemC
     }
     
     /**
+     * 获取所有分组的配置
+     */
+    public List<SystemConfig> getAllConfigs() {
+        return list(new QueryWrapper<SystemConfig>()
+                .orderByAsc("group_name", "config_key"));
+    }
+    
+    /**
      * 保存或更新配置
      */
     public void saveOrUpdateConfig(String configKey, String configValue, String description, 

@@ -1,31 +1,36 @@
 import React, { useState, useEffect } from 'react'
-import { Card, Table, Button, Modal, Form, Input, Select, message, Space, InputNumber, Divider } from 'antd'
+import { Card, Table, Button, Modal, Form, Input, Select, message, Space, InputNumber, Divider, Tabs } from 'antd'
 import { EditOutlined, SaveOutlined } from '@ant-design/icons'
 import { useAuth } from '../auth/AuthContext'
 
 const { Option } = Select
+const { TabPane } = Tabs
 
 export default function SystemConfig() {
   const { api } = useAuth()
   const [loading, setLoading] = useState(false)
-  const [configs, setConfigs] = useState([])
+  const [configs, setConfigs] = useState({})
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [editingConfig, setEditingConfig] = useState(null)
+  const [activeTab, setActiveTab] = useState('oss')
   const [form] = Form.useForm()
   
   const groupOptions = [
     { label: 'OSS 配置', value: 'oss' },
+    { label: '微信配置', value: 'wechat' },
+    { label: '服务器配置', value: 'server' },
+    { label: '腾讯云配置', value: 'tencent' },
     { label: '邮件配置', value: 'email' },
     { label: '短信配置', value: 'sms' }
   ]
   
-  // 加载 OSS 配置
-  const loadConfigs = async (group = 'oss') => {
+  // 加载所有配置
+  const loadAllConfigs = async () => {
     setLoading(true)
     try {
-      const res = await api.get(`/api/admin/system-config/group/${group}`)
+      const res = await api.get('/api/admin/system-config/all')
       if (res.data.code === 0) {
-        setConfigs(res.data.data || [])
+        setConfigs(res.data.data || {})
       }
     } catch (error) {
       console.error('加载配置失败', error)
@@ -36,7 +41,7 @@ export default function SystemConfig() {
   }
   
   useEffect(() => {
-    loadConfigs('oss')
+    loadAllConfigs()
   }, [])
   
   const handleEdit = (record) => {
@@ -65,7 +70,7 @@ export default function SystemConfig() {
       if (res.data.code === 0) {
         message.success('配置已保存')
         setEditModalOpen(false)
-        loadConfigs('oss')
+        loadAllConfigs()
       }
     } catch (error) {
       console.error('保存配置失败', error)
@@ -113,28 +118,41 @@ export default function SystemConfig() {
   
   return (
     <Card title="系统配置管理">
-      <Space direction="vertical" style={{ width: '100%' }} size="large">
-        <div style={{ background: '#f0f2f5', padding: '12px', borderRadius: '4px' }}>
-          <strong>OSS 配置说明：</strong>
-          <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
-            • 在下方表格中编辑 OSS 相关配置，前端上传图片时会自动使用这些配置
-          </p>
-          <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
-            • 敏感信息（如 AccessKeyId、AccessKeySecret）不会明文显示，但可以更新
-          </p>
-          <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
-            • 配置优先级：数据库 &gt; 环境变量 &gt; 默认值
-          </p>
-        </div>
-        
-        <Table
-          rowKey="configKey"
-          dataSource={configs}
-          columns={columns}
-          loading={loading}
-          pagination={false}
-        />
-      </Space>
+      <Tabs 
+        activeKey={activeTab} 
+        onChange={setActiveTab}
+        type="card"
+      >
+        {Object.keys(configs).map(groupName => {
+          const groupLabel = groupOptions.find(opt => opt.value === groupName)?.label || groupName
+          return (
+            <TabPane tab={groupLabel} key={groupName}>
+              <Space direction="vertical" style={{ width: '100%' }} size="large">
+                <div style={{ background: '#f0f2f5', padding: '12px', borderRadius: '4px' }}>
+                  <strong>{groupLabel}说明：</strong>
+                  <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
+                    • 在下方表格中编辑{groupLabel}相关配置
+                  </p>
+                  <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
+                    • 敏感信息（如密钥、密码等）不会明文显示，但可以更新
+                  </p>
+                  <p style={{ margin: '8px 0 0 0', fontSize: '12px' }}>
+                    • 配置优先级：数据库 &gt; 环境变量 &gt; 默认值
+                  </p>
+                </div>
+                
+                <Table
+                  rowKey="configKey"
+                  dataSource={configs[groupName] || []}
+                  columns={columns}
+                  loading={loading}
+                  pagination={false}
+                />
+              </Space>
+            </TabPane>
+          )
+        })}
+      </Tabs>
       
       <Modal
         title="编辑配置"
