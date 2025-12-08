@@ -3,7 +3,7 @@
 
 set -e
 
-APP_DIR="/opt/miniapp-backend"
+APP_DIR="/opt/miniapp_frontend"
 APP_NAME="miniapp-backend"
 SERVICE_NAME="miniapp-backend"
 

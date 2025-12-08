@@ -5,9 +5,9 @@ After=network.target
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/opt/miniapp-backend/miniapp-backend
-ExecStartPre=/bin/mkdir -p /opt/miniapp-backend/miniapp-backend/logs
-ExecStart=/usr/bin/java -jar /opt/miniapp-backend/miniapp-backend/target/miniapp-backend-0.0.1-SNAPSHOT.jar
+WorkingDirectory=/opt/miniapp_frontend/miniapp-backend
+ExecStartPre=/bin/mkdir -p /opt/miniapp_frontend/miniapp-backend/logs
+ExecStart=/usr/bin/java -jar /opt/miniapp_frontend/miniapp-backend/target/miniapp-backend-0.0.1-SNAPSHOT.jar
 Restart=always
 RestartSec=10
 
