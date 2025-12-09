@@ -12,7 +12,7 @@ export function AuthProvider({ children }) {
 
   const api = useMemo(() => {
     const instance = axios.create({ 
-      baseURL: 'https://fxyw.work/api',
+      baseURL: import.meta.env.VITE_API_BASE_URL || 'https://fxyw.work/api',
       timeout: 60000  // 增加到60秒,给首次查询足够时间
     })
     
@@ -93,7 +93,7 @@ export function AuthProvider({ children }) {
   const login = async (username, password) => {
     setLoading(true)
     try {
-      const res = await axios.post('http://fxyw.work/api/admin/auth/login', { username, password })
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL || 'https://fxyw.work/api'}/admin/auth/login`, { username, password })
       if (res.data?.code === 0) {
         const t = res.data.data.token
         setToken(t)
