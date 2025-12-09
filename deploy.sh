@@ -96,33 +96,24 @@ fi
 # 创建日志目录
 mkdir -p logs
 
-# 检查服务文件是否存在并更新
-echo "🔧 更新服务配置..."
-sudo cp $APP_DIR/miniapp-backend.service /etc/systemd/system/$SERVICE_NAME.service
-sudo systemctl daemon-reload
-
-# 重启服务
-if systemctl is-active --quiet $SERVICE_NAME; then
-    echo "🔄 重启服务..."
-    sudo systemctl restart $SERVICE_NAME
-else
-    echo "▶️  启动服务..."
-    sudo systemctl start $SERVICE_NAME
+# 启动后端服务
+echo "🔧 启动后端服务..."
+# 杀掉可能存在的旧进程
+pids=$(ps aux | grep "miniapp-backend" | grep -v grep | awk '{print $2}')
+if [ -n "$pids" ]; then
+    echo "_kill old processes: $pids"
+    kill -9 $pids 2>/dev/null || echo "Warning: Could not kill some processes"
 fi
 
-# 等待服务启动
-sleep 3
+# 等待旧进程完全退出
+sleep 2
 
-# 检查服务状态
-if systemctl is-active --quiet $SERVICE_NAME; then
-    echo "✅ 后端服务运行正常！"
-    echo "📊 查看日志: sudo journalctl -u $SERVICE_NAME -f"
-    echo "📝 日志文件路径: $APP_DIR/miniapp-backend/logs/miniapp-backend.log"
-else
-    echo "❌ 后端服务启动失败！"
-    echo "📋 查看错误日志: sudo journalctl -u $SERVICE_NAME -n 50"
-    exit 1
-fi
+# 启动新服务
+nohup java -jar $JAR_FILE > $APP_DIR/miniapp-backend/logs/miniapp-backend.log 2>&1 &
+disown
+
+echo "✅ 后端服务已在后台启动！"
+echo "📊 查看日志: tail -f $APP_DIR/miniapp-backend/logs/miniapp-backend.log"
 
 # 启动前端管理项目
 echo "🚀 启动前端管理项目..."
