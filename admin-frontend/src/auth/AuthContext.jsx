@@ -11,8 +11,19 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(false)
 
   const api = useMemo(() => {
+    // 根据环境确定API基础URL
+    const getBaseURL = () => {
+      // 如果在生产环境，使用相对路径或配置的API地址
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        // 假设API与前端在同一域名下，只是端口不同
+        return window.location.protocol + '//' + window.location.hostname + ':8081';
+      }
+      // 本地开发环境
+      return 'http://localhost:8081';
+    };
+    
     const instance = axios.create({ 
-      baseURL: 'http://localhost:8081',
+      baseURL: getBaseURL(),
       timeout: 60000  // 增加到60秒,给首次查询足够时间
     })
     
@@ -93,7 +104,7 @@ export function AuthProvider({ children }) {
   const login = async (username, password) => {
     setLoading(true)
     try {
-      const res = await axios.post('http://localhost:8081/api/admin/auth/login', { username, password })
+      const res = await axios.post(api.defaults.baseURL + '/api/admin/auth/login', { username, password })
       if (res.data?.code === 0) {
         const t = res.data.data.token
         setToken(t)
