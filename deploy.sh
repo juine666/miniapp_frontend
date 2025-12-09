@@ -134,6 +134,7 @@ npm install
 
 # 构建前端项目
 echo "🔨 构建前端项目..."
+export NODE_ENV=production
 npm run build
 
 # 杀掉占用5173端口的进程（前端开发服务器）
@@ -158,7 +159,7 @@ nohup npm run dev > /tmp/admin-frontend.log 2>&1 &
 
 echo "✅ 前端管理项目已在后台启动！"
 echo "📝 前端日志文件: /tmp/admin-frontend.log"
-echo "🌐 访问地址: https://fxyw.work:8080/"
+echo "🌐 访问地址: https://fxyw.work:5173/"
 echo "👤 登录凭证: 用户名: admin, 密码: admin123"
 
 echo "🎉 部署完成！"
