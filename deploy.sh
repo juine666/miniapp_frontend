@@ -67,6 +67,19 @@ else
     echo "未找到占用8081端口的进程"
 fi
 
+# 杀掉占用5173端口的进程（前端开发服务器）
+echo "🔌 杀掉占用5173端口的进程..."
+port_pids_5173=$(lsof -ti:5173 2>/dev/null || echo "")
+if [ -n "$port_pids_5173" ]; then
+    echo "找到占用5173端口的进程: $port_pids_5173"
+    for pid in $port_pids_5173; do
+        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉占用5173端口的进程 $pid"
+    done
+    echo "已尝试杀掉占用5173端口的进程"
+else
+    echo "未找到占用5173端口的进程"
+fi
+
 # 等待一段时间让进程完全退出
 sleep 2
 
@@ -121,13 +134,34 @@ sleep 3
 
 # 检查服务状态
 if systemctl is-active --quiet $SERVICE_NAME; then
-    echo "✅ 服务运行正常！"
+    echo "✅ 后端服务运行正常！"
     echo "📊 查看日志: sudo journalctl -u $SERVICE_NAME -f"
     echo "📝 日志文件路径: $APP_DIR/miniapp-backend/logs/miniapp-backend.log"
 else
-    echo "❌ 服务启动失败！"
+    echo "❌ 后端服务启动失败！"
     echo "📋 查看错误日志: sudo journalctl -u $SERVICE_NAME -n 50"
     exit 1
 fi
+
+# 启动前端管理项目
+echo "🚀 启动前端管理项目..."
+cd $APP_DIR/admin-frontend
+
+# 安装依赖
+echo "📦 安装前端依赖..."
+npm install
+
+# 构建前端项目
+echo "🔨 构建前端项目..."
+npm run build
+
+# 启动前端开发服务器（后台运行）
+echo "▶️ 启动前端开发服务器..."
+nohup npm run dev > /tmp/admin-frontend.log 2>&1 &
+
+echo "✅ 前端管理项目已在后台启动！"
+echo "📝 前端日志文件: /tmp/admin-frontend.log"
+echo "🌐 访问地址: http://localhost:5173"
+echo "👤 登录凭证: 用户名: admin, 密码: admin123"
 
 echo "🎉 部署完成！"
