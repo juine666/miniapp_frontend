@@ -184,6 +184,12 @@ Page({
     }
   },
   async checkFavorites(newList = null) {
+    // 如果用户未登录，不检查收藏状态
+    const app = getApp();
+    if (!app.globalData.token) {
+      return;
+    }
+    
     const goodsList = newList || this.data.goodsList;
     for (let i = 0; i < goodsList.length; i++) {
       try {
