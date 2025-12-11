@@ -56,54 +56,18 @@ Page({
       menus: ['shareAppMessage', 'shareTimeline']
     });
     
-    // 检查是否已登录，如果没登录则先登录
+    // 直接加载数据，无需检查登录状态
+    this.loadDetail();
+    this.loadComments();
+    this.loadVoices();
+    
+    // 检查是否已登录，如果已登录则加载用户相关信息
     const app = getApp();
     const token = app?.globalData?.token || wx.getStorageSync('token');
     
-    if (!token) {
-      // 未登录，先触发自动登录
-      console.log('未登录，触发自动登录');
-      app.doLogin().then(() => {
-        // 登录成功，加载数据
-        this.loadCurrentUser();
-        this.loadDetail();
-        this.checkFavorite();
-        this.loadComments();
-        this.loadVoices();
-      }).catch(() => {
-        // 登录失败，弹窗提示用户手动登录
-        wx.showModal({
-          title: '需要登录',
-          content: '需要登录才能查看完整信息，是否现在登录？',
-          confirmText: '现在登录',
-          cancelText: '取消',
-          success: (res) => {
-            if (res.confirm) {
-              // 调起微信登录授权
-              wx.login({
-                success: (loginRes) => {
-                  if (loginRes.code) {
-                    // 获取登录code成功，调用后端接口进行登录
-                    this.doWechatLogin(loginRes.code);
-                  } else {
-                    wx.showToast({ title: '登录失败，请重试', icon: 'none' });
-                  }
-                },
-                fail: () => {
-                  wx.showToast({ title: '调起登录失败', icon: 'none' });
-                }
-              });
-            }
-          }
-        });
-      });
-    } else {
-      // 已登录，直接加载
+    if (token) {
       this.loadCurrentUser();
-      this.loadDetail();
       this.checkFavorite();
-      this.loadComments();
-      this.loadVoices();
     }
   },
 
@@ -328,6 +292,39 @@ Page({
     const id = this.data.id;
     if (!id) return;
     
+    // 检查是否已登录
+    const app = getApp();
+    const token = app?.globalData?.token || wx.getStorageSync('token');
+    
+    if (!token) {
+      // 未登录，弹窗提示
+      wx.showModal({
+        title: '需要登录',
+        content: '需要登录才能收藏商品，是否现在登录？',
+        confirmText: '现在登录',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) {
+            // 调起微信登录
+            wx.login({
+              success: (loginRes) => {
+                if (loginRes.code) {
+                  this.doWechatLogin(loginRes.code);
+                } else {
+                  wx.showToast({ title: '登录失败', icon: 'none' });
+                }
+              },
+              fail: () => {
+                wx.showToast({ title: '调起登录失败', icon: 'none' });
+              }
+            });
+          }
+        }
+      });
+      return;
+    }
+    
+    // 已登录，执行收藏/取消收藏操作
     try {
       request({
         url: this.data.isFavorited ? `/api/favorites/${id}` : '/api/favorites',
@@ -376,8 +373,10 @@ Page({
 
   showCommentModal() {
     // 检查是否已登录
-    const currentUserId = this.data.currentUserId;
-    if (!currentUserId) {
+    const app = getApp();
+    const token = app?.globalData?.token || wx.getStorageSync('token');
+    
+    if (!token) {
       // 未登录，弹窗提示
       wx.showModal({
         title: '需要登录',
@@ -623,8 +622,10 @@ Page({
 
   async _doPublishComment(content, emotion, productId, replyingToId) {
     // 检查是否已登录
-    const currentUserId = this.data.currentUserId;
-    if (!currentUserId) {
+    const app = getApp();
+    const token = app?.globalData?.token || wx.getStorageSync('token');
+    
+    if (!token) {
       // 未登录，弹窗提示
       wx.showModal({
         title: '需要登录',
@@ -652,6 +653,7 @@ Page({
       return;
     }
     
+    // 已登录，继续发表评论
     try {
       wx.showLoading({ title: '发送中...' });
       
