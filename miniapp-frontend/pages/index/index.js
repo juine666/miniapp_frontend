@@ -156,8 +156,7 @@ Page({
         
         return { 
           ...item, 
-          coverUrl: coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg',
-          isFavorited: false 
+          coverUrl: coverUrl || 'https://img.yzcdn.cn/vant/cat.jpeg'
         };
       });
       
@@ -176,52 +175,8 @@ Page({
         hasMore: hasMore,
         loading: false
       });
-      
-      // 批量检查收藏状态
-      await this.checkFavorites(newList);
     } else {
       this.setData({ loading: false });
-    }
-  },
-  async checkFavorites(newList = null) {
-    // 如果用户未登录，不检查收藏状态
-    const app = getApp();
-    if (!app.globalData.token) {
-      return;
-    }
-    
-    const goodsList = newList || this.data.goodsList;
-    for (let i = 0; i < goodsList.length; i++) {
-      try {
-        const checkRes = await request({ url: `/api/favorites/${goodsList[i].id}/check` });
-        if (checkRes.code === 0) {
-          const index = this.data.goodsList.findIndex(item => item.id === goodsList[i].id);
-          if (index >= 0) {
-            this.setData({ [`goodsList[${index}].isFavorited`]: checkRes.data });
-          }
-        }
-      } catch (e) {
-        // 忽略错误
-      }
-    }
-  },
-  async toggleFavorite(e) {
-    const id = e.currentTarget.dataset.id;
-    const index = e.currentTarget.dataset.index;
-    const item = this.data.goodsList[index];
-    const isFavorited = item.isFavorited;
-    
-    try {
-      if (isFavorited) {
-        await request({ url: `/api/favorites/${id}`, method: 'DELETE' });
-        wx.showToast({ title: '已取消收藏', icon: 'none' });
-      } else {
-        await request({ url: `/api/favorites/${id}`, method: 'POST' });
-        wx.showToast({ title: '已收藏', icon: 'none' });
-      }
-      this.setData({ [`goodsList[${index}].isFavorited`]: !isFavorited });
-    } catch (e) {
-      wx.showToast({ title: '操作失败', icon: 'none' });
     }
   },
   async onPullDownRefresh() {
