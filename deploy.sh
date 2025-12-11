@@ -1,156 +1,129 @@
 #!/bin/bash
-# 一键部署脚本
-
+# ==============================
+# 一键部署脚本（支持 all/backend/frontend 模式）
+# ==============================
 set -e
 
+MODE=$1
+if [ -z "$MODE" ]; then
+  echo "❗ 使用方式:"
+  echo "  miniapp_deploy.sh all        全量部署（后端 + 前端 + 重载 nginx）"
+  echo "  miniapp_deploy.sh backend    仅打包并重启后端服务"
+  echo "  miniapp_deploy.sh frontend   仅构建并部署前端（admin + 小程序）"
+  exit 1
+fi
+
 APP_DIR="/opt/miniapp_frontend"
-APP_NAME="miniapp-backend"
-SERVICE_NAME="miniapp-backend"
+BACKEND_DIR="$APP_DIR/miniapp-backend"
+ADMIN_FRONTEND_DIR="$APP_DIR/admin-frontend"
+JAR_NAME="miniapp-backend-0.0.1-SNAPSHOT.jar"
+BACKEND_LOG="$BACKEND_DIR/logs/app.log"
+NGINX_BIN="/www/server/nginx/sbin/nginx"  # 宝塔 nginx
 
-echo "🚀 开始部署 $APP_NAME..."
+echo "=============================="
+echo "🚀 开始部署模块: $MODE"
+echo "=============================="
 
-# 检查目录是否存在
-if [ ! -d "$APP_DIR" ]; then
-    echo "📁 创建应用目录: $APP_DIR"
-    sudo mkdir -p $APP_DIR
-    sudo chown $USER:$USER $APP_DIR
-fi
-
-# 进入应用目录
-cd $APP_DIR
-
-# 拉取最新代码
-if [ -d ".git" ]; then
-    echo "📥 拉取最新代码..."
-    git pull origin main
-else
-    echo "📥 克隆代码仓库..."
-    git clone https://github.com/juine666/miniapp_frontend.git .
-fi
-
-# 杀掉原来运行的程序
-echo "🔪 杀掉原来运行的程序..."
-pids=$(ps aux | grep "miniapp-backend" | grep -v grep | awk '{print $2}')
-if [ -n "$pids" ]; then
-    echo "找到运行中的进程: $pids"
-    for pid in $pids; do
-        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉进程 $pid"
+# ------------------------------
+# 函数：杀掉占用端口（不报错）
+# ------------------------------
+kill_port() {
+  PORT=$1
+  echo "🔪 检查并杀掉占用端口 $PORT 的进程..."
+  PIDS=$(sudo lsof -ti:$PORT 2>/dev/null || true)
+  if [ -n "$PIDS" ]; then
+    for PID in $PIDS; do
+      sudo kill -9 $PID 2>/dev/null || echo "⚠️ 无法杀掉进程 $PID"
     done
-    echo "已尝试杀掉原有进程"
-else
-    echo "未找到运行中的进程"
-fi
+    echo "✅ 已杀掉进程: $PIDS"
+    sleep 2
+  else
+    echo "⚡ 端口 $PORT 没有占用"
+  fi
+}
 
-# 杀掉占用8080端口的进程
-echo "🔌 杀掉占用8080端口的进程..."
-port_pids_8080=$(lsof -ti:8080 2>/dev/null || echo "")
-if [ -n "$port_pids_8080" ]; then
-    echo "找到占用8080端口的进程: $port_pids_8080"
-    for pid in $port_pids_8080; do
-        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉占用8080端口的进程 $pid"
-    done
-    echo "已尝试杀掉占用8080端口的进程"
-else
-    echo "未找到占用8080端口的进程"
-fi
+# ------------------------------
+# 函数：部署后端
+# ------------------------------
+deploy_backend() {
+  echo "--------------------------------"
+  echo "🔧 构建后端服务..."
+  echo "--------------------------------"
 
-# 杀掉占用8081端口的进程
-echo "🔌 杀掉占用8081端口的进程..."
-port_pids_8081=$(lsof -ti:8081 2>/dev/null || echo "")
-if [ -n "$port_pids_8081" ]; then
-    echo "找到占用8081端口的进程: $port_pids_8081"
-    for pid in $port_pids_8081; do
-        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉占用8081端口的进程 $pid"
-    done
-    echo "已尝试杀掉占用8081端口的进程"
-else
-    echo "未找到占用8081端口的进程"
-fi
+  cd "$BACKEND_DIR"
+  mvn clean package -DskipTests
 
-# 等待一段时间让进程完全退出
-sleep 2
-
-# 进入后端目录
-cd $APP_DIR/miniapp-backend
-
-# 编译打包
-echo "🔨 编译打包..."
-mvn clean package -DskipTests
-
-# 检查jar包是否存在
-JAR_FILE=$(find target -name "*.jar" -not -name "*-sources.jar" | head -1)
-if [ -z "$JAR_FILE" ]; then
-    echo "❌ 未找到jar包，编译失败！"
+  if [ $? -eq 0 ]; then
+    echo "✅ 后端打包成功: target/$JAR_NAME"
+  else
+    echo "❌ 后端打包失败"
     exit 1
-fi
+  fi
 
-echo "✅ 编译成功: $JAR_FILE"
+  echo "▶️ 启动后端服务 (systemd 模式)..."
+  sudo systemctl daemon-reload
+  sudo systemctl stop miniapp-backend 2>/dev/null || true
+  sudo systemctl start miniapp-backend
+  sleep 3
+  sudo systemctl status miniapp-backend --no-pager || true
+  echo "📊 后端日志: tail -f $BACKEND_LOG"
+}
 
-# 检查配置文件
-if [ ! -f "src/main/resources/application.yml" ]; then
-    echo "⚙️  创建配置文件..."
-    cp src/main/resources/application.yml.example src/main/resources/application.yml
-    echo "⚠️  请编辑配置文件: src/main/resources/application.yml"
-fi
+# ------------------------------
+# 函数：部署前端
+# ------------------------------
+deploy_frontend() {
+  echo "--------------------------------"
+  echo "🎨 构建管理后台前端..."
+  echo "--------------------------------"
 
-# 创建日志目录
-mkdir -p logs
+  cd "$ADMIN_FRONTEND_DIR"
+  npm install --registry=https://registry.npmmirror.com
+  npm run build
 
-# 启动后端服务
-echo "🔧 启动后端服务..."
-# 杀掉可能存在的旧进程
-pids=$(ps aux | grep "miniapp-backend" | grep -v grep | awk '{print $2}')
-if [ -n "$pids" ]; then
-    echo "_kill old processes: $pids"
-    kill -9 $pids 2>/dev/null || echo "Warning: Could not kill some processes"
-fi
+  echo "✅ 管理后台前端构建完成 → dist/"
+}
 
-# 等待旧进程完全退出
-sleep 2
+# ------------------------------
+# 函数：重载 nginx
+# ------------------------------
+reload_nginx() {
+  echo "--------------------------------"
+  echo "🔄 重新加载 Nginx..."
+  echo "--------------------------------"
+  sudo $NGINX_BIN -t && sudo $NGINX_BIN -s reload
+  echo "✅ Nginx 已重载"
+}
 
-# 启动新服务
-nohup java -jar $JAR_FILE > $APP_DIR/miniapp-backend/logs/miniapp-backend.log 2>&1 &
-disown
+# ------------------------------
+# 执行逻辑
+# ------------------------------
+case "$MODE" in
+  all)
+    kill_port 8081
+    deploy_backend
+    deploy_frontend
+    reload_nginx
+    ;;
+  backend)
+    kill_port 8081
+    deploy_backend
+    ;;
+  frontend)
+    deploy_frontend
+    reload_nginx
+    ;;
+  *)
+    echo "❌ 无效参数: $MODE"
+    echo "用法: all | backend | frontend"
+    exit 1
+    ;;
+esac
 
-echo "✅ 后端服务已在后台启动！"
-echo "📊 查看日志: tail -f $APP_DIR/miniapp-backend/logs/miniapp-backend.log"
+echo "=============================================="
+echo "🎉 部署完成！模块：$MODE"
+echo "🌐 管理后台: https://fxyw.work/admin/"
+echo "📊 后端日志查看: tail -f $BACKEND_LOG"
 
-# 启动前端管理项目
-echo "🚀 启动前端管理项目..."
-cd $APP_DIR/admin-frontend
-
-# 安装依存関係
-echo "📦 安装前端依赖..."
-npm install
-
-# 构建前端项目
-echo "🔨 构建前端项目..."
-export NODE_ENV=production
-npm run build
-
-# 杀掉占用5173端口的进程（前端开发服务器）
-echo "🔌 杀掉占用5173端口的进程..."
-port_pids_5173=$(lsof -ti:5173 2>/dev/null || echo "")
-if [ -n "$port_pids_5173" ]; then
-    echo "找到占用5173端口的进程: $port_pids_5173"
-    for pid in $port_pids_5173; do
-        sudo kill -9 $pid 2>/dev/null || echo "警告: 无法杀掉占用5173端口的进程 $pid"
-    done
-    echo "已尝试杀掉占用5173端口的进程"
-else
-    echo "未找到占用5173端口的进程"
-fi
-
-# 等待一段时间让进程完全结束
-sleep 2
-
-# 启动前端开发服务器（后台执行）
-echo "▶️ 启动前端开发服务器..."
-nohup npm run dev > /tmp/admin-frontend.log 2>&1 &
-
-echo "✅ 前端管理项目已在后台启动！"
-echo "📝 前端日志文件: /tmp/admin-frontend.log"
-echo "🌐 访问地址: https://fxyw.work:5173/"
 echo "👤 登录凭证: 用户名: admin, 密码: admin123"
-
-echo "🎉 部署完成！"
+echo "=============================="
