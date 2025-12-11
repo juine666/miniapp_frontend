@@ -24,7 +24,7 @@ export async function loadPermissionConfig() {
   // 开始加载
   configLoadPromise = (async () => {
     try {
-      const response = await fetch('http://localhost:8081/api/admin/permissions/config', {
+      const response = await fetch('http://localhost:8081/admin/permissions/config', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adminToken') || ''}`
         }

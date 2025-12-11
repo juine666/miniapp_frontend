@@ -214,7 +214,7 @@ const StudentEnrollment = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const response = await api.get('/api/admin/student-enrollment/page', {
+      const response = await api.get('/admin/student-enrollment/page', {
         params: {
           pageNum: pagination.current,
           pageSize: pagination.pageSize,
@@ -268,13 +268,13 @@ const StudentEnrollment = () => {
       let response
       if (editingRecord) {
         // 编辑
-        response = await api.put(`/api/admin/student-enrollment/${editingRecord.id}`, payload)
+        response = await api.put(`/admin/student-enrollment/${editingRecord.id}`, payload)
         if (response.data?.code === 0) {
           message.success('修改成功')
         }
       } else {
         // 新增
-        response = await api.post('/api/admin/student-enrollment', payload)
+        response = await api.post('/admin/student-enrollment', payload)
         if (response.data?.code === 0) {
           message.success('添加成功')
         }
@@ -295,7 +295,7 @@ const StudentEnrollment = () => {
   // 删除
   const handleDelete = async (id) => {
     try {
-      const response = await api.delete(`/api/admin/student-enrollment/${id}`)
+      const response = await api.delete(`/admin/student-enrollment/${id}`)
       if (response.data?.code === 0) {
         message.success('删除成功')
         fetchData()
@@ -319,7 +319,7 @@ const StudentEnrollment = () => {
       cancelText: '取消',
       onOk: async () => {
         try {
-          const response = await api.post('/api/admin/student-enrollment/batch-delete', selectedRowKeys)
+          const response = await api.post('/admin/student-enrollment/batch-delete', selectedRowKeys)
           if (response.data?.code === 0) {
             message.success('删除成功')
             setSelectedRowKeys([])
@@ -335,7 +335,7 @@ const StudentEnrollment = () => {
   // 导出
   const handleExport = async () => {
     try {
-      const response = await api.post('/api/admin/student-enrollment/export', {
+      const response = await api.post('/admin/student-enrollment/export', {
         columns: selectedColumns
       }, { responseType: 'blob' })
 

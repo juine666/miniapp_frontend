@@ -28,7 +28,7 @@ export default function SystemConfig() {
   const loadAllConfigs = async () => {
     setLoading(true)
     try {
-      const res = await api.get('/api/admin/system-config/all')
+      const res = await api.get('/admin/system-config/all')
       if (res.data.code === 0) {
         setConfigs(res.data.data || {})
       }
@@ -59,7 +59,7 @@ export default function SystemConfig() {
   const handleSave = async () => {
     try {
       const values = await form.validateFields()
-      const res = await api.put('/api/admin/system-config', {
+      const res = await api.put('/admin/system-config', {
         configKey: values.configKey,
         configValue: values.configValue,
         description: values.description,

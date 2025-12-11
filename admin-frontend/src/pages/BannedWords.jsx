@@ -49,7 +49,7 @@ export default function BannedWords() {
       if (category) params.category = category
       if (isActive !== undefined) params.isActive = isActive
       
-      const res = await api.get('/api/admin/banned-words', { params })
+      const res = await api.get('/admin/banned-words', { params })
       if (res.data.code === 0) {
         const data = res.data.data
         setWords(data.records || [])
@@ -95,7 +95,7 @@ export default function BannedWords() {
       
       if (editingWord) {
         // 编辑
-        const res = await api.put(`/api/admin/banned-words/${editingWord.id}`, values)
+        const res = await api.put(`/admin/banned-words/${editingWord.id}`, values)
         if (res.data.code === 0) {
           message.success('违禁词已更新')
           setModalOpen(false)
@@ -103,7 +103,7 @@ export default function BannedWords() {
         }
       } else {
         // 新增
-        const res = await api.post('/api/admin/banned-words', values)
+        const res = await api.post('/admin/banned-words', values)
         if (res.data.code === 0) {
           message.success('违禁词已添加')
           setModalOpen(false)
@@ -127,7 +127,7 @@ export default function BannedWords() {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          const res = await api.delete(`/api/admin/banned-words/${record.id}`)
+          const res = await api.delete(`/admin/banned-words/${record.id}`)
           if (res.data.code === 0) {
             message.success('违禁词已删除')
             loadWords(pagination.current, pagination.pageSize, filterCategory, filterActive)
@@ -142,7 +142,7 @@ export default function BannedWords() {
 
   const handleToggle = async (record) => {
     try {
-      const res = await api.post(`/api/admin/banned-words/${record.id}/toggle`, {
+      const res = await api.post(`/admin/banned-words/${record.id}/toggle`, {
         isActive: !record.isActive
       })
       if (res.data.code === 0) {

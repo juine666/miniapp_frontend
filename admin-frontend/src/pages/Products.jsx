@@ -47,7 +47,7 @@ export default function Products() {
   // 加载分类列表
   const loadCategories = async () => {
     try {
-      const res = await api.get('/api/admin/categories', { params: { page: 0, size: 100 } })
+      const res = await api.get('/admin/categories', { params: { page: 0, size: 100 } })
       if (res.data.code === 0) {
         setCategories(res.data.data.content || [])
       }
@@ -70,7 +70,7 @@ export default function Products() {
         ...(filters.status !== '' && filters.status && { status: filters.status }),
         ...(filters.categoryId && { categoryId: filters.categoryId })
       }
-      const res = await api.get('/api/admin/products', { params })
+      const res = await api.get('/admin/products', { params })
       if (res.data.code === 0) {
         const pageData = res.data.data
         setData({
@@ -109,7 +109,7 @@ export default function Products() {
 
   const setStatus = async (record, status) => {
     try {
-      await api.put(`/api/admin/products/${record.id}/status/${status}`)
+      await api.put(`/admin/products/${record.id}/status/${status}`)
       message.success('状态已更新')
       load(pagination.current - 1, pagination.pageSize)
     } catch (error) {
@@ -154,7 +154,7 @@ export default function Products() {
         }
       }
       
-      await api.put(`/api/admin/products/${selectedProduct.id}`, formData, {
+      await api.put(`/admin/products/${selectedProduct.id}`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       message.success('商品已更新')
@@ -192,7 +192,7 @@ export default function Products() {
         return
       }
       
-      await api.post('/api/admin/products', formData, {
+      await api.post('/admin/products', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       })
       message.success('商品上传成功')
